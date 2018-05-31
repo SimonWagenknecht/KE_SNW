@@ -1,0 +1,1060 @@
+/*						UserRam.c														 */
+/*	Nicht	intialisierte	User - Variablen					 */
+/*	Bereich wird nach Reset gelöscht							 */
+
+#include "defins.h"
+#include "struct.h"
+#include "ustruct.h"
+#include "userdef.h"
+#include "projdef.h"
+#include "uconstext.h"
+#include "evetab.h"
+#include "archivsdm.h"	// Josch-SDM
+
+
+
+int k_dummy;
+char anz_dummy;	// ***AnFre für Solar-Anzeigetafel
+
+char testClear;
+char char_test1;
+char char_test2;
+int  int_test;
+mwsp *temperatur;
+
+int TaErsatz[12];
+UINT TaErsatzCtr;
+char TaErsatzVerz;
+
+// NLT Neue Leittechnik
+events prim_evtab[PETAB_DEFL];
+events seku_evtab[SETAB_DEFL];
+char sms_feld[PETAB_DEFL];				// Merker für Feldindex prim_evtab
+
+/* Konfigurations-Anzeigebytes */
+char ptinput1;
+char ptinput2;
+char aeinput1;
+char aeinput2;
+char diginput1;
+char diginput2;
+char digtherm1;
+char digtherm2;
+char digoutput1;
+char digoutput2;
+char anaoutput1;
+char anaoutput2;
+char zinput1;					// R36
+char zinput2;					// R36
+char zinput_r37[4];		// R37_1 und R37_2  ( R37_3 und R37_4 nicht benutzt, aber Speicherplatz reserviert )
+
+char ort_idf;
+char ort_idf_flag;
+
+// Objekt- und Standortbezeichnungen
+char Objektbez [16];		
+char Objektnum [10];		
+char Strasse   [16];		
+char Nummer    [10];		
+char Ort       [16];		
+char Plz       [10];		
+char Version_PVers_Ascii[10];	// Programmversion
+
+//--------------------------------------------------------------------------------------------------
+// MBUS
+#if ( ((IMPLEMENT_S1 & MBUS1_IMPL) == MBUS1_IMPL) || ((IMPLEMENT_S2 & MBUS1_IMPL) == MBUS1_IMPL) || ((IMPLEMENT_S3 & MBUS1_IMPL) == MBUS1_IMPL) )
+
+MbusDynam MbusData[MBUSANZ];
+MbusStandard MbusPara[MBUSANZ];
+UINT MbusFrequ;
+char MbusAktualisierung;
+char MbusCtrAktiv;
+char MbusStatus;
+UINT Timeout;
+char RxStatus;
+
+char MbusTxCtr;
+char MbusTxLng;
+char MbusRxCtr;
+char MbusRxLng;
+char *pMbusTx;
+char *pMbusRx;
+
+char MbusTxBuf[16];
+char MbusRxBuf[256];
+
+char MbCtrAkt;
+//Sichtbarkeit Sichtbar[MBUSANZ];
+Sichtbarkeit Sichtbar;
+uhrzeit AktStd;
+uhrzeit LetzteAkt;
+char mbus_vis;
+char zaehlerNummer;
+
+#endif
+
+//--------------------------------------------------------------------------------------------------
+// ModBus_Uni	// Modbus
+// ModBus_Uni	#if ( ((IMPLEMENT_S1 & MODBUS1_IMPL) == MODBUS1_IMPL) || ((IMPLEMENT_S2 & MODBUS1_IMPL) == MODBUS1_IMPL) || ((IMPLEMENT_S3 & MODBUS1_IMPL) == MODBUS1_IMPL) )
+//				
+//// Jochen Teil
+//																											// Kommentare von JoSch
+////		unsigned int modbusDeviceNr;											// Modbus.c  + modbusparli.h
+////		int activeRow[3];																	// Modbus.c  + modbusparli.h
+////		unsigned char modbusSlaveAddresses[3];						// Modbus.c  + modbusparli.h  + modbusstandard.h
+////		unsigned char modbusSioParity[3];									// Modbus.c  + modbusparli.h  + modbusstandard.h
+////		unsigned char modbusConvertBuffer[3][256];				// Modbus.c		
+//
+//
+//// RKL + Jochen																							
+//		char modb_leng_tx[3];															// U_ModBusSio.c
+//		char modb_rts_prescaler[3];												// U_ModBusSio.c
+//		char modb_rts_timer[3];														// U_ModBusSio.c
+//		char modb_rx_buff_size;														// U_ModBusSio.c
+//		char modb_rx_status;															// Modbus.c										
+//		char modb_tx_count[3];														// U_ModBusSio.c
+//		char modb_rx_count[3];														// U_ModBusSio.c							
+//		char modb_rx_buffer_ready[3];											// U_ModBusSio.c							
+//		char modb_rx_int_state[3];												// U_ModBusSio.c							
+//		char modb_sio_errorflag[3];												// U_ModBusSio.c
+//		unsigned int EoF_timer[3];												// U_ModBusSio.c
+//		char timer_function[3];														// U_ModBusSio.c
+//		char func_code[3];																// U_ModBusSio.c  + Modbus.c	
+//		unsigned char byte_count_or_exception[3];					// U_ModBusSio.c  + Modbus.c
+//		unsigned int first_reg[3];												// U_ModBusSio.c  + Modbus.c	
+//		unsigned int cnt_regs[3];													// U_ModBusSio.c  + Modbus.c	
+//		void* reg_address[3];															// U_ModBusSio.c  + Modbus.c
+//		char modb_curr_adr[3];														// U_ModBusSio.c  + Modbus.c	
+//
+//#endif						
+
+//--------------------------------------------------------------------------------------------------
+// Benutzung der Funktion Test-RS485
+// Aufruf durch HandlerS1, HandlerS2 oder HandlerS3 organisiert durch UserHandler
+#if ( ((IMPLEMENT_S1 & GBUS1_IMPL) == GBUS1_IMPL) || ((IMPLEMENT_S2 & GBUS1_IMPL) == GBUS1_IMPL) || ((IMPLEMENT_S3 & GBUS1_IMPL) == GBUS1_IMPL) )
+
+serial485	serial[3];
+
+#endif
+
+//--------------------------------------------------------------------------------------------------
+// Benutzung der Funktion Funkempfang
+// Aufruf durch HandlerS1, HandlerS2 oder HandlerS3 organisiert durch UserHandler
+#if ( ((IMPLEMENT_S1 & FUNK1_IMPL) == FUNK1_IMPL) || ((IMPLEMENT_S2 & FUNK1_IMPL) == FUNK1_IMPL) || ((IMPLEMENT_S3 & FUNK1_IMPL) == FUNK1_IMPL) )
+
+char ucReceiverTyp_RF;		//090310 0=NEU 1=ALT
+char ucCond_RF;
+char ucRxFlag_RF;
+char ucChecksum_RF;
+char ucBcounter_RF;
+char ucfRxBuf_RF[12];
+char ucRF_ComPort;				// muß in den EEPROM
+rfsens	rf_feld[12];
+char ucTeach_idx;
+char bedien_rf_nummer;
+char funk_vis;
+
+#endif
+
+//--------------------------------------------------------------------------------------------------
+// Grundfos-Pumpen mit GENIbus 
+#if ( ( ( IMPLEMENT_S2 & GENI1_IMPL) == GENI1_IMPL ) || ( ( IMPLEMENT_S3 & GENI1_IMPL) == GENI1_IMPL ) )
+// Neue Genibus Variablen
+	GeniDeviceTable genibus_device_table[GENI_DEVICE_MAX];
+	
+	GeniValues Geni_Values[GENI_DEVICE_MAX];
+		
+	unsigned char uc_geni_dummy_stat;		// Dummy für Statusspeicher
+	
+	unsigned char uc_genibus_device_nr;
+	
+	unsigned char ucf_genibus_rx_buffer[GENIBUS_RX_BUFFER_SIZE];
+	unsigned char uc_genibus_rx_count;
+	unsigned char uc_genibus_rx_buff_size;
+	unsigned char uc_genibus_rx_errorflag;		// ToDo: Geordnete Fehlerbehandlung / Anzeige
+	unsigned char uc_genibus_rx_error;
+	unsigned char uc_genibus_rx_telegram_ready;
+	unsigned char uc_genibus_rx_timeout_ctr;
+	
+	unsigned char uc_genibus_tx_count;
+	unsigned char uc_genibus_tx_lenght;
+
+	
+	unsigned char uc_genibus_rts_prescaler; 
+	unsigned char uc_genibus_rts_timer;
+	
+	unsigned char uc_genibus_state;
+	unsigned char uc_genibus_special_function;
+	
+	unsigned char uc_genibus_own_adr;
+	
+	unsigned char uc_genibus_get_adress;
+	unsigned char uc_genibus_reset_pump;			// Adresse des zu resetenden Gerätes
+	unsigned char uc_genibus_reset_result;
+	unsigned char uc_genibus_start_manual_request;
+	GeniManualRequest genibus_manual_request;
+	
+	unsigned char uc_genibus_request_table_idx;
+	
+	unsigned int  ui_genibus_relay_ctr;
+	
+	unsigned char uc_genibus_func_test;
+
+#endif
+
+
+#if ( GENI || WILO )
+
+PuBusStandard BusPuPara[BUS_PU_MAX];
+PuBusDynam BusPuData[BUS_PU_MAX];
+char ssmBusPu;
+char ssmPuCtr;
+
+#endif
+
+
+#if ( ((IMPLEMENT_S1 & MODBUS1_IMPL) == MODBUS1_IMPL) || ((IMPLEMENT_S2 & MODBUS1_IMPL) == MODBUS1_IMPL) || ((IMPLEMENT_S3 & MODBUS1_IMPL) == MODBUS1_IMPL) )
+// Für Modbus
+unsigned int mbtest_out;
+char modb_curr_port;
+char modb_power_on;
+char modb_tsk_wdg_count;
+char modb_bus_status;
+char modb_leng_tx;
+char modb_rts_prescaler;
+char modb_rts_timer;	
+char rq_idx;		// wegen parli temp. hier
+char bus_tio_count;
+char modb_state_control;	// Statemachine control 
+char modb_rx_buff_size;
+char modb_rx_status;
+char modb_tx_count;
+char modb_rx_count;
+char modb_rx_buffer_ready;
+char modb_rx_int_state;
+char modb_rx_rxtio;
+char modb_sio_errorflag;
+char EoF_timer;
+char bus_timeout_com;
+char bus_timeout_com_shad;
+char pu_timeout_com;
+char timer_function;
+char Bus_restart;
+char cycle_timer;
+char cycle_timer1;
+char func_code;
+char cycle_count;
+char master_slave_func;
+unsigned int first_reg;
+unsigned int cnt_regs;
+unsigned int modb_adr_offset;
+char save_tx_count;
+char modb_slave_idx;
+char bit_value;
+unsigned int reg_value;
+//char tx_data_buff[8];
+char input_reg_idx;
+char holding_reg_idx;
+char modb_curr_adr;
+char SerialDeviceNr;
+char TestHandMode;
+char TaskTimer1;
+
+modb_control_value	modb_control[MODB_SLAVE_MAX];
+
+char TestpuMax;
+
+#if ( WILO )
+
+// Strukturvariable
+modb_data_value	modb_data[MODB_SLAVE_MAX];
+int input_reg6_celsius[MODB_SLAVE_MAX];
+char SerialDeviceNr;
+char ModbusBaudWilo;		// WILO Pumpenparameter "A" Baudrate 5 = 9600 fest
+char ModbusSioWilo;			// WILO Pumpenparameter "C" SIO-Einstellung Parität und StopBit (2, 3, 6, 10)
+#endif
+
+#if ( BELIMO )
+char modb_device_idx;
+char Gateway_Device_idx;
+char Gateway_Device_wr_idx;
+unsigned char Gateway_Device_Present[DEVICE_MAX];
+unsigned char Gateway_Device_Dissable[DEVICE_MAX];
+unsigned int Modb_holding_reg[DEVICE_MAX][MODB_HOLDING_REGS];
+unsigned int ModB_output_value[DEVICE_MAX][MODB_WR_HOLDING_REGS];
+unsigned int ModB_out_value_shad[DEVICE_MAX][MODB_WR_HOLDING_REGS];
+ULONG op_hours[DEVICE_MAX];
+#endif
+
+#if ( KWB_KESSEL )
+char ModbusAlarm[MODB_SLAVE_MAX][256];
+#endif
+
+#endif
+
+
+//----------------------------------------------------------------------------------------------------
+
+// Variabler Kategorie-Typ
+char KatVar_Typ[16];
+// Info über Handschalter in ASCCI
+char sw_stat_info[16];
+
+// Index-Feld für Namenslisten R36, R37, R38, R33
+unsigned int nlist[18];									// 18 Ein/Ausgänge				R36
+unsigned int n37list[R37_MODMAX][13];		// 13 Ein/Ausgänge				R37 
+unsigned int n38list[R38_MODMAX][14];		// 14 Analogeingänge			R38
+unsigned int n39list[R39_MODMAX][12];		// 12 Digitaleingänge			R39
+unsigned int n33list[R33_MODMAX][6];		//  6 Digitalausgänge			R33
+
+
+//Sichtbarkeitsspeicher für Parametergruppen
+char	anl_vis;					// Anlage
+char	ke_vis[KEMAX];		// Kessel
+char	hk_vis[HKMAX];		// Heizung
+char	ww_vis[WWMAX];		// Warmwasser
+char	nt_vis[NTMAX];		// Netztrennung
+char	so_vis[SOMAX];		// Solar ***AnFre
+char	hkSoL_vis[HKSoLMAX];	// Solare Heizung		***AnFre
+
+// #####ulsch
+char fer_vis;						// Ferienprogramm
+char qsm_vis;						// Quittierbare Gespeicherte Störmeldungen
+
+char	ze_vis[8];				// Zähler R36
+char	x1ze_vis[6];			// Zähler R37_1
+char	x2ze_vis[6];			// Zähler R37_2
+char	dia_vis;					// Diagnose
+char	zlt_vis;					// Datue
+char	syc_vis;					// Synchronisation Zähler R36
+char	tes_vis;					// Test
+char	sys_vis;					// System
+char	r37vis[R37_MODMAX];
+char	r38vis[R38_MODMAX];
+char	r39vis[R39_MODMAX];
+char	r33vis[R33_MODMAX];
+
+/***** ulsch : Heizgradtage *****/
+char	hgt_vis;					// Heizgradtage
+
+//Sichtbarkeitsspeicher für Parameter
+char	vis;							// Normal sichtbare Parameter
+char	hid1;							// Mit Service-Code 1	sichtbare Parameter	(135)
+char	hid2;							// Mit Service-Code 2	sichtbare Parameter	(137)
+char	hid3;							// Mit Service-Code 3	sichtbare Parameter	(143)
+char	hid4;							// Mit Service-Code 4	sichtbare Parameter	(139)
+char	kom;							// Nur für Komtab sichtbar
+//***AnFre 12.12.2012 Sichtbarkeit der Anzeige Wilo-BusPumpen in den Gruppen
+char	wilo1;				// Pumpen-Index 1: Solarpumpe
+char	wilo2;				// Pumpen-Index 2: Pufferpumpe
+char	wilo3;				// Pumpen-Index 3: Ladepumpe
+char	wilo4;				// Pumpen-Index 4: Tauscherpumpe (oder Netzpumpe)
+char	wilo5;				// Pumpen-Index 5: Zirkpumpe
+
+// Projekttyp 
+char	proj_typ;					// Auswahl eines implemetierten Anlagen-Projektes
+// Projekthilfsgrößen, Auswertung in "Output.c"
+char  temp_proj_typ;		// temporär (für Bedien) mit Prüfung und Auswertung 
+char	newproj;					// neues Projekt aktiviert (Zählzelle down bis Reset)
+char	wpause[6];				// Wechselpause zwischen AUF/ZU bei verriegelten Ausgängen
+char	dadat;						// vom R50 R3X_DADAT-Kommando
+char	dadat_cd;					// 						""		-Countdown
+char	aadat[2];					// vom R50 R3X_AADAT-Kommando
+char	aadat_cd;					// 						""		-Countdown
+
+// Typ und Version (wird geladen entsprechend proj_typ)
+char Version_PTyp[16];
+char Version_PVers[3];
+char namur;
+
+// Raumtemperaturen für verschiedene Lüftungskreise, Übertragung vom R50
+mwsp raumtemp[4];			
+int  zuluft;
+char ablufter;					// Anzahl der Ablüfter im Projekt
+
+// ------------------- Pointer-Felder -------------------------------------
+
+// -------------- Temperaturen Pt1000	(Felder von Zeigern auf pt_mewe[i])
+mwsp *TA[ANLMAX];					// Aussentemp
+mwsp *TVP[ANLMAX];				// Vorlauf  Primär
+mwsp *TRP[ANLMAX];				// Rücklauf Primär
+
+mwsp *TVS[HKMAX];					// Vorlauf  Sekundär
+mwsp *TRS[HKMAX];					// Rücklauf Sekundär
+mwsp *TI[HKMAX];					// Raumtemperaturen
+
+mwsp *TWWC[WWMAX];				// Temperatur nach PWÜ
+mwsp *TWW1L[WWMAX];				// Speichertemp. 1 oben
+mwsp *TWW2L[WWMAX];				// Speichertemp. 2 unten
+mwsp *TWWV[WWMAX];				// Warmwassertemp
+mwsp *TWWP[WWMAX];				// Temperatur vor PWÜ
+mwsp *TWWZ[WWMAX];				// Zirkulationstemperatur
+
+// ***AnFre Station SEZ 40-200 (Keine Felder, Zeiger auf 1 Wert)
+mwsp *TW1_[1];
+mwsp *TW2_[1];		//ist TH3	06.06.2012
+mwsp *TW3_[1];		//ist TH4	06.06.2012
+mwsp *TW4_[1];		//ist TH5	06.06.2012
+mwsp *TS1_[1];
+mwsp *TS2_[1];
+mwsp *TS3_[1];
+mwsp *TS4_[1];
+mwsp *TS5_[1];
+mwsp *TS6_[1];
+mwsp *TS7_[1];
+// ***AnFre 31.10.2007: tatsächlich benutzte Temp.werte   (wegen ev. Temperaturfehler)
+int ts1;
+int ts2;
+int ts3;
+int ts4;
+int ts5;
+int ts6warm;
+int ts7kalt;
+
+int th2;	//***Anfre 06.06.2012
+int th3;	//***Anfre 06.06.2012
+int th4;	//***Anfre 06.06.2012
+int th5;	//***Anfre 06.06.2012
+
+mwsp *TVKE[KEMAX];				// Vorlauf  Kessel
+mwsp *TRKE[KEMAX];				// Rücklauf  Kessel
+mwsp *TVGKE[KEMAX];				// Gemeinsamer Kesselvorlauf
+mwsp *TRGKE[KEMAX];				// Gemeinsamer Kesselrücklauf
+
+mwsp *TVSEK[NTMAX];				// Vorlauf Sek. Netztrennung
+mwsp *TRSEK[NTMAX];				// Rücklauf Sek. Netztrennung
+mwsp *TVSGNT[NTMAX];			// Vorlauf Sekundär WT gesamt
+mwsp *TRSGNT[NTMAX];			// Rücklauf Sekundär WT gesamt
+mwsp *TRPNT[NTMAX];				// Rücklauf prim. Netztrennung
+//***AnFre folgende 4 Temp. nicht benutzt ! (nur für Pool-Solar)
+mwsp *TKOLL[SOMAX];			// Temperatur am Solar-Kollektor
+mwsp *TPUF1L[SOMAX];			// Solar-Puffer-Temp. 1 oben
+mwsp *TPUF2L[SOMAX];			// Solar-Puffer-Temp. 2 unten
+mwsp *TWWCSO[SOMAX];			// Regeltemp.am Solar-Übertrager
+
+mwsp *TP_UNI[TP_UNI_ANZ]; // universeller Pt1000-Eingang
+
+mwsp **mwpadr;						// Arbeitsspeicher
+
+// --------------- Analogeingänge 0-10V (Felder von Zeigern auf ae_mewe[i])
+mwsp *LQF[1];							// Beispiel: Luftqualitätsfühler
+mwsp *AE_UNI[AE_UNI_ANZ];
+mwsp *ADAPT[HKANZ ? HKANZ : 1];	// Adaptions-Kennwert
+
+#if TAE_ANZ == 1
+mwsp *TAE[1];							// Außentemperatur
+#endif
+
+// --------------- Digitaleingänge			(Felder von Zeigern auf di_mewe[i])
+dinpsp	*STBHK[HKMAX];
+dinpsp	*STBWW[WWMAX];
+dinpsp	*STWHK[HKMAX];
+dinpsp	*STWWW[WWMAX];
+dinpsp	*WWUW[WWMAX];				
+dinpsp	*WWOW[WWMAX];
+dinpsp	*KEAL[KEMAX];				// Kesselalarm Si-Kette
+dinpsp	*BRAL[KEMAX];				// Brenneralarm 
+dinpsp	*NACHSP[KEMAX];			// Nachspeisung
+dinpsp	*PUAL[HKMAX];				// Pumpenstörung 
+dinpsp	*PUWZAL[WWMAX];			// Pumpenstoerung Zirkulationspumpe (Sammelmeldung)
+dinpsp	*PUWLAL[WWMAX];			// Stoermeldung (Ent-)Ladepumpe
+dinpsp	*STBWWSP[WWMAX];		// Stoermeldung STB Speicher
+dinpsp	*BMKES[KEMAX];			// Betriebsmeldung Kessel
+dinpsp	*PUSAMAL[HKMAX];		// Sammelmeldung Pumpenstörung
+dinpsp	*STBNT[NTMAX];			// Sicherh.temp.begrenzer Netztrennung
+dinpsp	*STWNT[NTMAX];			// Sicherh.temp.wächter Netztrennung
+dinpsp	*RKZUNT[NTMAX];			// RM Klappe ZU NT
+dinpsp	*RKAUFNT[NTMAX];		// RM Klappe AUF NT
+dinpsp	*DRMAXNT[NTMAX];		// Max-Druck NT
+dinpsp	*DRMASNT[NTMAX];		// Max-Druck NT sek.
+dinpsp	*DRMISNT[NTMAX];		// Min-Druck NT sek.
+dinpsp	*RVZUNT[NTMAX];			// RM Ventil ZU NT
+dinpsp	*SAMAL[ANLMAX];			// Sammelstörmeldung allgemein
+dinpsp	*PUWTAL[WWMAX];			// Stoermeldung Tauscherpumpe
+dinpsp	*FRGHK[HKMAX];			// Freigabe Regelung Heizkreis
+dinpsp	*FERINP[ANLMAX];		// Ferienschalter
+dinpsp	*DE_UNI[DE_UNI_ANZ];
+dinpsp	*SM_UNI[SM_UNI_ANZ];// universeller Digitaleingang für Störmeldungen
+dinpsp	*BM_UNI[BM_UNI_ANZ];// universeller Digitaleingang für Betriebsmeldungen
+dinpsp	*PUKEAL[KEMAX];			// Störmeldung Kesselpumpe
+dinpsp	*BMPUKE[KEMAX];			// Betriebsmeldung Kessel/Zubringer-Pumpe ***AnFre
+dinpsp	*BMPU[HKMAX];				// Betriebsmeldung Heizungspumpe
+dinpsp	*BMPUWL[WWMAX];			// Betriebsmeldung Ladepumpe
+dinpsp	*BMPUWZ[WWMAX];			// Betriebsmeldung Zirkulationspumpe
+dinpsp	*BMPUWT[WWMAX];			// Betriebsmeldung Tauscherpumpe
+dinpsp	*HKAUS[HKMAX];			// Anlagenschalter Nichtnutzung HK 
+dinpsp	*WWAUS[WWMAX];			// Anlagenschalter Nichtnutzung WWB
+dinpsp	*QUITTS[ANLMAX];		// Quittierungstaste
+dinpsp	*SSFKE[KEMAX];			// Schornsteinfegertaste
+dinpsp	*STBKE[KEMAX];			// Sicherh.temp.wächter Kessel
+dinpsp	*DRKE[KEMAX];				// SM Max-Druck Kessel
+dinpsp	*ADAPT_T[HKANZ ? HKANZ : 1];		// Adaptionsmeldung "zu tief"
+dinpsp	*ADAPT_H[HKANZ ? HKANZ : 1];		// Adaptionsmeldung "zu hoch"
+#if ( PUDO == 1 )
+	dinpsp	*PUDAL[HKMAX];		// Pumpenstörung, Doppelpumpe
+#endif
+dinpsp	*PUALNT[NTMAX];			// Pumpenstörung Hauptpumpe
+// ***AnFre
+dinpsp	*BMPUSOL[SOMAX];		// Betriebsmeldung Solar-Pumpe
+dinpsp	*BMPUPUF[SOMAX];		// Betriebsmeldung Puffer-Pumpe
+dinpsp	*BMPUNT[NTMAX];			// Betriebsmeldung Netz-Pumpe sekundär
+
+dinpsp	**dipadr;						// Arbeitsspeicher
+
+// ---------------- Zähleingänge R36			(Felder von Zeigern auf zaehler[i])
+zaehlsp *ZE[8];
+// ---------------- Zähleingänge R37_1		(Felder von Zeigern auf zaehler[i])
+zaehlsp *X1ZE[6];
+// ---------------- Zähleingänge R37_2		(Felder von Zeigern auf zaehler[i])
+zaehlsp *X2ZE[6];
+
+// MBus: max.6 Zähler
+#if MBUSANZ > 0
+zaehlsp	mbZaehler[MBUSANZ];								// Zähleingänge
+zaehlsp *MBZE[MBUSANZ];
+#endif
+
+// ---------------- Analogausgänge				(Felder von Zeigern auf Aout[i])
+aasp *AA_UNI[AA_UNI_ANZ];
+aasp *RVENT[HKMAX];						// Regelventil für Heizkreise
+aasp *RVENTWW[WWMAX];					// Regelventil für Warmwasser
+aasp *RVENTKE[KEMAX];					// Regelwert für Kessel
+aasp *RVENTKR[KEMAX];					// Regelventil für Kesselrücklauf-Anhebung
+aasp *DZPUKE[KEMAX];					// Drehzahl Kesselpumpe
+aasp *AASSTM[2];							// Sammelstörmeldung Analogausgabe
+aasp *PUWZ[WWMAX];						// Drehzahl Warmwasser-Zirkulationspumpe
+aasp *PUWL[WWMAX];						// Drehzahl Ladepumpe (HAST-AKKU : Entladepumpe )
+aasp *RVENTSP[WWMAX];					// Strahlpumpe Warmwasser
+aasp *RVENTMI[WWMAX];					// Mischer Warmwasser
+aasp *RVENTNT[NTMAX];					// Regelventil Netztrennung
+aasp *RVENTSO[HKSoLMAX];			// Regelventil Solare Heizunterstützung
+// ***AnFre
+aasp *MVSOLWW[SOMAX];					 // MotorVentil Solar-WW
+aasp *MVKALTW[SOMAX];					// MotorVentil Kaltwasser
+
+#if TAA_ANZ > 0
+aasp *TAA[TAA_ANZ];						// Außentemperatur
+#endif
+
+#if ANFORD > 0
+aasp *TMANF[ANFORD];
+#endif
+
+aasp **aapadr;								// Arbeitsspeicher
+
+// ---------------- Relaisausgänge				(Felder von Zeigern auf Dout[i])
+doutsp	*RZU[HKMAX];					// HK Stellventile zufahren
+doutsp	*RAUF[HKMAX];					// HK Stellventile auffahren
+doutsp	*RWWZU[WWMAX];				// WW Stellventil zufahren
+doutsp	*RWWAUF[WWMAX];				// WW Stellventil auffahren
+doutsp	*PU[HKMAX];						// Heizungspumpen
+doutsp	*PUMIN[HKMAX];				// Minimaldrehzahl
+doutsp	*PUWLEA[WWMAX];				// Ladepumpen 
+doutsp	*PUWZEA[WWMAX];				// Zirkulationspumpen
+doutsp	*ELVENT[WWMAX];
+doutsp	*PUGWW[WWMAX];
+doutsp	*SSTM[2];							// Sammelstörmeldung
+doutsp	*KESTU1[KEMAX];				// Kessel Brennerstufe 1
+doutsp	*KESTU2[KEMAX];				// Kessel Brennerstufe 2
+doutsp	*KE[KEMAX];						// Kessel Freigabe
+doutsp	*KLKEAZ[KEMAX];				// Kesselabsperrklappe AUF/ZU
+doutsp	*PUWTEA[WWMAX];				// Tauscherpumpe
+doutsp	*RNTZU[NTMAX];				// Netztrennung Regelventil zufahren
+doutsp	*RNTAUF[NTMAX];				// Netztrennung Regelventil auffahren
+doutsp	*KLNTAZ[NTMAX];				// Tauscher-Absperrklappe AUF/ZU
+doutsp	*FEROUT[1];						// Ferienstatus
+//ulsch
+doutsp	*DA_UNI[DA_UNI_ANZ];
+doutsp	*MKEZU[KEMAX];				// Kessel Modulation ZU
+doutsp	*MKEAUF[KEMAX];				// Kessel Modulation AUF
+doutsp	*RKEZU[KEMAX];				// Rücklauf-Anhebung: Kesselkreis ZU
+doutsp	*RKEAUF[KEMAX];				// Rücklauf-Anhebung: Kesselkreis AUF
+doutsp	*PUKEEA[KEMAX];				// Kesselpumpe
+doutsp	*PUKOLEA[SOMAX];			// Solar-Kollektor-Pumpe		***AnFre
+doutsp	*PUSOEA[SOMAX];				// Solar-Pumpe
+//ulsch
+doutsp	*KLKEZU[KEMAX];				// Kesselabsperrklappe ZU
+doutsp	*KLKEAUF[KEMAX];			// Kesselabsperrklappe AUF
+// ***AnFre
+doutsp	*PUSOLEA[SOMAX];			// Solar-Kreis-Pumpe
+doutsp	*PUPUFEA[SOMAX];			// Solar-Puffer-Pumpe
+doutsp	*MVKOLEA[SOMAX];			// ***AnFre MotorVentil Kollektor 
+doutsp	*MVPUFEA[KEMAX];			// ***AnFre MotorVentil Kessel/Puffer 
+doutsp	*MVWLEA[WWMAX];				// ***AnFre MotorVentil Ladepumpen 
+
+#if PUDO == 1 
+	doutsp	*PUD[HKMAX];				// Heizungspumpen, Doppelpumpe
+#endif
+
+doutsp	*PUNTEA[NTMAX];				// Pumpe Netztrennung (Hauptpumpe)
+doutsp	*UVHKEA[KEMAX];			// ***AnFre 31.01.2008 Umschalt-Ventil HK1: Kessel/Puffer 
+doutsp	*UVWWEA[WWMAX];			// ***AnFre 23.04.2009 Umschalt-Ventil TWW-Solar 
+
+
+doutsp	**dopadr;							// Arbeitsspeicher
+
+//---------------------------------------------------------------------------------------------
+// Speicherplätze für R37-In/Out-Modul und R38-PT1000-Modul und R39-INP-Modul und R33 OUT-Modul
+//---------------------------------------------------------------------------------------------
+Ram37	mod37[R37_MODMAX];			// maximal 4 (dann keine weiteren Module)
+Ram38	mod38[R38_MODMAX];			// maximal 4 (dann keine weiteren Module)
+Ram39	mod39[R39_MODMAX];			// maximal 4 (dann keine weiteren Module)
+Ram33	mod33[R33_MODMAX];			// maximal 4 (dann keine weiteren Module)
+char mod39sysinit;						// Merkmal für SysEEP_InitUser  (Kaltstart 66 wurde ausgeführt)	
+
+char proc_IO;									// Auftragsmerker
+char iocnt;										// Counter über maximal 4 Module
+char oready;									// Flag: wenn Output-Task abgelaufen
+//---------------------------------------------------------------------------
+
+// Sammelstörmeldung für Anzeige und LT
+char sstm[S_CLASS_ANZ];				// Feld mit Zählerständen der jeweiligen Sammelalarmklasse, Index entsprechend userdef.h 
+char sstm_old[S_CLASS_ANZ];		// Merker für Event.c (Erhöhung des Zählerstandes bei Sammelalarmen (neuer Alarm) )
+
+// Schaltpause für statische Relais, wenn mehrere Relais gleichzeitig einschalten wollen
+char Schalt_Pause;		// Sekunden
+char schalt_count;
+
+/*-------------- Absenkung nach Zeit für mehrere Heizkreise --------------*/
+char	 		abx;								// Reglerindex für Absenkung
+char	 		setwoche[HKMAX];		// Schalter Absenkzeiten"Woche" kopieren auf alle Tage
+absenktab abs_tab[HKMAX][8];	// Absenkzeiten und Temperaturen für eine Woche
+/*-------------- Absenkung bei Bedarf für mehrere Heizkreise -------------*/
+char	 		bex;								// Reglerindex für Bedarfs-Absenkung
+
+
+/*-------------------- Steuer ----------------------------------------*/
+
+// Skalierungswerte für Analogausgabe R36
+aask		AASkal[2];		// Grundwerte (EEPROM gestützt, Voreinstellung in UserReply.c bei Kaltstart 66)
+UINT		AoutSk[2];		// aktuelle skalierte Ausgabewerte; Umrechnung Aout[i] -> AoutSk[i] in Output.c
+
+// gedämpfte Außenlufttemperatur 
+mwsp	ta1m;				// gedämpfte Außentemp. + Status
+//float	fl_ta1m;		//		"								(für Filterberechnung) ist im Noinit-Rambereich
+char	Ta1mzk;			// Filterzeitkonstante 				[min]
+char	steustart;	// Steuerstart nach Reset
+
+mwsp  bcta;				// Broadcast Außentemp. + Status
+char  bc_vorra;		// Vorrang Broadcast-Außentemp.
+char  bc_flag;		// Flag = 1 wenn ta von bcta abstammt 
+char  bc_simu;		// Simulation eines BCTA1-Kommandos
+mwsp  ta;					// Arbeitsspeicher für Außentemperatur
+
+// gemittelte Außenlufttemperatur über Stunden
+mwsp	ta1mh;			// gedämpfte Außentemp. + Status
+//float	fl_ta1mh;	//		"				(für Filterberechnung) ist im Noinit-Rambereich
+int		ta1mh_temp;	// Eingebbarer Parameter zum Einstellen der gedämpften Ta 
+
+char	Ta1mhzk;		// Filterzeitkonstante 				[h]
+char	zzta1mh;		// Zähler für Tastzeit
+char	zzsave;			// Zeitzähler für Ablage im EEPROM 
+
+// Sommer Winter,	zentrale Parameter in ANL
+int		Tae;				// Temp. Winter ein						 [°C] * 10	
+int		Taa;				// Temp. Sommer aus						 [°C] * 10	
+char	sowi;				// 1 = Sommer
+// ***AnFre
+char	SomBegin[2];// Datum Sommer-Anfang [Tag,Monat]
+char	SomEnd[2];	// Datum Sommer-Ende	 [Tag,Monat]
+
+char	Klima;			// Klimaschutz
+int		DTKlima;		// Absenkung Klima
+
+#if ANF_EXT > 0
+mwsp anfExt[ANF_EXT];							// Anforderung über Bus
+#endif
+
+int maxAnford;		// maximale Anforderung (HK, WW)
+
+/*--------------- Reglerparameter für mehrere Heizkreise ---------------*/
+//	Die Parameternamen sind in den Strukturdefinitionen festgelegt (ustruct.h) 
+
+// Statische Parameter (mit Standdardwerten)	
+//   Der Bereich wird gefüllt:
+//	 a)nach Kaltstart aus der Liste mit Standardwerten (in UserConst.c)
+//		 (Transport mit Funktion "Typelist_copy()" in UserReply.c)
+//	 b)nach Reset mit Werten aus EEPROM
+//		 (Transport mit Funktion "Ram__Bicram(0)" in Main.c )
+HkStandard	hks[HKMAX];	
+
+// Dynamische Parameter
+//	 Der Bereich dient als Arbeitsspeicher für die Regelprogramme
+HkDynam			hkd[HKMAX];
+
+/*--------------- Reglerparameter für Solare Heizkreise  ***AnFre---------------*/
+// Statische Parameter (mit Standdardwerten)	
+HkSoLStandard	hksSoL[HKSoLMAX];	
+// Dynamische Parameter
+HkSoLDynam		hkdSoL[HKSoLMAX];
+
+/*--------------- Reglerparameter für mehrere Warmwasserkreise -------*/
+// Statische Parameter (mit Standdardwerten)	
+//   Der Bereich wird gefüllt:
+//	 a)nach Kaltstart aus der Liste mit Standardwerten (in UserConst.c)
+//		 (Transport mit Funktion "Typelist_copy()" in UserReply.c)
+//	 b)nach Reset mit Werten aus EEPROM
+//		 (Transport mit Funktion "Ram__Bicram(0)" in Main.c )
+WwStandard	wws[WWMAX];	
+
+// Dynamische Parameter
+//	 Der Bereich dient als Arbeitsspeicher für die Regelprogramme
+WwDynam			wwd[WWMAX];
+
+//--------*** AnFre ***-----------------------------------------------------
+/* Struktur der Profilparameter eines Warmwasserkreises				*/
+// Teil1: Statische Parameter (mit Standdardwerten)
+PrStandard prs[PRMAX];
+// Dynamische Parameter
+//	 Der Bereich dient als Arbeitsspeicher 
+PrDynam			prd[PRMAX];
+
+/*--------------- Reglerparameter für mehrere Kesselkreise -------*/
+// Statische Parameter (mit Standdardwerten)	
+//   Der Bereich wird gefüllt:
+//	 a)nach Kaltstart aus der Liste mit Standardwerten (in UserConst.c)
+//		 (Transport mit Funktion "Typelist_copy()" in UserReply.c)
+//	 b)nach Reset mit Werten aus EEPROM
+//		 (Transport mit Funktion "Ram__Bicram(0)" in Main.c )
+KeStandard	kes[KEMAX];
+
+// Dynamische Parameter
+//	 Der Bereich dient als Arbeitsspeicher für die Regelprogramme
+KeDynam			ked[KEMAX];
+
+/*--------------- Reglerparameter für mehrere Vorregelkreise (Netztrennung)------*/
+//	Die Parameternamen sind in den Strukturdefinitionen festgelegt (ustruct.h) 
+
+// Statische Parameter (mit Standdardwerten)	
+//   Der Bereich wird gefüllt:
+//	 a)nach Kaltstart aus der Liste mit Standardwerten (in UserConst.c)
+//		 (Transport mit Funktion "Typelist_copy()" in UserReply.c)
+//	 b)nach Reset mit Werten aus EEPROM
+//		 (Transport mit Funktion "Ram__Bicram(0)" in Main.c )
+NtStandard	nts[NTMAX];	
+
+// Dynamische Parameter
+//	 Der Bereich dient als Arbeitsspeicher für die Vorregelprogramme
+NtDynam			ntd[NTMAX];
+
+
+/*--------------- Reglerparameter für Solar-Regelung -------------*/
+SoStandard	sos[SOMAX];
+SoDynam	sod[SOMAX];
+// ***AnFre 
+char NotBetr;		//Anzeige Notbetrieb
+UINT NotTage;		//Anzahl Tage bis Notbetrieb
+// ***AnFre 
+char zirkMax;	//Anzeige WW-Zirkulation zu warm
+char speicherMax;	//Anzeige WW-Speicher zu warm
+char pufferMax;	//Anzeige  Solar-Puffer zu warm
+char pusoTempAl;		// Solarpumpe Temp.Alarm
+char v2MinAlarm;	//Anzeige Koll.Vol.Strom minimal
+char pusoFrostAl;		// Solarpumpe Frost-Alarm
+// ***AnFre in Alarme.c als static definiert char zVolAlarm;		// Zähler bis Alarm EIN
+char kwzDefekt;		// Kaltwasser-Zähler defekt
+// ***AnFre externe HAST-Alarme
+char ext1SammelSM;	//Anzeige EXT 1: EINZEL-Alarm HKV
+char ext2SammelSM;	//Anzeige EXT 2: EINZEL-Alarm WPU
+char ext3SammelSM;	//Anzeige EXT 3: EINZEL-Alarm KES
+// ***AnFre 30.05.2013 externe SSM: Bezeichnung ändern
+char extAlarmText[16];
+
+/*--------------- Alarmtabelle -----------------------------------*/
+AlarmVar	alarmtab[SETAB_DEFL];
+
+char quit_taste;
+char un_qsm;								// 1 = Unquittierte Störungen vorhanden
+char unbek_Alarm;					// unbekannter Alarm (alarmtab - Index)
+
+UINT alarmlist_dae[SETAB_DEFL];		// aktuelle Alarme in einer Liste merken (für RFB):  2 Byte DAE-Nummer
+char alarmanz_dae;
+
+/*---------------- Zählerspeicherung pro Monat ------------------------*/
+char	std_old;
+char	monza_first;
+char	monza_znum;
+// Rest verlagert nach UserNoinit.c
+
+/***** ulsch : Archivspeicher *****/
+char	arp_vis;						// Sichtbarkeit der Gruppe "Archivierung" in Parli
+char arch_par;						// Anzahl , char = UCHAR !	
+char archivAktiv;					// Archivierung parametriert, Anlauf beendet ( Kennung 58h )
+char ParaBuffer[128];
+
+/***** ulsch : Adaption*****/
+/*---------------- Adaption --------------------------------------------------------*/
+char mwAdapt[HKMAX][ADAP_STAT_MAX];			// uebermittelte Werte 2,5,8
+char adapt_countdown[HKMAX];					// Wert in min, empfangen vom R50 über Kommando WR_ADAKENNZ
+
+#if ( ADAP_STAT_HK1 > 0 || ADAP_STAT_HK2 > 0 || ADAP_STAT_HK3 > 0 || ADAP_STAT_HK4 > 0 )
+mwsp mwAdaption[HKMAX][ADAP_STAT_MAX];	// Kopie von mwAdapt mit selbst gebildetem Status ( Datenuebertrag.fehler .stat = 1 )
+char AdaptMeldg[HKMAX][16];
+int AdaptKorr[HKMAX][10];								// 10 temperaturspez.Adaptionswerte fuer -25 grd C ...+20 grd C, in 0,1 grd
+char tvsHigh[HKMAX];										// Zaehler zur Ueberwachung der Vorlauf-Temperatur
+char tvsLow[HKMAX];
+char tvsNormal[HKMAX];
+char leistgLow[HKMAX];									// Zaehler
+char leistgHigh[HKMAX];
+#endif
+
+/***** ulsch : Ferienprogramm *****/
+char ferienStat;					// Zustand Ferien	
+ferienZeit ferien[10];		// Feld fuer 10 Ferien-Termine ( 60 Byte )
+
+char absenkStat;					// Zustand Absenkung
+
+/***** ulsch : Heizgradtage *****/
+#if HEIZGRD == 1
+char indexMon;
+int ta7;
+int ta14;									// Speicherplatz unmittelbar nach ta7 !
+monHzGrd sMonHzGrd;
+monHzGrd sMonHzGrdAnz;
+char merkerStd;
+char monHzGrdAnz;
+#endif
+
+/***** ulsch : Waermemenge, Diagnose *****/
+#if WMENG > 0
+zaehlspWmeng wmengCtr[4];					// ZIN7 bis ZIN10 sind möglich
+#endif
+
+#if ( LEIST_BER > 0 )
+maxLeistung MaxLeistung[4];
+#endif
+
+#if ( LEIST_BEGR > 0 )
+grenzLeistungStat GrenzLeistung;
+grenzLeistungDyn grenzLeistung;
+UINT AnzahlBegrenzung;
+UINT DauerBegrenzung;
+#endif
+
+#if DIAG == 1
+diagnose did;											// dyn. Parameter
+diagParam dis;										// stat. Parameter
+// ***AnFre 06.06.2012 RL HK1: TH2
+UINT TH2MittelZaehler;			// Minuten-Zähler Mittlere TH2 diesen Monat (max. 44640)
+UINT TH2Mittel[12];					// Mittlere TH2 Jan. bis Dez.
+UINT TH2MittelVJ[12];				// Mittlere TH2 Vorjahr Jan. bis Dez.
+ULONG TH2MittelSumme;
+char TH2MittelMonAlt;				// Mittlere TH2 alter Monat
+char TH2MittelJahrAlt;			// Mittlere TH2 altes Jahr
+// ***AnFre 06.06.2012 RL Netz: TN2
+UINT TN2MittelZaehler;			// Minuten-Zähler Mittlere TH2 diesen Monat (max. 44640)
+UINT TN2Mittel[12];					// Mittlere TH2 Jan. bis Dez.
+UINT TN2MittelVJ[12];				// Mittlere TH2 Vorjahr Jan. bis Dez.
+ULONG TN2MittelSumme;
+char TN2MittelMonAlt;				// Mittlere TH2 alter Monat
+char TN2MittelJahrAlt;			// Mittlere TH2 altes Jahr
+#endif	
+
+//#####josch: // Komtab-Copy
+copydata CopyData[COPY_RESERV_EMPF];
+char		 LeerData[1];
+int			 CopySend[COPY_RESERV_SEND];
+int			 LeerSend[1];
+
+// ***AnFre:
+zaehlspVolstr volstrCtr;	//Volumenzähler Kaltwasser TWE
+// ***AnFre 03.09.2009 Diagnose KWZ
+diagnoseKWZ kwd;											// dyn. Parameter 5 Zeiten in h
+diagParamKWZ kws;											// stat. Parameter für 4 Parameter(16 Byte)
+char ZeitLoesch; 											// Zeiten löschen (auch bei KS66=1)
+ULONG timeDiff;			// Zeit-Zaehler 100ms
+ULONG lasttimeDiff;	// Zeit-Zaehler letzter Impuls 100ms
+
+
+UINT	CO2_Faktor;				// CO2-Faktor 0,000 [kg/kWh]
+ULONG	CO2_Einspar;			// CO2-Einsparung in 0 kg
+char	Tyfocor;					// Anteil Tyfocor in Vol.% (nur 40, 50 oder 60)
+// ***AnFre 30.04.2014: Korrekturwert für WZx Vorlauf- Rücklauf-Temperatur	[ 0,1 K ]
+// spezielle Behandlung in WmengSolar.c
+mwsp	WZxTV[4];					//  WZx: Vorlauf zur Anzeige
+int		WZxTVKorr[4];			//	WZx: Vorlauf-Korrektur
+int		WZxTVKorrAlt[4];
+mwsp	WZxTR[4];					//  WZx: Rücklauf zur Anzeige
+int		WZxTRKorr[4];			//	WZx: Rücklauf-Korrektur
+int		WZxTRKorrAlt[4];
+
+// ***AnFre: R101-Copy entfernt
+//mwsp SSM_Ext1;						// HAST 1: Sammelstörung 				von UST1  über Bus	(R101-Copy)
+//mwsp ANF_Ext1;						// HAST 1: Sollwert-Anforderung von UST1  über Bus	(R101-Copy)
+//mwsp SSM_Ext2;						// HAST 2: Sammelstörung 				von UST2  über Bus	(R101-Copy)
+//mwsp ANF_Ext2;						// HAST 2: Sollwert-Anforderung von UST2 über Bus	(R101-Copy)
+
+//  Empfangsdaten von Daten-Manager	***AnFre 19.04.2012
+// Sollwert-Anforderung
+mwsp DM_ANF_Ext1;					// HKV 1: Sollwert-Anforderung von UST1 über S1/S2
+mwsp DM_ANF_Ext2;					// HKV 2: Sollwert-Anforderung von UST2 über S1/S2
+mwsp DM_SSM_Ext1;					// HKV 	: Sammelstörung 				von UST1 über S1/S2
+mwsp DM_SSM_Ext2;					// WPU 	: Sammelstörung 				von WPU über S1/S2
+mwsp DM_SSM_Ext3;					// KESSEL: Sammelstörung 				von KES über S1/S2
+
+mwsp DM_WPU_Frei;					// WPU-Freigabe
+mwsp DM_WPU_Ventil;				// WPU Stellung Regelventil HK1
+
+// Ausgewählte (gültige) Sollwert-Anforderung	***AnFre 21.01.2009
+mwsp ExtAnf1;	// von Unterstation 1
+mwsp ExtAnf2;	// von Unterstation 2
+
+char ssfEinAnl;										// Schornsteinfeger-Funktion ( KE1 OR KE2 )	
+
+#if TAE_ANZ == 1
+mwsp ta_ae;
+int TaeSkalMin;
+int TaeSkalMax;
+#endif
+
+#if TAA_ANZ > 0
+int TaaSkalMin;
+int TaaSkalMax;
+#endif
+
+#if ANFORD == 1
+int TmanfSkalMin;
+int TmanfSkalMax;
+int TmanfSkalMinSpg;
+int TmanfSkalMaxSpg;
+#endif
+
+sAnaInpPara AnaInpPara[AE_UNI_ANZ];
+sAnaInp anaInp[AE_UNI_ANZ];
+
+
+// ***** josch: Datenmanager ***************************************************************
+// Gerät im DS_Modus (Data Slave),	Auswertung in der Funktion DReply() 
+#if DS_MODE == 1
+char DS_RxBuf[DS_RXBUF_MAX];			// vom Master empfangene Daten
+char DS_RxTout;										// Timeout in Minuten
+char DS_RxStat;										// Status der Empfangsdaten
+char DS_TxBuf[DS_TXBUF_MAX];			// an den Master zu sendende Daten
+char DS_TxLeng;										// Datenanzahl zu senden
+
+// Empfangene Daten vom Master (Variable müssen vom Typ mwsp sein)
+//mwsp zentrale_ea;									// Beispiel für 1 Byte: Ein/Aus              
+//mwsp zentrale_istwert;						// Beispiel für 3 Byte: Temperatur mit Status
+//mwsp zentrale_sollwert;						// Beispiel für 2 Byte: Sollwert             
+
+#endif
+
+// Gerät im DM_Modus (Data Master),	Datenbearbeitung in der Funktion DManager(), Organisation der Datenübertragung im Task DTimer() 
+#if DM_MODE == 1
+dm_param DM[DM_SLAVES];						// DM Struktur
+char dtslave;											// DTimer aktueller Slave
+char dtstate;											// DTimer aktueller Bearbeitungsstatus
+char dtauftrag;										// DTimer aktueller Auftrag
+char proc_TI;											// DTimer Auftragsmerker 
+char Slave[4];										// Slave 1 - 4 Adressen
+
+// Empfangene Daten von den Slaves  (Variable müssen vom Typ mwsp sein)
+//mwsp station1_ea;									// Beispiel für 1 Byte: Ein/Aus              
+//mwsp station1_istwert;						// Beispiel für 3 Byte: Temperatur mit Status
+//mwsp station1_sollwert;						// Beispiel für 2 Byte: Sollwert             
+//
+//	#if DM_SLAVES > 1
+//mwsp station2_ea;			
+//mwsp station2_istwert;
+//mwsp station2_sollwert;
+//	#endif
+
+#endif
+
+// ***** Josch-SDM : Archiv mit SD-Card-Memory ********************************************************* 
+#if ARCHIV_SDM == 1
+UINT	werks_sdm_code;						// Code eingeben für Werkseinstellung
+UINT	sdm_akt_dae;
+char	a_sperre;
+char	sdm_arch_stop;						// Benutzer-Stopp (1), wird gesichert in Standard.c 
+char	mount_check;
+char	test_start;
+char	sdm_base_check;
+char	sdm_alarm_check;
+
+// Funktion: Zeitmessung (in Upro.c)
+// IN:       char  onoff ...ON (1=Start), OFF ( 0=Stop)
+// OUT:      ULONG Zeit.....ms
+#if ZEIT_MESSUNG == 1
+ULONG read_zeit;
+ULONG write_zeit;	
+ULONG write_zeit_max;
+#endif
+
+char	c_erg_gl;									// Ergebnis der Card-Zugriffe veröffentlichen in der parli
+char  c_erg_text[16];
+char	a_erg_gl;									// Ergebnis der Archivierung  veröffentlichen in der parli
+char  a_erg_text[16];
+char	cardType;
+char	speedClass;
+char	performanceMove;
+char	ferro_err;
+char	card_err;
+
+char	bic_err;
+char	asdm_status;
+char	asdm_action;
+char	sdm_ret;										// Fehleranzeige
+char	asdm_minut;
+ULONG asdm_time;									// Zeitmarke aktuell
+ULONG read_time;									// Zeitmarke: Erster Zeitstempel der Datenpage, deren Eintrag in der Verweispage fehlt
+char  asdm_buffer[64];						// Puffer für Zeitstempel und Datenwert
+char	asdm_page[512];							// Puffer für eine Page
+ULONG timeout_max;
+
+UINT	current_dae;
+char	current_dae_exp;
+char	max_expand;
+char	exp_index;
+UINT	dae_append;
+UINT	komtab_changed;
+char	daily_init;
+int   reset_dae;									// ferro Init für ein DAE,EXP
+
+UINT	ferro_adr;
+UINT	ferro_mnext;
+UINT	ferro_msize;
+ferro_info	dae_info[1];
+ferro_info *exp_ferro_tab[256];		// Pointer auf Expanddaten-Tabelle im alloziierten Ferro-Bereich
+
+// DAE Archivierung
+ULONG hp_adr;											// aktuelle Adresse der Hauptpage.    Anzahl 1
+ULONG vp_adr;											// aktuelle Adresse der Verweispage.  Anzahl 15
+ULONG dp_adr;											// aktuelle Adresse der Datenpage.    Anzahl 2032
+ULONG sdm_mnext;									// Expand-Allocation: nächster freier Platz
+ULONG sdm_msize;									// Expand-Allocation: Größe des verfügbaren Speicherbereiches
+ULONG	exp_sdm_tab[256];						// Expand-Allocation; die Expanddaten-Tabelle enthält alle alloziierten Hauptpage-Adressen
+
+// DAE Suche
+ULONG search_hp_adr;							// gefundene Adresse der Hauptpage.
+UINT  search_vp_num;							// gefundene Verweispagenummer in der Hauptpage (1-15)
+ULONG search_vp_adr;							// gefundene Adresse der Verweispage.
+UINT  search_dp_num;							// gefundene Datenpagenummer in der Verweispage (1-2032)
+ULONG search_dp_adr;							// gefundene Adresse der Datenpage.
+UINT  search_ts_num;							// gefundene Zeitstempelnummer in der Datenpage
+char	sd_buf[512];								// Puffer für eine Page
+
+#if SPEED_SAVE == 1			//$ Test
+ULONG asdm_test_start;
+#endif
+
+#endif // End ARCHIV_SDM == 1
+
+// ***AnFre : Kaltwasser TWW *********************************************/
+extern zaehlspVolstr volstrCtr;	
+// ***AnFre 03.09.2009 Diagnose KWZ
+extern diagnoseKWZ kwd;											// dyn. Parameter
+extern diagParamKWZ kws;										// stat. Parameter
+extern char ZeitLoesch; 											// Zeiten löschen (auch bei KS66=1)
+extern ULONG timeDiff;			// Zeit-Zaehler 100ms
+extern ULONG lasttimeDiff;	// Zeit-Zaehler letzter Impuls 100ms
+
+
+extern UINT	CO2_Faktor;				// CO2-Faktor 0,000 [kg/kWh]
+extern ULONG	CO2_Einspar;			// CO2-Einsparung in 0 kg
+extern char	Tyfocor;					// Anteil Tyfocor in Vol.% (nur 40, 50 oder 60)
+
+
+
+
+																		
