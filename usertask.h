@@ -269,7 +269,7 @@
 #endif
 
 //------------------ AnalogEA	: Skalierung und Dämpfung der 0-10V Eingänge  ------------
-#if ANALOG_AE > 0
+#if ( ANALOG_AE || RM_POWER_ANZ || AE_DRUCK_ANZ )
 #define	U22_STAT		0x00
 #define U22_BICB		NOIC
 #define	U22_ZAEHL		83								// 2,075 s Startverzögerung				
@@ -321,12 +321,15 @@
 #endif
 
 //------------------ letzter Task: Archivierung mit SD-Card ------------------------------
-#if ARCHIV_SDM == 1
+
+
+//------------------ Benutzersteuerung mit UNI-Elementen --------------------------------
+#if STEUER_UNI == 1
 #define	U25_STAT		0x00					
 #define U25_BICB		NOIC
-#define	U25_ZAEHL		80
-#define	U25_ZEITG		10
-#define	U25_TASK		ArchivSDM
+#define	U25_ZAEHL		40
+#define	U25_ZEITG		40
+#define	U25_TASK		SteuerUni
 #else
 #define	U25_STAT		0x80					
 #define U25_BICB		NOIC
@@ -335,5 +338,61 @@
 #define	U25_TASK		Leer
 #endif
 
+//------------------ Extrahieren von Modbus-Bitfeldern -----------------------------
+#if (MODBUS_UNI > 0) && (MODBUS_EXT == 1)
+#define	U26_STAT		0x00					
+#define U26_BICB		NOIC
+#define	U26_ZAEHL		46
+#define	U26_ZEITG		40
+#define	U26_TASK		ModbusExtract
+#else
+#define	U26_STAT		0x80					
+#define U26_BICB		NOIC
+#define	U26_ZAEHL		4
+#define	U26_ZEITG		4
+#define	U26_TASK		Leer
+#endif
+
+//----------------- Wilo Pumpen  --------------------------------------------------------------
+#if WILO_MODBUS == 1
+#define	U27_STAT		0x00					
+#define U27_BICB		NOIC
+#define	U27_ZAEHL		405						// 10,075 Sek Startverzögerung
+#define	U27_ZEITG		40						// 1 s
+#define	U27_TASK		WiloPumpenSteuerung
+#else
+#define	U27_STAT		0x80					
+#define U27_BICB		NOIC
+#define	U27_ZAEHL		4
+#define	U27_ZEITG		4
+#define	U27_TASK		Leer
+#endif	
+//----------------- Reserve --------------------------------------------------------------
+#define	U28_STAT		0x80					
+#define U28_BICB		NOIC
+#define	U28_ZAEHL		4
+#define	U28_ZEITG		4
+#define	U28_TASK		Leer
+
+#define	U29_STAT		0x80					
+#define U29_BICB		NOIC
+#define	U29_ZAEHL		4
+#define	U29_ZEITG		4
+#define	U29_TASK		Leer
+
+//------------------ letzter Task: Archivierung mit SD-Card ------------------------------
+#if ARCHIV_SDM == 1	//...........Josch-SDM : Archiv mit SD-Card-Memory
+#define	U30_STAT		0x00					
+#define U30_BICB		XICB|SPIB
+#define	U30_ZAEHL		400					// 10 sec Startverzoegerung
+#define	U30_ZEITG		4						// 100 ms
+#define	U30_TASK		ArchivSDM
+#else
+#define	U30_STAT		0x80					
+#define U30_BICB		NOIC
+#define	U30_ZAEHL		4
+#define	U30_ZEITG		4
+#define	U30_TASK		Leer
+#endif	
 #endif	// USERTASK_H_INCLUDED
 

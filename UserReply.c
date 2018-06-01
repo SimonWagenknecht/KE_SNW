@@ -63,7 +63,9 @@ void load_eapointer37(unsigned int *ea, char idx, char ext);
 void load_eapointer38(unsigned int *ea, char idx, char ext);
 void load_eapointer39(unsigned int *ea, char idx, char ext);
 void load_eapointer33(unsigned int *ea, char idx, char ext);
-char LoadPointer(char typ, char klasse, char num, char idx, char ext, char iodev);
+char LoadPointer(char typ, char klasse, char num, char idx, char ext, char iodev, unsigned int *label);
+char LoadParamText(char *liste, unsigned int param);
+void ListParameter(char *list, char klasse, unsigned int label);
 void Blink(char rot, char gelb, char blau, char idx);
 void Print(const char *text, char idx);
 void move_evetab(char rw);
@@ -109,6 +111,14 @@ zaehlsp * get_zpointer(char knum, UINT *dim_adr, UINT *err_adr, UINT *init_adr, 
 
 #define RD_ALARMLIST		0x3F				// Lese Liste der aktuellen Alarme 
 
+// Josch-SDM : Archiv SD-Card-Memory (definiert in archivsdm.h)
+//#define READ_SDMEM        0x60    // Test: Lese Daten von einem Speicherplatz
+//#define READ_ARCHIV       0x61    // Lese archivierte Daten in Form von Datenpaketen (Zeitstempel + Daten)
+//#define READ_MEMINFO      0x62    // Test: Lese Informationen zur Speicherbelegung aus dem Ferro-Ram    
+//#define READ_ARCHIV_INFO  0x63    // Test: Lese SD-Speicher-Informationen zu einem gefundenen DAE
+//#define CHECK_FERRO_SDHC  0x64    // Kommando für Prüfplatz: Ferro2 gesteckt ?, SDHC gesteckt ?
+//#define WRITE_SDMEM       0x65    // Test: Schreibe Daten auf einen Speicherplatz
+
 /* Subkommandos User50-Anwendung	*/
 /*--------------------------------*/
 #define  RD_VBR					0x11		// Zählerstände lesen     (4 Byte ZQ1...ZQ8)
@@ -133,6 +143,8 @@ zaehlsp * get_zpointer(char knum, UINT *dim_adr, UINT *err_adr, UINT *init_adr, 
 #define TEACH_IN_DATUE_MEM								0x02		// der Slave soll das TeachIn speichern
 #define TEACH_IN_DATUE_ABBRUCH						0x04		// der Slave soll das TeachIn abbrechen
 #define TEACH_IN_DATUE_NACHFRAGE					0x00		// der Slave soll das TeachIn beantworten für die Dauerabfrage
+
+#define RD_MONSUM				0x59		// Monatsverbrauch lesen
 
 // Indexbasis für Telegramm WR_KASKADE
 #define HK_BED			0		// Index für Heizkreise						ab 1 - HKANZ
@@ -497,8 +509,11 @@ void User50Reply(char *RsTxBuf, char	*RsRxBuf,	char prot)
 	unsigned int pageadr = 0;
 	signed char nutzung, nachford, bedarf;
 	zaehlsp *pZaehler = NULL;
-	ULONG longwert;
+	ULONG longwert = 0;
+	ULONG longtime = 0;
 	UINT dim_adr, err_adr, init_adr, sync_adr;
+	UINT vb_jahr;
+	char jahr_idx =0;
 		
 	switch(RsRxBuf[1])				// subkommando
 	{
@@ -695,10 +710,49 @@ void User50Reply(char *RsTxBuf, char	*RsRxBuf,	char prot)
 					RsTxBuf[offs++] = i;																					// Zählerkanal
 					RsTxBuf[offs++] = pZaehler->zdim.konfig;											// Konfiguration des Zählers
 					RsTxBuf[offs++] = pZaehler->zdim.exponent;										// Einheitenzählung:	Exponent zum Errechnen der Speicherwerte
+
+					#if MBUSANZ > 0 
+					if((i > 30) && (i <= 30 + MBUSANZ )) {	//100526 diese Daten hat nur ein MBus-Zähler
+						switch(MbusPara[i-31].Typ) {
+							case KWS:
+								pZaehler->zdim.medium = KALTWASSER;
+								break;
+							case WWS:
+								pZaehler->zdim.medium = WARMWASSER;
+								break;
+							case ELT:
+								pZaehler->zdim.medium = ELEKTRO;
+								break;
+							case WRM:
+								pZaehler->zdim.medium = WAERMEMENGE;
+								break;
+							default:
+								break;
+						}
+					}
+					#endif
+
 					RsTxBuf[offs++] = pZaehler->zdim.medium;											// Information: 			Definitionsbyte
 					// INIT Dongle-Nummer des PC-Bedieners (2) , Tag, Monat und Jahr der Initialisierung
-					bicbus(EEPADR,	(char	*)&RsTxBuf[offs],	init_adr , 5,	BICRD);
-					offs += 5;
+					if(init_adr > 0) {	//100519
+						bicbus(EEPADR,	(char	*)&RsTxBuf[offs],	init_adr , 5,	BICRD);
+						offs += 5;
+					}
+					
+					else {
+						#if MBUS_MASTER == 0
+							RsTxBuf[offs++] = 0;
+							RsTxBuf[offs++] = 0;
+							RsTxBuf[offs++] = 0;
+							RsTxBuf[offs++] = 0;
+							RsTxBuf[offs++] = 0;
+						#else
+							pFehler =  &Z_Fehler[i-31];															// Pointer auf MBus-Zusatzspeicher
+							memcpy(&RsTxBuf[offs], &pFehler->clearDongle, 5);
+							offs += 5;
+						#endif
+					}
+					
 					memcpy(&RsTxBuf[offs], pZaehler->zdim.zname, 16);							// Raumname (wie Zählername ) 
 					offs += 16;
 					memcpy(&RsTxBuf[offs], pZaehler->zdim.znumm, 16);							// Zählernummer
@@ -707,6 +761,18 @@ void User50Reply(char *RsTxBuf, char	*RsRxBuf,	char prot)
 					offs += 16;
 					memcpy(&RsTxBuf[offs], pZaehler->zdim.stich_tag, 3);					// Stichtag
 					offs += 3;
+					
+					#if MBUSANZ > 0
+					if((i > 30) && (i <= 30 + MBUSANZ )) {	//100526 Telegrammlänge erweitert (diese Daten hat nur ein MBus-Zähler)
+						RsTxBuf[offs++] = MbusPara[i-31].Adr;
+						RsTxBuf[offs++] = MbusPara[i-31].Freigabe;
+					}
+					else 
+					#endif
+					{
+						RsTxBuf[offs++] = 0;
+						RsTxBuf[offs++] = 0;
+					}
 
 					*(int *) (RsTxBuf + offs) = Checksum(RsTxBuf+j, (unsigned char) (offs-j));		// CRC1 + CRC2 
 					offs = RsFrame(RsTxBuf,(char)(offs-j+2), RCOK, prot);													// Rahmen mit richtiger Protokolllänge
@@ -752,8 +818,42 @@ void User50Reply(char *RsTxBuf, char	*RsRxBuf,	char prot)
 					pZaehler->zdim.exponent = RsRxBuf[offs++];										// Einheitenzählung:	Exponent zum Errechnen der Speicherwerte
 					pZaehler->zdim.medium   = RsRxBuf[offs++];										// Information: 			Definitionsbyte					
 
-					// INIT Dongle-Nummer des PC-Bedieners (2) , Tag, Monat und Jahr der Initialisierung
-					bicbus(EEPADR,	 (char	*)&RsRxBuf[offs],	init_adr, 5,	BICWR);
+					#if MBUSANZ > 0
+					if((i > 30) && (i <= 30 + MBUSANZ )) {
+						switch(pZaehler->zdim.medium) {
+							case KALTWASSER:
+								MbusPara[i-31].Typ 			= KWS;
+								break;
+							case WARMWASSER:
+								MbusPara[i-31].Typ 			= WWS;
+								break;
+							case ELEKTRO:
+								MbusPara[i-31].Typ 			= ELT;
+								break;
+							case WAERMEMENGE:
+								MbusPara[i-31].Typ 			= WRM;
+								break;
+							default:
+								MbusPara[i-31].Typ 			= OTHER;
+								break;
+						}
+					}
+					#endif
+					
+					if(init_adr > 0) {	//100519
+						// INIT Dongle-Nummer des PC-Bedieners (2) , Tag, Monat und Jahr der Initialisierung
+						bicbus(EEPADR,	 (char	*)&RsRxBuf[offs],	init_adr, 5,	BICWR);
+					}
+					else {
+						#if MBUS_MASTER != 0
+							pFehler =  &Z_Fehler[i-31];															// Pointer auf MBus-Zusatzspeicher
+							pFehler->clearDongle = *(int*)&RsRxBuf[offs];
+							pFehler->clearTag = RsRxBuf[offs+2];
+							pFehler->clearMon = RsRxBuf[offs+3];
+							pFehler->clearJahr = RsRxBuf[offs+4];
+						#endif
+					}
+					
 					offs += 5;
 																																				// Raumname ignorieren
 					offs += 16;
@@ -764,11 +864,26 @@ void User50Reply(char *RsTxBuf, char	*RsRxBuf,	char prot)
 					memcpy(pZaehler->zdim.stich_tag, &RsRxBuf[offs], 3);					// Stichtag
 					offs += 3;
 					
-					// Dimensionierung sichern im EEPROM (Ferro):
-					bicbus(EEPADR, (char *)&pZaehler->zdim.komma,	dim_adr     , 16,	BICWR); // 16 Byte Dimension   (ZAEHLxx_DIM_ADR)
-					bicbus(EEPADR, (char *)&pZaehler->zdim.zname,	dim_adr + 16, 16,	BICWR); // 16 Byte Zählername  (ZAEHLxx_NAME_ADR)
-					bicbus(EEPADR, (char *)&pZaehler->zdim.znumm,	dim_adr + 32, 16,	BICWR); // 16 Byte Zählernummer(ZAEHLxx_NUMM_ADR)
+					#if MBUSANZ > 0
+					if(RsRxBuf[-1] >= 0x47) {	//100526 Telegrammlänge erweitert mit Adresse des MBus-Zählers und ob der Zähler aktiv ist
+						if((i > 30) && (i <= 30 + MBUSANZ )) {
+							MbusPara[i-31].Adr 			= RsRxBuf[offs++];
+							MbusPara[i-31].Freigabe = RsRxBuf[offs++];
+							#if MBUS_MASTER == 0
+								bicbus(EEPADR,	 (char	*)&MbusPara[i-31],	MBUS_PARA_ADR+((i-31)*MBUS_PARA_LENG), MBUSLENG,	BICWR);
+							#else
+								ZaehlerDatenLoeschen ( i-31 );
+							#endif
+						}
+					}
+					#endif
 					
+					if(init_adr > 0) {	//100519
+						// Dimensionierung sichern im EEPROM (Ferro):
+						bicbus(EEPADR, (char *)&pZaehler->zdim.komma,	dim_adr     , 16,	BICWR); // 16 Byte Dimension   (ZAEHLxx_DIM_ADR)
+						bicbus(EEPADR, (char *)&pZaehler->zdim.zname,	dim_adr + 16, 16,	BICWR); // 16 Byte Zählername  (ZAEHLxx_NAME_ADR)
+						bicbus(EEPADR, (char *)&pZaehler->zdim.znumm,	dim_adr + 32, 16,	BICWR); // 16 Byte Zählernummer(ZAEHLxx_NUMM_ADR)
+					}
 				}	
 				else
 					RsFrame(RsTxBuf, 0,	ERANZ	,	prot);
@@ -797,8 +912,21 @@ void User50Reply(char *RsTxBuf, char	*RsRxBuf,	char prot)
 					*(long*)&RsTxBuf[offs] 	= longwert;													
 					offs += 4;
 
-					// Fehlerspeicher + CLEAR Dongle-Nummer des PC-Bedieners (2) , Tag, Monat und Jahr der Fehlerlöschung
-					bicbus(EEPADR,	(char	*)&RsTxBuf[offs],	err_adr, 31,	BICRD);
+					if(err_adr > 0) {	//100519
+						// Fehlerspeicher + CLEAR Dongle-Nummer des PC-Bedieners (2) , Tag, Monat und Jahr der Fehlerlöschung
+						bicbus(EEPADR,	(char	*)&RsTxBuf[offs],	err_adr, 31,	BICRD);
+					}
+					else {
+						#if MBUS_MASTER == 0
+						for(k=0;k<31;k++) {
+							RsTxBuf[offs+k] = 0;	// Puffer füllen
+						}
+						#else
+							pFehler =  &Z_Fehler[i-31];															// Pointer auf MBus-Zusatzspeicher
+							memcpy(&RsTxBuf[offs], &pFehler->ok1Time, 31);
+						#endif
+					}
+					#if MBUS_MASTER == 0
 					if((pZaehler->ucZstatus & LO_HI_FLANKE) == LO_HI_FLANKE)	{	//081117 eingefügt
 						RsTxBuf[offs+0] = Tag;
 						RsTxBuf[offs+1] = Mon;
@@ -815,6 +943,7 @@ void User50Reply(char *RsTxBuf, char	*RsRxBuf,	char prot)
 						RsTxBuf[offs+10] = Min;
 						RsTxBuf[offs+11] = Sek;
 					}
+					#endif
 					offs += 31;
 
 					*(int*)&RsTxBuf[offs]	= pZaehler->zdim.faktor;								// Einheitenzählung:		Anzahl der Zwischenzählerschritte
@@ -827,9 +956,24 @@ void User50Reply(char *RsTxBuf, char	*RsRxBuf,	char prot)
 					RsTxBuf[offs++] = pZaehler->zdim.exponent;										// Einheitenzählung:	Exponent zum Errechnen der Speicherwerte
 					RsTxBuf[offs++] = pZaehler->zdim.medium;											// Information: 			Definitionsbyte
 					// INIT Dongle-Nummer des PC-Bedieners (2) , Tag, Monat und Jahr der Initialisierung
-					bicbus(EEPADR,	(char	*)&RsTxBuf[offs],	init_adr , 5,	BICRD);
-					offs += 5;
-					
+					if(init_adr > 0) {	//100519
+						bicbus(EEPADR,	(char	*)&RsTxBuf[offs],	init_adr , 5,	BICRD);
+						offs += 5;
+					}
+					else {
+						#if MBUS_MASTER == 0
+							RsTxBuf[offs++] = 0;
+							RsTxBuf[offs++] = 0;
+							RsTxBuf[offs++] = 0;
+							RsTxBuf[offs++] = 0;
+							RsTxBuf[offs++] = 0;
+						#else
+							pFehler =  &Z_Fehler[i-31];															// Pointer auf MBus-Zusatzspeicher
+							memcpy(&RsTxBuf[offs], &pFehler->clearDongle, 5);
+							offs += 5;
+						#endif
+					}
+	
 					// neu
 					*(long long *)&RsTxBuf[offs] = pZaehler->zwert;								// Hauptzähler aktuell					
 					offs += 8;
@@ -859,7 +1003,16 @@ void User50Reply(char *RsTxBuf, char	*RsRxBuf,	char prot)
 				pZaehler = get_zpointer(i, &dim_adr, &err_adr, &init_adr, &sync_adr);	// Pointer auf den gewünschten Zähler ermitteln
 				if( pZaehler != NULL )												
 				{
-					bicbus(EEPADR,	(char	*)&RsRxBuf[3],	err_adr, 31,	BICWR);
+					if(err_adr > 0) {	//100519
+						bicbus(EEPADR,	(char	*)&RsRxBuf[3],	err_adr, 31,	BICWR);
+					}
+					else {
+						#if MBUS_MASTER != 0
+							pFehler =  &Z_Fehler[i-31];															// Pointer auf MBus-Zusatzspeicher
+							memcpy(&pFehler->ok1Time, &RsRxBuf[3], 31);
+							MbusData[i-31].errors = 0;
+						#endif
+					}
 				}	
 				else
 					RsFrame(RsTxBuf, 0,	ERANZ	,	prot);
@@ -880,18 +1033,25 @@ void User50Reply(char *RsTxBuf, char	*RsRxBuf,	char prot)
 				pZaehler = get_zpointer(i, &dim_adr, &err_adr, &init_adr, &sync_adr);	// Pointer auf den gewünschten Zähler ermitteln
 				if( pZaehler != NULL )												
 				{
-					//RsTxBuf[offs++] = i;																					// Zählerkanal ****josch: steht nicht in der Telegrammliste !
-					bicbus(EEPADR,	(char	*)&RsTxBuf[offs],	sync_adr  , 4,	BICRD);	// Synchronisationswert aktuell nur LOW-Teil
-					offs += 4;
-					bicbus(EEPADR,	(char	*)&RsTxBuf[offs],	sync_adr+8, 4,	BICRD);	// Synchronisationswert Vorjahr nur LOW-Teil
-					offs += 4;
-					// SYNC Dongle-Nummer des PC-Bedieners (2) , Tag, Monat und Jahr der Synchronisierung
-					bicbus(EEPADR,	(char	*)&RsTxBuf[offs],	sync_adr+SDONGLE_OFF, 5,	BICRD);
-					offs += 5;
-					bicbus(EEPADR,	(char	*)&RsTxBuf[offs],	sync_adr  , 8,	BICRD);	// Synchronisationswert aktuell long long
-					offs += 8;
-					bicbus(EEPADR,	(char	*)&RsTxBuf[offs],	sync_adr+8, 8,	BICRD);	// Synchronisationswert Vorjahr long long
-					offs += 8;
+					if(sync_adr > 0) {	//100519
+						//RsTxBuf[offs++] = i;																					// Zählerkanal ****josch: steht nicht in der Telegrammliste !
+						bicbus(EEPADR,	(char	*)&RsTxBuf[offs],	sync_adr  , 4,	BICRD);	// Synchronisationswert aktuell nur LOW-Teil
+						offs += 4;
+						bicbus(EEPADR,	(char	*)&RsTxBuf[offs],	sync_adr+8, 4,	BICRD);	// Synchronisationswert Vorjahr nur LOW-Teil
+						offs += 4;
+						// SYNC Dongle-Nummer des PC-Bedieners (2) , Tag, Monat und Jahr der Synchronisierung
+						bicbus(EEPADR,	(char	*)&RsTxBuf[offs],	sync_adr+SDONGLE_OFF, 5,	BICRD);
+						offs += 5;
+						bicbus(EEPADR,	(char	*)&RsTxBuf[offs],	sync_adr  , 8,	BICRD);	// Synchronisationswert aktuell long long
+						offs += 8;
+						bicbus(EEPADR,	(char	*)&RsTxBuf[offs],	sync_adr+8, 8,	BICRD);	// Synchronisationswert Vorjahr long long
+						offs += 8;
+					}
+					else {
+						for(k=0;k<29;k++) {
+							RsTxBuf[offs++] = 0;	// Puffer füllen
+						}
+					}
 					
 					*(int *) (RsTxBuf + offs) = Checksum(RsTxBuf+j, (unsigned char) (offs-j));		// CRC1 + CRC2 
 					offs = RsFrame(RsTxBuf,(char)(offs-j+2), RCOK, prot);													// Rahmen mit richtiger Protokolllänge
@@ -918,20 +1078,30 @@ void User50Reply(char *RsTxBuf, char	*RsRxBuf,	char prot)
 				if( pZaehler != NULL )												
 				{
 					offs = 3;
-					bicbus(EEPADR,	(char	*)&RsRxBuf[offs],	sync_adr  , 4,	BICWR);	// Synchronisationswert aktuell nur LOW-Teil
+					if(sync_adr > 0) {	//100519
+						bicbus(EEPADR,	(char	*)&RsRxBuf[offs],	sync_adr  , 4,	BICWR);	// Synchronisationswert aktuell nur LOW-Teil
+					}
 					offs += 4;
-					bicbus(EEPADR,	(char	*)&RsRxBuf[offs],	sync_adr+8, 4,	BICWR);	// Synchronisationswert Vorjahr nur LOW-Teil
+					if(sync_adr > 0) {	//100519
+						bicbus(EEPADR,	(char	*)&RsRxBuf[offs],	sync_adr+8, 4,	BICWR);	// Synchronisationswert Vorjahr nur LOW-Teil
+					}
 					offs += 4;
 					// SYNC Dongle-Nummer des PC-Bedieners (2) , Tag, Monat und Jahr der Synchronisierung
-					bicbus(EEPADR,	(char	*)&RsRxBuf[offs],	sync_adr+SDONGLE_OFF, 5,	BICWR);
+					if(sync_adr > 0) {	//100519
+						bicbus(EEPADR,	(char	*)&RsRxBuf[offs],	sync_adr+SDONGLE_OFF, 5,	BICWR);
+					}
 					offs += 5;
 					
 					pZaehler->syncw = *(long long *)&RsRxBuf[offs]; 								// Synchronisationswert aktuell long long
-					bicbus(EEPADR,	(char	*)&RsRxBuf[offs],	sync_adr  , 8,	BICWR);
+					if(sync_adr > 0) {	//100519
+						bicbus(EEPADR,	(char	*)&RsRxBuf[offs],	sync_adr  , 8,	BICWR);
+					}
 					offs += 8;
 
 					pZaehler->syncw_vj = *(long long *)&RsRxBuf[offs]; 							// Synchronisationswert Vorjahr long long
-					bicbus(EEPADR,	(char	*)&RsRxBuf[offs],	sync_adr+8, 8,	BICWR);	
+					if(sync_adr > 0) {	//100519
+						bicbus(EEPADR,	(char	*)&RsRxBuf[offs],	sync_adr+8, 8,	BICWR);	
+					}
 					offs += 8;
 
 					pZaehler->syncfl = 4;			 					// Flag für Synchronisieroption 1 (aktuell) und 3 (Vorjahr)
@@ -945,6 +1115,73 @@ void User50Reply(char *RsTxBuf, char	*RsRxBuf,	char prot)
 			}		
 			break;
 			
+case RD_MONSUM:														// 0x59 Monatsverbrauch lesen (neu 27.05.2015)
+			i = 2;
+			if(prot == PROT232)
+				i = 5;
+			if ( Checksum ( &RsRxBuf[2], (char)(RsRxBuf[-1]-i) ) )						// korrektes Ergebnis : 0 
+				RsFrame(RsTxBuf, 0,	CRC_ERR,	prot);			
+			else
+			{
+				offs = RsFrame(RsTxBuf,	0, RCOK, prot); 												// Vorläufiger Rahmen: xx Daten + CRC
+				j = offs;                                                     	// offset merken	
+				i = RsRxBuf[2];																									// Kanalnummer (Modulnummer)
+				vb_jahr = *(int*)&RsRxBuf[3];																		// Verbrauchsjahr
+				k = RsRxBuf[5];																									// 1= 1.Jahreshälfte 2= 2.Jahreshälfte
+				if(k==0 || k>2)
+				{	
+					RsFrame(RsTxBuf, 0,	ERANZ	,	prot);														// ungültige Jahreshälfte
+					break;
+				}	
+				k--;	
+				
+				if( (vb_jahr - 2000) == Jahr )
+					jahr_idx = 0;																									// aktuelles Jahr
+				else if( (vb_jahr - 2000) == (Jahr - 1) )
+					jahr_idx = 1;																									// Vorjahr
+				else
+				{	
+					RsFrame(RsTxBuf, 0,	ERANZ	,	prot);														// ungültiges Jahr
+					break;
+				}	
+				
+				pZaehler = get_zpointer(i, &dim_adr, &err_adr, &init_adr, &sync_adr);	// Pointer auf den gewünschten Zähler ermitteln
+				if( pZaehler != NULL )												
+				{
+					RsTxBuf[offs++] = i;																					// Zählerkanal (Modulnummer)
+					RsTxBuf[offs++] = 1;																					// Datentyp: 1=Verbräuche 2=Zählerstände
+					RsTxBuf[offs++] = pZaehler->zdim.konfig;											// Konfiguration des Zählers
+					for(i = 0; i < 6; i++)
+					{
+						if(jahr_idx == 0)
+						{
+							longwert = pZaehler->verbr_akt[i + k*6];
+						//longtime =
+						}	
+						else
+						{
+							longwert = pZaehler->verbr_vor[i + k*6];
+						//longtime =
+						}
+						
+						*(unsigned long long *)(RsTxBuf + offs) = (unsigned long long)longwert;
+						offs+=8;
+						*(ULONG *)(RsTxBuf + offs) = longtime;
+						offs+=4;
+					}
+					
+					*(int *) (RsTxBuf + offs) = Checksum(RsTxBuf+j, (unsigned char) (offs-j));		// CRC1 + CRC2 
+					offs = RsFrame(RsTxBuf,(char)(offs-j+2), RCOK, prot);													// Rahmen mit richtiger Protokolllänge
+				}
+				else
+					RsFrame(RsTxBuf, 0,	ERANZ	,	prot);
+			}
+			break;
+					
+						
+
+		
+//---------------------------------------------------------------------------------------------------------------------------------------------------			
 	#if ( ((IMPLEMENT_S1 & FUNK1_IMPL) == FUNK1_IMPL) || ((IMPLEMENT_S2 & FUNK1_IMPL) == FUNK1_IMPL) || ((IMPLEMENT_S3 & FUNK1_IMPL) == FUNK1_IMPL) )
 	// Funktelegramme
 		 case WR_RF_INIT:                 // TeachIn veranlassen schreiben
@@ -1165,6 +1402,25 @@ zaehlsp * get_zpointer(char knum, UINT *dim_adr, UINT *err_adr, UINT *init_adr, 
 	}
 	#endif
 #endif		
+
+
+#if WMENG > 0
+	else if ( knum >= 95 && knum <= 98 )																			// Kanalnummer 95...98
+	{	
+		if ( ZE[knum-91]->zstat	!= NICHTV )														// keine Dummy-Vorbelegung ?
+		{
+//			zpointer   = &wmengCtr[knum-95];															// Pointer auf R36
+// so gehts nicht! Ich muss die erforderlichen Werte in eine zusätzliche Struktur zaehlsp eintragen (Wärmemenge, Dimension kWh, Komma 0, exp = 3)
+//	UserRam: zaehlsp wmengCalc[4];
+			zpointer   = &wmengCalc[knum-95];															// Pointer auf R36
+			*dim_adr  = ZAEHL01_DIM_ADR + (knum-91) * ZAEHL_DIM_OFFS;		// Adresse Zählerdimensionierung im EEPROM
+			*err_adr  = Z01LH_ADR + (knum-91) * ZFEHLER_OFFS;						// Adresse Fehlerspeicher im EEPROM
+			*init_adr = INITDONGLE01_ADR + (knum-91) * ZINIT_OFFS;			// Adresse Zählerinitialisierung im EEPROM
+			*sync_adr = SYNCAKTU01_ADR + (knum-91) * SYNC_OFFS;					// Adresse Zählersynchronisierung im EEPROM
+		}	
+	}	
+#endif
+
 	else
 		zpointer = NULL;
 			
@@ -1385,7 +1641,7 @@ char* get_feldadresse(char *wert, unsigned char ucExp_num, unsigned char ucAttr,
 
 	#endif
 
-	// WILO
+	// WILO // WILOAF
 	#if ( WILO )
 		if ( SerialDeviceNr == 0 )
 			SerialDeviceNr = 1;
@@ -1413,6 +1669,12 @@ char* get_feldadresse(char *wert, unsigned char ucExp_num, unsigned char ucAttr,
 			wert += ( (char *)&modb_data[1] - (char *)&modb_data[0] ) * ( ucExp_num_wilo-1 );
 
 	#endif
+
+	// Grundfospumpen mit Modbus
+	#if GRUNDFOS_MODBUS == 1
+	
+	
+	#endif // GRUNDFOS_MODBUS == 1
 
 	// M-BUS
 	#if ( ( ( IMPLEMENT_S3 & MBUS1_IMPL ) ==  MBUS1_IMPL ) && MBUSANZ > 0 ) 
@@ -1734,11 +1996,12 @@ void Init_Laufzeiten(void)
 {
 	char i;
 
-#if SPEED_SAVE == 1
+#if SPEED_SAVE == 1	// Josch-SDM
 	asdm_test_start = 0x1F07E260;			// 01.04.2015 00:00
 	bicbus ( EEPADR,	(char *)&asdm_test_start,	ASDM_TEST_START_ADR, 4, BICWR);
 #endif	
 	
+
 // Heizkreis-Pumpenlaufzeiten löschen	
 #if ( PULZ_HK1 > 0 || PULZ_HK2 > 0 || PULZ_HK3 > 0 || PULZ_HK4 > 0 )
 	for ( i = HK1; i < HKANZ; i++ )
@@ -1855,15 +2118,15 @@ void SysEEP_InitUser_67(void)
 
 // Schnittstelle und Funktionen (sind im System voreingestellt worden)
 //---------------------------------------------------------------------------------------------
-	if(c_Mode_S1 != 0xFF)
+	if(c_Mode_S1 != NULL_MODE)
 	{	Mode_S1 = c_Mode_S1;
 		bicbus(EEPADR,	(char *)&Mode_S1,	S1_MODE_EADR,		1, BICWR);
 	}	
-	if(c_Mode_S2 != 0xFF)
+	if(c_Mode_S2 != NULL_MODE)
 	{	Mode_S2 = c_Mode_S2;
 		bicbus(EEPADR,	(char *)&Mode_S2,	S2_MODE_EADR,		1, BICWR);
 	}	
-	if(c_Mode_S3 != 0xFF)
+	if(c_Mode_S3 != NULL_MODE)
 	{	Mode_S3 = c_Mode_S3;
 		bicbus(EEPADR,	(char *)&Mode_S3,	S3_MODE_EADR,		1, BICWR);
 	}	
@@ -1881,19 +2144,46 @@ void SysEEP_InitUser_67(void)
 		bicbus(EEPADR,	(char *)&Baudrate_S3,	BAUDRATE_S3_EADR,		2, BICWR);
 	}	
 
-	if(c_Funktion_S1 != 0)
+	if(c_Funktion_S1 != NULL_FU)
 	{	Funktion_S1 = c_Funktion_S1;
 		bicbus(EEPADR,	(char *)&Funktion_S1,	FUNKTION_S1_EADR,		1, BICWR);
 	}	
-	if(c_Funktion_S2 != 0)
+	if(c_Funktion_S2 != NULL_FU)
 	{	Funktion_S2 = c_Funktion_S2;
 		bicbus(EEPADR,	(char *)&Funktion_S2,	FUNKTION_S2_EADR,		1, BICWR);
 	}	
-	if(c_Funktion_S3 != 0)
+	if(c_Funktion_S3 != NULL_FU)
 	{	Funktion_S3 = c_Funktion_S3;
 		bicbus(EEPADR,	(char *)&Funktion_S3,	FUNKTION_S3_EADR,		1, BICWR);
 	}	
-// ***AnFre für WILO-ModBus
+
+if(c_Parity_S1 != NULL_PARI)
+	{	Parity_S1 = c_Parity_S1;
+		bicbus(EEPADR,	(char *)&Parity_S1,	PARITY_S1_EADR,		1, BICWR);
+	}	
+	if(c_Parity_S2 != NULL_PARI)
+	{	Parity_S2 = c_Parity_S2;
+		bicbus(EEPADR,	(char *)&Parity_S2,	PARITY_S2_EADR,		1, BICWR);
+	}	
+	if(c_Parity_S3 != NULL_PARI)
+	{	Parity_S3 = c_Parity_S3;
+		bicbus(EEPADR,	(char *)&Parity_S3,	PARITY_S3_EADR,		1, BICWR);
+	}	
+
+	if(c_Stopbits_S1 != NULL_STOP)
+	{	Stopbits_S1 = c_Stopbits_S1;
+		bicbus(EEPADR,	(char *)&Stopbits_S1,	STOPBITS_S1_EADR,		1, BICWR);
+	}	
+	if(c_Stopbits_S2 != NULL_STOP)
+	{	Stopbits_S2 = c_Stopbits_S2;
+		bicbus(EEPADR,	(char *)&Stopbits_S2,	STOPBITS_S2_EADR,		1, BICWR);
+	}	
+	if(c_Stopbits_S3 != NULL_STOP)
+	{	Stopbits_S3 = c_Stopbits_S3;
+		bicbus(EEPADR,	(char *)&Stopbits_S3,	STOPBITS_S3_EADR,		1, BICWR);
+	}	
+
+
 // Pumpen-Parameter A Achtung!: im R66E immer 5 = 9600 Baud
 	ModbusBaudWilo	= c_ModbusBaudWilo;
 	bicbus(EEPADR,	(char *)&ModbusBaudWilo,	MODBUSBAUDWILO_ADR,	1, BICWR);
@@ -2113,7 +2403,7 @@ void SysEEP_InitUser_66(void)
 
 	/*** AnFre 03.09.2009 : Diagnose-Parameter KWZ-Volumenstrom *****/
 	kws.FlowBereich[0] = 700;	kws.FlowBereich[1] = 1600;	kws.FlowBereich[2] = 2300;	kws.FlowBereich[3] = 3000;
-	bicbus ( EEPADR, (char *)&kws, DIAG_PARA_ADR, sizeof(kws), BICWR );
+	bicbus ( EEPADR, (char *)&kws, DIAG_PARA, sizeof(kws), BICWR );
 	ZeitLoesch = 1;
 #endif
 	/* ***AnFre KWZ: Maximum löschen	*/
@@ -2226,6 +2516,8 @@ void SysEEP_InitUser_66(void)
 	mod38[0].bus = 0;			// XBUS
 	mod38[0].adr = 0x30;	// 1.Adresse 48D
 	bicbus(EEPADR,	(char	*)&mod38[0].bus,		R38_1_BUS_ADR,	2, BICWR);		// bus und adr stehen hintereinander
+mod38[0].life = 0xFFFF; // alles lebt
+	bicbus(EEPADR,	(char	*)&mod38[0].life,		R38_1_LIFE_ADR,	2, BICWR);
 #endif
 
 #if R38_MODULE > 1
@@ -2233,6 +2525,8 @@ void SysEEP_InitUser_66(void)
 	mod38[1].bus = 0;			// XBUS
 	mod38[1].adr = 0x32;	// 2.Adresse 50D
 	bicbus(EEPADR,	(char	*)&mod38[1].bus,		R38_2_BUS_ADR,	2, BICWR);
+	mod38[1].life = 0xFFFF;
+	bicbus(EEPADR,	(char	*)&mod38[1].life,		R38_2_LIFE_ADR,	2, BICWR);
 #endif
 
 #if R38_MODULE > 2
@@ -2240,6 +2534,8 @@ void SysEEP_InitUser_66(void)
 	mod38[2].bus = 0;			// XBUS
 	mod38[2].adr = 0x34;	// 3.Adresse 52D
 	bicbus(EEPADR,	(char	*)&mod38[2].bus,		R38_3_BUS_ADR,	2, BICWR);
+	mod38[2].life = 0xFFFF;
+	bicbus(EEPADR,	(char	*)&mod38[2].life,		R38_3_LIFE_ADR,	2, BICWR);
 #endif
 
 #if R38_MODULE > 3
@@ -2247,6 +2543,8 @@ void SysEEP_InitUser_66(void)
 	mod38[3].bus = 0;			// XBUS
 	mod38[3].adr = 0x36;	// 4.Adresse 54D
 	bicbus(EEPADR,	(char	*)&mod38[3].bus,		R38_4_BUS_ADR,	2, BICWR);
+	mod38[3].life = 0xFFFF;
+	bicbus(EEPADR,	(char	*)&mod38[3].life,		R38_4_LIFE_ADR,	2, BICWR);
 #endif
 
 	// Vergabe der Standard-Adressen für INP-Modul R39
@@ -2505,6 +2803,12 @@ void Typelist_copy(void)
 	
 //#####ulsch: skalierbare Analogeingänge
 	memcpy ( (void *)&AnaInpPara, (void *)&AnaInpStandardPara, sizeof(AnaInpPara) );
+#if RM_POWER_ANZ	
+	memcpy ( (void *)&RmPowerPara, (void *)&RmPowerStandardPara, sizeof(RmPowerPara) );
+#endif
+#if AE_DRUCK_ANZ	
+	memcpy ( (void *)&DruckPara, (void *)&DruckStandardPara, sizeof(DruckPara) );
+#endif
 
 	// Auswahl nach Projekt Typ
 	if(proj_typ >= PROJTYPEN)	// auf max. abtesten
@@ -2590,14 +2894,29 @@ void Typelist_copy(void)
 			memcpy( (void *)&sos[i], (void *)&So_Standparam[profil], SOSLENG );
 	}
 
+	// Standardwerte für Benutzersteuerung mit UNI-Elementen
+	#if STEUER_UNI == 1
+		i = 0;
+		profil = Projekte[proj_typ].unicode[i];			// Laden der Profil Nummer
+		if ( profil < UNI_PROFILE )									// auf max abtesten
+			// Speicherbereich für Standardwerte laden
+			memcpy( (void *)&unis[i], (void *)&Uni_Standparam[profil], UNISLENG );
+	#endif
+
 	// Standardwerte für Bus-Pumpen
+	#if ( GENI == 1 || WILO_MODBUS == 1 )
 	#if BUS_PU_MAX > 0 
 	for ( i = 0; i < BUS_PU_MAX; i++ )
 	{	
 		// Speicherbereich für Standardwerte laden
 		memcpy( (void *)&BusPuPara[i], (void *)&PuBus_Standparam[i], BUS_PU_LENG );
-	}
-	#endif	
+	// Änderung neue Genibus-Implementierung
+			#if ( ( ( IMPLEMENT_S2 & GENI1_IMPL) == GENI1_IMPL ) || ( ( IMPLEMENT_S3 & GENI1_IMPL) == GENI1_IMPL ) )
+			genibus_device_table[i].uc_adr = PuBus_Standparam[i].Adresse;
+			#endif
+		}
+		#endif
+	#endif
 	
 }
 
@@ -2862,6 +3181,7 @@ void load_eapointer36(unsigned int *ea, char idx, char ext)
 {
 	char typ, klasse, num, retnum;
 	unsigned int eatyp;
+	unsigned int label = 0;
 	
 	// Extrahieren der Definition des Ein/Ausgangs (Definitionen in "userdef.h")
 	eatyp 	= *ea;
@@ -3094,13 +3414,16 @@ void load_eapointer36(unsigned int *ea, char idx, char ext)
 	if(bs_error == 0)		// wenn Fehler() nicht aufgerufen wurde
 	{
 		// 2. Pointer laden
-		retnum = LoadPointer(typ, klasse, num, idx, ext, R36);
+		retnum = LoadPointer(typ, klasse, num, idx, ext, R36, &label);
 		
 		// 3. Laden der Indizes für Stringfelder (Ein-/Ausgangsnamen)
 		//------------------------------------------------------------------------
 		nlist[idx]			= (eatyp & 0xFFF0) | retnum;
-	}	
+		
+		// 4. Parameter suchen und Textliste laden
+		ListParameter(ntext[idx], klasse, label);
 
+	}
 }
 
 	
@@ -3112,6 +3435,7 @@ void load_eapointer37(unsigned int *ea, char idx, char ext)
 {
 	char typ, klasse, num, retnum;
 	unsigned int eatyp;
+unsigned int label = 0;
 	
 	// Extrahieren der Definition des Ein/Ausgangs (Definitionen in "userdef.h")
 	eatyp 	= *ea;
@@ -3194,14 +3518,16 @@ void load_eapointer37(unsigned int *ea, char idx, char ext)
 	if(bs_error == 0)		// wenn Fehler() nicht aufgerufen wurde
 	{
 		// 2. Pointer laden
-		retnum = LoadPointer(typ, klasse, num, idx, ext, R37);
+	retnum = LoadPointer(typ, klasse, num, idx, ext, R37, &label);
 		
 		// 3. Laden der Indizes für Stringfelder (Ein-/Ausgangsnamen)
 		//------------------------------------------------------------------------
 		n37list[ext-1][idx] = (eatyp & 0xFFF0) | retnum;
-	}	
+		
+	// 4. Parameter suchen und Textliste laden
+		ListParameter(n37text[ext-1][idx], klasse, label);
 
-	
+	}
 }
 
 //-----------------------------------------------------------------------------	
@@ -3212,6 +3538,7 @@ void load_eapointer38(unsigned int *ea, char idx, char ext)
 {
 	char typ, klasse, num, retnum;
 	unsigned int eatyp;
+unsigned int label = 0;
 	
 	// Extrahieren der Definition des Ein/Ausgangs (Definitionen in "userdef.h")
 	eatyp 	= *ea;
@@ -3247,13 +3574,16 @@ void load_eapointer38(unsigned int *ea, char idx, char ext)
 	if(bs_error == 0)		// wenn Fehler() nicht aufgerufen wurde
 	{
 		// 2. Pointer laden
-		retnum = LoadPointer(typ, klasse, num, idx, ext, R38);
+retnum = LoadPointer(typ, klasse, num, idx, ext, R38, &label);
 		
 		// 3. Laden der Indizes für Stringfelder (Ein-/Ausgangsnamen)
 		//------------------------------------------------------------------------
 		n38list[ext-1][idx] = (eatyp & 0xFFF0) | retnum;
-	}
 	
+// 4. Parameter suchen und Textliste laden
+		ListParameter(n38text[ext-1][idx], klasse, label);
+
+	}
 }
 
 //-----------------------------------------------------------------------------	
@@ -3264,6 +3594,7 @@ void load_eapointer39(unsigned int *ea, char idx, char ext)
 {
 	char typ, klasse, num, retnum;
 	unsigned int eatyp;
+unsigned int label = 0;
 	
 	// Extrahieren der Definition des Ein/Ausgangs (Definitionen in "userdef.h")
 	eatyp 	= *ea;
@@ -3297,13 +3628,16 @@ void load_eapointer39(unsigned int *ea, char idx, char ext)
 	if(bs_error == 0)		// wenn Fehler() nicht aufgerufen wurde
 	{
 		// 2. Pointer laden
-		retnum = LoadPointer(typ, klasse, num, idx, ext, R39);
+retnum = LoadPointer(typ, klasse, num, idx, ext, R39, &label);
 		
 		// 3. Laden der Indizes für Stringfelder (Ein-/Ausgangsnamen)
 		//------------------------------------------------------------------------
 		n39list[ext-1][idx] = (eatyp & 0xFFF0) | retnum;
-	}	
+	
+// 4. Parameter suchen und Textliste laden
+		ListParameter(n39text[ext-1][idx], klasse, label);
 
+	}
 }
 
 //-----------------------------------------------------------------------------	
@@ -3314,6 +3648,7 @@ void load_eapointer33(unsigned int *ea, char idx, char ext)
 {
 	char typ, klasse, num, retnum;
 	unsigned int eatyp;
+unsigned int label = 0;
 	
 	// Extrahieren der Definition des Ein/Ausgangs (Definitionen in "userdef.h")
 	eatyp 	= *ea;
@@ -3341,11 +3676,72 @@ void load_eapointer33(unsigned int *ea, char idx, char ext)
 	if(bs_error == 0)		// wenn Fehler() nicht aufgerufen wurde
 	{
 		// 2. Pointer laden
-		retnum = LoadPointer(typ, klasse, num, idx, ext, R33);
+retnum = LoadPointer(typ, klasse, num, idx, ext, R33, &label);
 		
 		// 3. Laden der Indizes für Stringfelder (Ein-/Ausgangsnamen)
 		//------------------------------------------------------------------------
 		n33list[ext-1][idx] = (eatyp & 0xFFF0) | retnum;
+// 4. Parameter suchen und Textliste laden
+		ListParameter(n33text[ext-1][idx], klasse, label);
+
+	}
+}
+
+// Unterprogramm zu ListParameter: Suchen und Laden der Texte für Ein/Ausgänge
+char LoadParamText(char *liste, unsigned int param)
+{
+	char i, j;
+	char ret = 0;
+	unsigned int label = 0;
+	char pleng = 0;
+	char grtext[5] = {0};
+	
+	
+	for(i = 0; i < PARLIMAX; i++)
+	{
+		// nicht relevante Gruppen übergehen
+		strcpy(grtext, Pgruppe[i].grkz);
+		if(		
+				  strncmp(grtext, "ALK", 3) == 0
+				||strncmp(grtext, "ZLT", 3) == 0
+				||strncmp(grtext, "TES", 3) == 0
+				||strncmp(grtext, "SYS", 3) == 0
+			)
+			continue;		// nächste Gruppe vergleichen	
+		else
+		{
+			pleng = Pgruppe[i].pleng;		// Länge der Parametergruppe
+			// Parameter suchen			
+			for(j = 0; j < pleng; j++)
+			{
+				label = (unsigned int)Pgruppe[i].Param[j].label;
+				if(label == param)													// Parameter gefunden
+				{
+					strcpy(liste, Pgruppe[i].grkz);						// Gruppenkennzeichen
+					strcat(liste, Pgruppe[i].Param[j].bez);		// Bezeichnung
+					ret = 1;																	// gefunden
+					break;
+				}	 
+			}	
+		}
+		if(ret == 1)
+			break;	
+	}
+	return(ret);
+		
+}
+	
+// Unterprogramm: Textliste für Ein/Ausgänge füllen
+void ListParameter(char *liste, char klasse, unsigned int label)
+{
+		if(klasse == 0)												// wenn xx_FREI, d.h. nicht belegter Ein-/Ausgang
+				strcpy(liste, "*->: UNBELEGT       ");
+		else if(label == 0)															// ungültige Information
+				strcpy(liste, "                    ");
+		else
+		{
+			if(LoadParamText(liste, label) == 0)			// wenn Parameter nicht gefunden		
+				strcpy(liste, "*->: NICHT GEFUNDEN ");
 	}	
 
 }
@@ -3640,6 +4036,12 @@ void fill_alarmtab(char idx, char alclass_num)
 				alarmtab[idx].Waitlimit		=  1;
 				break;
 			
+case ANZEIGE_ROT:
+				alarmtab[idx].Maske				=  1;
+				alarmtab[idx].Visloader		=  5;			// Anzeigezeit in Sek. für die LCD-Anzeige	
+				alarmtab[idx].Ledfunc			=  1;			// Rote Led ein
+				alarmtab[idx].Waitlimit		=  1;
+				break;
 			default:															// Alle Alarme, die zu einer Sammelalarmgruppe gehören sowie alle Einzelalarme
 				alarmtab[idx].Maske				=  1;
 				alarmtab[idx].Visloader		=  5;			// 5 Sekunden Anzeige

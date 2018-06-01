@@ -8,6 +8,10 @@
 #include "userdef.h"
 #include "uramext.h"
 
+/* User-Compilierungszeit und Datum	*/
+const char user_compile_time[15] = __TIME__;
+const char user_compile_date[15] = __DATE__;
+
 	/* Typ und Version des gesamten Projektes												*/
 //									             				 "---------------"
 	const char Kategorie_Typ[16] 				= {"JMX71:NAHWAERME"};  //genau 15 Zeichen
@@ -60,6 +64,9 @@ const char DiaTN2mod[16]						= {"RL HKN,  (TN2) "};	//***AnFre Mittlere Temp. T
 const char Monatswerte[16] 					= {" Monatswerte   "};		//MBus
 
 const char Stoermeld[16]						=	{"STOERMELDUNGEN "};
+const char ModBusMasterSlave[16]		=	{"MASTER/SLAVE   "};
+const char ModBusMaster[16]					= {"MASTER         "};	
+const char ModBusSlave[16]					= {"SLAVE          "};	
 
 /***** ulsch : Heizgradtage *****/
 const char HzGrdTg[16]						  =	{"G{15} VDI3807  "};
@@ -82,16 +89,28 @@ const char c_ModulAdr               = 10;                   // 0=dummy
 const char c_StationsAdr            = 10;                   // 0=dummy
 
 // Voreinstellung Schnittstelle und Funktionen
-const char c_Mode_S1                = 0x01;									// 0xFF    = dummy,  0=Slave, 1=Master
-const char c_Mode_S2                = 0x01;									// 0xFF    = dummy,  0=Slave, 1=Master
-const char c_Mode_S3                = 0xFF;								  // 0xFF    = dummy,  0=Slave, 1=Master
-const UINT c_Baudrate_S1            = 9600;                 // 0       = dummy
-const UINT c_Baudrate_S2            = 9600;                 // 0       = dummy
-const UINT c_Baudrate_S3            = 0;                    // 0       = dummy
-const char c_Funktion_S1            = GBUS_FU;              // NULL_FU = dummy,  GBUS_FU....MODBUS1_FU...siehe projdef.h
-const char c_Funktion_S2            = MODBUS1_FU;           // NULL_FU = dummy
-const char c_Funktion_S3            = NULL_FU;              // NULL_FU = dummy
+const char c_Mode_S1                = MASTER;            // NULL_MODE = dummy,  MASTER, SLAVE
+const UINT c_Baudrate_S1            = 9600;                    // 0         = dummy,  z.B. 9600
+const char c_Funktion_S1            = GBUS_FU;              // NULL_FU   = dummy,  GBUS_FU, MODBUS1_FU, MBUS1_FU, GENI1_FU...siehe projdef.h
+const char c_Parity_S1              = NULL_PARI;            // NULL_PARI = dummy,  NOPAR, EVEN, ODD 
+const char c_Stopbits_S1            = NULL_STOP;            // NULL_STOP = dummy,  1, 2 
+
+const char c_Mode_S2                = MASTER;            // NULL_MODE = dummy,  MASTER, SLAVE
+const UINT c_Baudrate_S2            = 9600;                    // 0         = dummy
+const char c_Funktion_S2            = MODBUS1_FU;              // NULL_FU   = dummy   GBUS_FU, MODBUS1_FU, MBUS1_FU, GENI1_FU...siehe projdef.h
+const char c_Parity_S2              = NULL_PARI;            // NULL_PARI = dummy,  NOPAR, EVEN, ODD 
+const char c_Stopbits_S2            = NULL_STOP;            // NULL_STOP = dummy,  1, 2 
+
+const char c_Mode_S3                = NULL_MODE;            // NULL_MODE = dummy,  MASTER, SLAVE
+const UINT c_Baudrate_S3            = 0;                    // 0         = dummy
+const char c_Funktion_S3            = NULL_FU;              // NULL_FU   = dummy,  GBUS_FU, MODBUS1_FU, MBUS1_FU, GENI1_FU...siehe projdef.h
+const char c_Parity_S3              = NULL_PARI;            // NULL_PARI = dummy,  NOPAR, EVEN, ODD 
+const char c_Stopbits_S3            = NULL_STOP;            // NULL_STOP = dummy,  1, 2 
+
+
+
 // ***AnFre für WILO-ModBus
+//WILOAF
 const char c_ModbusBaudWilo					= 5;				// WILO Pumpenparameter "A" Achtung! immer 5 = 9600 Baud
 const char c_ModbusSioWilo					= 6;				// WILO Pumpenparameter "C" SIO-Einstellung Parität und StopBit (2, 3, 6, 10)
 //------------------------------------------------------------------------------------------
@@ -283,7 +302,148 @@ const char * wilo_statdiag_set[]	=
 //#define VERS_DATUM	{17,1,6} 	// Software von 2017: JMX71:	System 29:09:16 mit SDM-Archiv, Ta kopieren (DTimer.c 29.11.16)
 																		// Funktion HKL: 66;/67; Absenkung Vorlauf tvsb, wenn Solares Heizen:  WIEDER ENTFERNT
 //#define VERS_DATUM	{17,3,29}		//Makl: neues System (8.3.17) neue Archiv SD (1.2.17)
-#define VERS_DATUM	{17,3,30}			// SiWa: Neue Bezeichnungen der Sensorik und Aktorik
+//#define VERS_DATUM	{17,3,30}			// SiWa: Neue Bezeichnungen der Sensorik und Aktorik
+
+//
+//#define VERS_DATUM	{10,12,10} // neu: WILO_MODBUS-Pumpen
+//#define VERS_DATUM	{11,1,14}  // MBus: Zeit für letzten korrekt erfassten Wert und des ersten und letzten Fehlers
+                                 // Darstellung der MBus-Zähler geändert (ZMB mit Expansion, ZMM entfällt, Anpassung an MBus-Master)
+ //#define VERS_DATUM	{11,7,21}  // Adapt.c: Adaption akzeptiert außer 2,5,8 auch den Wert 0 (keine Adaption, aber ungestörte Datenübertragung)
+                                 // UserReply.c, Steuer.c, ustruct.h: RD_STATIONS_INFO signalisiert Heizbetrieb (Winter)
+                                 // Absenk.c, Bedarf.c : laufende Absenkphase wird abgebrochen, wenn Ta < -15°C
+
+//#define VERS_DATUM	{11,8,8}   // neu: Datenmanager zum Transport von Daten zwischen R66-Geräten. Funktion Master (DM_MODE) oder Slave (DS_MODE) in projdef.h einstellbar.
+                                 //      System {11,8,8}
+
+//#define VERS_DATUM	{11,9,8}   // InOutR.c: Fehler beim R39 beseitigt (die obersten 4 Bits wurden nicht richtig dargestellt)
+//#define VERS_DATUM	{11,9,14}  // InOutR.c: Fehler beim R39 beseitigt (bstat wurde nicht regeneriert)
+//#define VERS_DATUM	{11,11,21}  // Modbus Wilo: Holding-Register 300 wird behandelt
+//#define VERS_DATUM	{11,11,28} 	// Betriebs-/Regelart in ASCII für Leittechnik
+//#define VERS_DATUM	{12,02,21} 	// KaskMode 2 (keine Kaskadierung in der Zeitabsenkung trotz HEIZ-BEDARF)
+  																// VorrangZeitabsenkung: in der Absenkzeit wird trotz HEIZ-BEDARF abgesenkt
+//#define VERS_DATUM  {12,5,30} // neues Betriebssystem {12,5,30} Verbesserung HEXBUF_FORM; parli.h: Attribute für HEXBUF_FORM angepasst
+//#define VERS_DATUM  {12,7,4}		// MBus: Klimazähler (Molline Energy INT 8); Dimensionen 0,1 cbm, 0,1 cbm/h, 0,1 W		
+
+//#define VERS_DATUM	{12,8,20}  // neue Funktion: usertext_erste_zeile(...) in UserKonv.c für multiple Texte in der Meldegruppe. C-System ab {12,8,20}
+
+//#define VERS_DATUM	{12,9,4}   // Neue Komtab-Copy Organisation: #include "copyparli.h" in parli.h hinter BETRIEBSSTUNDEN, Update Komtabparser.exe (ab 04.09.2012) erforderlich.
+                                 // Einstellungen in projdef.h, betrifft UserRam.c, uramext.h, CopyCheck.c, usertask.h
+//#define VERS_DATUM	{12,9,5}   // Neu: Einbindung Anybus. Bei Bedarf wird aus dem Pool der Ordner "Anybus" in den Projektordner kopiert und in der HEW die C-Quellen hinzugefügt. 
+//#define VERS_DATUM	{12,9,13}  // Änderung in WR_KASKADE  
+//#define VERS_DATUM	{12,11,20} // Systemänderung {12,11,20}: Test auf Drahtbruch bei 0-10V-Eingängen kann unterdrückt werden
+                                 // parli.h: Parameter 65 in der Testgruppe. Bit=0 : Testunterdrückung; 1.Bit links = IN10; Kaltstart 67 bzw.99 setzt alle auf 1
+
+//#define VERS_DATUM	{13,1,24}  // BM-Überwachung HK/WW parametrierbar. ZirkPu-Laufzeit; LadePu läuft bei Legio ständig (parametrierbar)
+//#define VERS_DATUM	{13,2,12}  // MBus: Leistung bei Elektro-Zählern    
+  
+//#define VERS_DATUM	{13,5,14}  // Neu: Objekt- und Standortbezeichnungen können vorbelegt werden (s.o.). Ausgeführt bei Kaltstart 67 bzw. 99
+//#define VERS_DATUM	{13,5,27}  // Neu: Freitags-Ventilöffnung
+//#define VERS_DATUM	{13,5,30}  // Parli.c: #include "standdef.h" zugefügt für variable Texte in 1. Zeile der Anzeige
+                                 // Beispiel für Alarmtext in UserKonv.c (AnFre) 
+//#define VERS_DATUM	{13,8,7}   // U_Mbus.c geändert (vorhergehende Version 08.04.13), in Userconst.c Voreinstellungen der MBus-Zähler
+//#define VERS_DATUM  {13,8,8}   // Einführung von DYN_ASCII_KONV ( Betriebssystem {13,8,8} ) für dynamische Texte (z.B. Betriebsstatus, Betriebsregie) 
+//#define VERS_DATUM  {13,10,9}	 // Fehler bei MBus beseitigt (betrifft Leistung von Berg-Elektrozählern, UserKonv.c und U_Mbus.c geändert)
+//#define VERS_DATUM  {13,11,5}	 // Ergänzung in parli.h und Komtab.c: SSTM Alarme und SSTM Alarme+Fühler
+
+//#define VERS_DATUM  {13,11,26} // Ab Betriebssystem {13,11,26}  
+                                 // Erweiterung: Anschluss Ni1000TK5000 ( nach L&S ) mit Parallelwiderstand 7,5k 
+                                 // Typauswahl in parli SYS: (hid2) 0=Pt1000 1=Ni1000 2=Ni1000TK5000
+                                 
+//#define VERS_DATUM  {13,11,27} // AnFre: U_ModBusSio_Wilo.c statt U_ModBusSio.c.
+                                 //        S2-Schnittstelle für WILO_MODBUS-Pumpen möglich. (Fehler beseitigt)
+                                 // AnFre: U_Wilo.c und UserConst.c: Für Wilo-Pumpen "Keine Meldung !" in Anzeige zugefügt
+                                 //        U_WILO.c S2-Schnittstelle freigeschaltet	 
+                                 // JoSch: DTimer korrigiert
+
+//#define VERS_DATUM  {14,2,11}  // ulsch: für RIEconMis UserReply.c geändert (MBus-Zähler wie bei MBus-Master behandelt)
+                                 //        (UserReply.c, RD_INI_ZAEHLER,WR_INI_ZAEHLER,RD_KONSUM,WR_KONSUM,RD_SYNC_KONSUM,WR_SYNC_KONSUM) 
+                                 // ulsch: interne Wärmemengen-Zähler zählerobjekt-kompatibel gemacht (Wmeng.c, UserReply.c, UserRam.c)   
+
+//#define VERS_DATUM  {14,2,26}  // JoSch: Erweiterte In-/Out Anzeige in ANL: Anzeige der entspr. Parameterbezeichnung aus der parli.h, mit folgenden
+                                 //        Änderungen: System ab {14,2,25}, parli.h, parli_inout.h (neu), InitEA.c, UserReply.c, UserRam.c und uramext.h                                     
+                                 //      - Weitere Aufräumarbeiten in der parli.h mit Bildung von "include ...". Einheitliche Namensgebung der parli-include-Dateien.
+//#define VERS_DATUM  {14,4,15}  // JoSch: Erweiterte In-/Out Anzeige in ANL: hinzugefügt SSTM RELAIS (parli.h) und QUITTS[0] (qsm.h) 
+//#define VERS_DATUM  {14,6,11}  // ulsch: U-Mbus.c geändert (WMZ Sensus Pollustat, u.a. mit Real-Formaten); 
+                                 // Zähler-Typ nicht mehr nach Respond-Telegramm, sondern entspr.Parametrierung 
+//#define VERS_DATUM  {14,10,15} // Zwei-Kessel-Anlage
+//#define VERS_DATUM  {14,11,19} // JoSch: Neues System  {14,11,18} : Anpassungen für get_feldadresse und user_erste_zeile
+                                 // Änderungen in allen parlis mit EXPAND_CHAR, ustruct.h, userdef.h, UserReply.c, UserKonv.c        
+
+//#define VERS_DATUM  {14,12,9}  // UlSch: MBus-Gaszähler implementiert (U_Mbus.c, parli-mbus.h, projdef.h, UserKonv.c, ustruct.h)      
+
+//#define VERS_DATUM  {14,12,17} // JoSch: Erweiterung: Anschluss Pt500 mit Reihenwiderstand 500 Ohm. Neues System {14,12,16} erforderlich.
+                                 //        in SYS; 1-8 Anzeige verändert: Pt1000 -> SENSOR. Der Sensortyp wird in Klartext angezeigt.
+                                 
+                                 // JoSch: Erweiterung: universell verwendbare Benutzersteuerung mit UNI-Elementen (SteuerUni.c, parli_uni.h, UniStandard, UniDynam)       
+                                 
+                                 // JoSch: Änderung Regelung: Begrenzung der PID-Stellgröße (anti windup) auf Kp * ei (gleitend) oder fest
+                                 //        betrifft RegelHk.c, RegelNt.c, RegelWw.c, Funktion.c, ustruct.h. Versteckte Zusatzinformationen in parli hinter *98; VENTILSTELLUNG   
+
+//#define VERS_DATUM  {15,1,5}  // UlSch: parli_mbus.h nun mit ZAEHLERWERT in Gruppe MBA (zwecks Archivierung)
+//#define VERS_DATUM  {15,1,20} // UlSch: MbusDataCopy entfällt (überflüssig durch Möglichkeit, expandierte Parameter auch einzeln darzustellen)
+                                // betrifft parli_mbus.h, Steuer.c, UserRam.c, uramext.h
+                                // Gaszähler Actaris/Itron implementiert (U_Mbus.c)
+                                // Heizungs-Doppelpumpen: beide laufen, wenn eine gestört (ThoSi)
+//#define VERS_DATUM  {15,2,26} // UlSch: Änderung Mbus
+//#define VERS_DATUM  {15,3,24} // UlSch: Änderung Wilo
+//#define VERS_DATUM  {15,3,26} // JoSch: Bugfix in UserKonv.c   Funktion: user_erste_zeile(...) ucMax_expander
+//#define VERS_DATUM  {15,5,6}	// UlSch: Änderung Mbus ( VolumeVarVIFE() )  
+
+//#define VERS_DATUM  {15,6,1}  // JoSch: Neu ArchivSDM.c:    Speicherung aller Parameter (Komtab), die sich verändert haben, auf SD-Card im 5 Minuten-Raster
+                                 //       Vorraussetzungen:  - Betriebssystem mit Monitoring-Task (DMonitor.c) ab  {15,6,1}
+                                 //                          - 4 GB SDHC Class 10
+                                 //                          - Speicherriegel mit 2. Ferro-Ram
+                                 //                          - projdef.h: #define ARCHIV_SDC  2
+                                 // JoSch + AnBu: parli.h  Integration GPRS (siehe Beschreibung GPRS) bzw suche in Dateien nach "// Änderung für R66 GPRS" 
+                                 // JoSch: Neues Kommando: RD_MONSUM (Lese Monatsverbräuche), betrifft UserReply.c
+                                 // JoSch: Kommandoerweiterung KOMTAB_READ zur Erfassung von Expansionsparametern
+
+//#define VERS_DATUM  {15,9,8}   // UlSch: Änderung U_Mbus.c, parli_mbus.h
+//#define VERS_DATUM  {15,9,21}  // UlSch (ThoSi): 
+                                 // bei RCOND_WW1=1 regeln während Nachlauf Ladepumpe
+                                 // Nachlauf Ladepumpe nun 10 min Standard 
+//#define VERS_DATUM  {15,9,23}  // mehrere Änderungen für Zwei-Kessel-Anlagen (betrifft auch UserRam.c)
+//#define VERS_DATUM  {15,10,13} // U_Mbus.c geändert ( TempVar() 
+//#define VERS_DATUM  {15,11,4}  // UlSch: Steuer2Ke.c geändert (bei Bestimmung der Ist-Kesselfolge wurde  gestört/gesperrt/Hand gleich behandelt, nun Priorisierung in dieser Reihenfolge)
+//#define VERS_DATUM  {15,11,4}  // Josch: DManager.c: Bugfixing bei AOUT_FORMP
+
+//#define VERS_DATUM  {16,1,14}  // Josch-SDM : Neues Betriebssystem {16,1,14} mit Erweiterung IrDA als IrDA-S4 Schnittstelle (über Modul RIEcon83)
+                                 // ArchivSD.c mit Filesystem entfällt. ArchivSDM.c erweitert mit Testkommando für Prüfplatz.
+                                 // Erforderliche Änderungen sind in "R36CPool_Anpassung_160114.txt " dokumentiert.
+//#define VERS_DATUM  {16,2,9}   // ulsch: 2 WW-Bereitungen. Geändert: SteuerWw,c, RegelWw.c, parli.h, ustruct.h, UserConst.c, uconstext.h, projdef.h, Steuer.c, RegelHk.c, Alarme.c, UserReply.c
+  
+//#define VERS_DATUM  {16,5,19}  // Josch: Fehler in Archiv_SDM.c korrigiert.Geändert: parli.h SYS; 88; ff.
+
+//#define VERS_DATUM  {16,5,23}  // Software für 1 Kessel komplett neu
+//#define VERS_DATUM  {16,6,21}  // Fehler in SteuerWw.c beseitigt: nach Speicherladung geht der Vorrang u.U.nicht zu Ende
+
+//#define VERS_DATUM  {16,6,29}  // Josch: Neue Implementierung Modbus (mit Pumpen (WILO_MODBUS, GENI, BELIMO), ohne Pumpen als Master oder Slave)
+//#define VERS_DATUM  {16,7,26}	 // ulsch: Kessel-Implementierung neu
+//#define VERS_DATUM  {16,9,29}  // AnBu: Änderung Gprs: parli.h ("work handler")
+//#define VERS_DATUM  {16,11,9}  // Josch,Joja: Modbus-Ergänzung (StopBits, READ_MULTIPLE_COILS, ModbusExtract.c) 
+//#define VERS_DATUM  {16,11,15} // Josch: Alarme.c, parli.h: Soft-Quittierung ohne Quittiertaste möglich.
+//#define VERS_DATUM  {16,11,29} // Josch: DTimer.c : Erweiterung - Sende Broadcast-Uhr
+//#define VERS_DATUM  {17,2,1}   // Josch: ArchivSDM.c: Automatische Fehlerkorrektur, betrifft: UserRam.c, uramext.h, archivsdm.h, UserReply.c, parli.h
+//#define VERS_DATUM  {17,4,5}   // Josch: ArchivSDM.c bugfix,  parli.h Neuordnung siehe ARCHIV_SDM
+//#define VERS_DATUM  {17,4,12}  // Josch: Neues System {17,4,12} : StationsAdresse synchronisieren mit Moduladresse.
+                                 //        betrifft  parli.h ZLT; *20; und folgenden ( ->;) Parameter übernehmen   
+                                 //        außerdem: Eine User-Compile-Zeit wird generiert, zu sehen in TES; *92; bis *93; 
+//#define VERS_DATUM  {17,6,19}	 // Ulsch: 8 MBus-Zähler
+
+//#define VERS_DATUM  {17,6,21}  // Josch: Neues System {17,6,21} :
+                                 //        Parität und Stopbits für 3 Schnittstellen sind in UserConst.c voreinstellbar. Sichtbar in Gruppe ZLT;   
+                                 //        Deaktivierung von Sensor- und Analogeingängen möglich. Zugriff in SYS: 09;SENSOR-IN LIFE und 10;ANALOG-IN LIFE  und in R38_MODULE 055;
+                                 // AnBu:  GPRS zurück zur Version vom 29.09.2016                                                                                                  
+                                    
+//#define VERS_DATUM  {17,8,30}  // Josch: ZLT Anzeige des Funktionsnamens. Betrifft: parli.h, UserKonv.c, uskonvform.h, UserConst.c, uconstext.h
+                                 // JoJa:  Modbus.c: Spezialkommando WRITE_SINGLE_COIL korrigiert
+
+//#define VERS_DATUM  {17,9,26}  // Josch: EA-Simulation mit System {17,9,26}
+                                 //        betrifft InOutR.c, UserRam.c .h, userdef.h, parli.h
+//#define VERS_DATUM  {17,11,13} // Josch: R3X-Simulator mit System {17,11,1} incl. Modulkonfiguration
+                                 //        betrifft InOutR.c, UserRam.c uramext.h
+  #define VERS_DATUM  {18,5,31}  // Josch: ArchivSDM.c erweitert. Datenblöcke enthalten zusätzlich Archiv-Info Kennzeichen. System vom {18,3,14} erforderlich
+                              
 /*--------------------------------------------------------------------------------*/
 /* 										Liste von Anlagen																						*/
 /*--------------------------------------------------------------------------------*/
@@ -2088,6 +2248,26 @@ const SoStandard  So_Standparam[] = {
 };
 const char SO_PROFILE = sizeof ( So_Standparam ) / sizeof ( SoStandard );		 	
 
+/*----------------------------------------------------------------------------------------*/
+/*  							Liste von Standardwerten für Benutzersteuerung mit UNI-Elementen				*/
+/*----------------------------------------------------------------------------------------*/
+const UniStandard  Uni_Standparam[] = {
+ // Profil 0 (dummy)
+	{
+//		 0,		// char	Loader;			// Testparameter
+		0,		// NspMax;					// min
+	},
+	// Profil 1
+	{
+//		10,		// char	Loader;			// Testparameter
+		10,		// NspMax;					// min
+	},
+};
+const char UNI_PROFILE = sizeof ( Uni_Standparam ) / sizeof ( UniStandard );		
+
+
+
+
 /*----------------------------------------------------------------------------------*/
 
 // Dimensionsnamen für Zähler
@@ -2106,6 +2286,18 @@ const zdname ze_dim_namen[10] = {
 }; 
 
 
+// Funktionsnamen für Schnittstellen
+const char fu_namen[9][7] = {
+	{"      "},  // #define NULL_FU         0         // keine Funktion                
+	{"GBUS  "},  // #define GBUS_FU         1         // RS485 RIEcon Gebäudebus       
+	{"FUNK  "},  // #define FUNK1_FU        2         // RS485 Funkmodul EnOcean       
+	{"GENI  "},  // #define GENI1_FU        3         // RS485 Genibus Pumpen          
+	{"MBUS  "},  // #define MBUS1_FU        4         // RS232 MBUS                    
+	{"TEST  "},  // #define GBUS1_FU        5         // RS485 Test Gebäudebus         
+	{"MODBUS"},  // #define MODBUS1_FU      6         // RS485 oder RS232 MODBUS Master
+	{"KNXBUS"},  // #define KNXBUS1_FU      7         // KNX/EIB über RIEcon66-SPL-KNX 
+	{"ANYBUS"},  // #define ANYBUS1_FU      8         // RS232 Anybus                  
+};	
 /* Zählerdimensionierungen für Systemstart 	(leerer EEPROM, Kaltstart 67 oder Kaltstart 99)  */
 // Stichtag 01.01.00 ( {0,1,1} ) verhindert Stichtag !
 // Stichtag ausführen : konfig Bit 4 setzen (konfig = 0x10)
@@ -2279,6 +2471,140 @@ const sAnaInpPara AnaInpStandardPara[] = {
 		0},					// Hysterese Grenzwerte 	
 };
 
+#if RM_POWER_ANZ
+const sPowInpPara RmPowerStandardPara[] = {
+								// RM_POW1
+	 {20,					// Skalierung 0 % = 2,0 V
+		1000,				// Skalierung 10,0 V = 100,0 %
+		10},				// Filterzeitkonstante [s]		
+#if RM_POWER_ANZ > 1
+								// RM_POW2 : 
+	 {20,					// Skalierung 0 % = 2,0 V
+		1000,				// Skalierung 10,0 V = 100,0 %
+		10},				// Filterzeitkonstante [s]		
+#endif
+#if RM_POWER_ANZ > 2
+								// RM_POW3 : 
+	 {0,					// Skalierung 0 % = 0,00 V
+		1000,				// Skalierung 10,0 V = 100,0 %
+		10},				// Filterzeitkonstante [s]		
+#endif
+#if RM_POWER_ANZ > 3
+								// RM_POW4 : 
+	 {0,					// Skalierung 0 % = 0,00 V
+		1000,				// Skalierung 10,0 V = 100,0 %
+		10},				// Filterzeitkonstante [s]		
+#endif
+#if RM_POWER_ANZ > 4
+								// RM_POW5 : 
+	 {0,					// Skalierung 0 % = 0,00 V
+		1000,				// Skalierung 10,0 V = 100,0 %
+		10},				// Filterzeitkonstante [s]		
+#endif
+#if RM_POWER_ANZ > 5
+								// RM_POW6 : 
+	 {0,					// Skalierung 0 % = 0,00 V
+		1000,				// Skalierung 10,0 V = 100,0 %
+		10},				// Filterzeitkonstante [s]		
+#endif
+#if RM_POWER_ANZ > 6
+								// RM_POW7 : 
+	 {0,					// Skalierung 0 % = 0,00 V
+		1000,				// Skalierung 10,0 V = 100,0 %
+		10},				// Filterzeitkonstante [s]		
+#endif
+#if RM_POWER_ANZ > 7
+								// RM_POW8 : 
+	 {0,					// Skalierung 0 % = 0,00 V
+		1000,				// Skalierung 10,0 V = 100,0 %
+		10},				// Filterzeitkonstante [s]		
+#endif
+};
+#endif
+
+#if AE_DRUCK_ANZ
+const sAnaInpPara DruckStandardPara[] = {
+// Beispiel: Druck Rücklauf Anlage: 0 bar = 2,0 V, 10 V = 6,00 bar
+//	 {20					// Skalierung 0 bar = 2,0 V
+//		600,				// Skalierung 10 V = 6,00 bar
+//		10,					// Filterzeitkonstante [s]		
+//		200,				// UGW	2,00 bar
+//		000,				// OGW	kein OGW
+//		20},				// Hysterese Grenzwerte 0,20 bar
+
+								// AE_DRU1
+	 {00,					// Skalierung 0 bar = 2,0 V
+		1600,				// Skalierung 10 V = 6,00 bar
+		10,					// Filterzeitkonstante [s]		
+		100,				// UGW = 2,00 bar
+		300,				// OGW = 3,00 bar
+		20},				// Hysterese Grenzwerte 0,20 bar	
+#if AE_DRUCK_ANZ > 1
+								// AE_DRU2 : 
+	 {00,					// Skalierung 0 bar = 2,0 V
+		1600,				// Skalierung 10 V = 6,00 bar
+		10,					// Filterzeitkonstante [s]		
+		100,				// UGW = 2,00 bar
+		300,				// OGW = 3,0 bar
+		20},				// Hysterese Grenzwerte 0,20 bar	
+#endif
+#if AE_DRUCK_ANZ > 2
+								// AE_DRU3 : 
+	 {00,					// Skalierung 0 bar = 2,0 V
+		1600,				// Skalierung 10 V = 6,00 bar
+		10,					// Filterzeitkonstante [s]		
+		100,				// UGW = 2,00 bar
+		300,				// OGW = 3,00 bar
+		20},				// Hysterese Grenzwerte 0,20 bar	
+#endif
+#if AE_DRUCK_ANZ > 3
+								// AE_DRU4 : 
+	 {00,					// Skalierung 0 bar = 2,0 V
+		1600,				// Skalierung 10 V = 6,00 bar
+		10,					// Filterzeitkonstante [s]		
+		100,				// UGW = 2,00 bar
+		300,				// OGW = 3,00 bar
+		20},				// Hysterese Grenzwerte 0,20 bar		
+#endif
+#if AE_DRUCK_ANZ > 4
+								// AE_DRU5 : 
+	 {00,					// Skalierung 0 bar = 2,0 V
+		1600,				// Skalierung 10 V = 6,00 bar
+		10,					// Filterzeitkonstante [s]		
+		100,				// UGW = 2,00 bar
+		300,				// OGW = 3,00 bar
+		20},				// Hysterese Grenzwerte 0,20 bar	
+#endif
+#if AE_DRUCK_ANZ > 5
+								// AE_DRU6 : 
+	 {00,					// Skalierung 0 bar = 2,0 V
+		1600,				// Skalierung 10 V = 6,00 bar
+		10,					// Filterzeitkonstante [s]		
+		100,				// UGW = 2,00 bar
+		300,				// OGW = 3,00 bar
+		20},				// Hysterese Grenzwerte 0,20 bar		
+#endif
+#if AE_DRUCK_ANZ > 6
+								// AE_DRU7 : 
+	 {00,					// Skalierung 0 bar = 2,0 V
+		1600,				// Skalierung 10 V = 6,00 bar
+		10,					// Filterzeitkonstante [s]		
+		100,				// UGW = 2,00 bar
+		300,				// OGW = 3,00 bar
+		20},				// Hysterese Grenzwerte 0,20 bar	
+#endif
+#if AE_DRUCK_ANZ > 7
+								// AE_DRU8 : 
+	 {00,					// Skalierung 0 bar = 2,0 V
+		1600,				// Skalierung 10 V = 6,00 bar
+		10,					// Filterzeitkonstante [s]		
+		100,				// UGW = 2,00 bar
+		300,				// OGW = 3,00 bar
+		20},				// Hysterese Grenzwerte 0,20 bar		
+#endif
+};
+#endif
+
 /*----------------------------------------------------------------------------------*/
 
 /* Tabelle der Aufheizzeiten											*/
@@ -2297,13 +2623,12 @@ const char tabse[6][5] = {
 
 /* Sonderzeichen LCD */
 const char CarTab[64] = {										//  Code:	Zeichen			in RFB	
-	0x00,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x00,	//  0x04:	Kasten					"®"  'gefülltes Karo	
+0x00,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x00,	//  0x04:	Kasten					"®"  'gefülltes Karo	
 	0x00,0x01,0x03,0x05,0x09,0x11,0x1F,0x00,	//  0x05:	Delta						'8'
 	0x06,0x09,0x09,0x06,0x00,0x00,0x00,0x00,	//  0x06:	Grad						'°'
 	0x18,0x04,0x0C,0x04,0x18,0x00,0x00,0x00,	//  0x07:	hoch 3					'³'
 	0x00,0x04,0x0E,0x15,0x04,0x04,0x00,0x00,	//  0x00:	Pfeil hoch			'0'
-//	0x00,0x04,0x04,0x15,0x0E,0x04,0x00,0x00,	//  0x01:	Pfeil runter		'2'
-	0x18,0x04,0x28,0x10,0x3C,0x00,0x00,0x00,	//  0x01:	hoch 2					'2'
+	0x00,0x04,0x04,0x15,0x0E,0x04,0x00,0x00,	//  0x01:	Pfeil runter		'2'
 	0x10,0x18,0x1C,0x1E,0x1C,0x18,0x10,0x00,	//  0x02:	Dreieck					'4'
 	0x00,0x00,0x00,0x04,0x00,0x00,0x00,0x00		//  0x03:	Mittelpunkt			'6'
 };

@@ -19,6 +19,8 @@
 #define KWS					0x16
 // Elektroz‰hler ( PadPuls M2 )
 #define ELT					2
+// Gasz‰hler 
+#define GMB         3
 // Klima W‰rme-/K‰ltez‰hler ( WDV-MOLLINE (Hydrometer) SYCLAR INT 8, Energy-INT8 )
 #define KLM					0x0D
 // Warmwasserz‰hler von ISTA liefern als Medium "other" !
@@ -70,6 +72,7 @@
 #define GBUS1_FU				5					// RS485 Test Geb‰udebus
 #define MODBUS1_FU			6					// RS485 oder RS232 MODBUS Master oder Slave
 #define KNXBUS1_FU			7					// KNX/EIB ¸ber RIEcon66-SPL-KNX
+#define ANYBUS1_FU      8         // RS232 Anybus
 //....
 
 // --------------- Anlage ------------------------------------------------
@@ -83,30 +86,31 @@
 #define VARIPROJ		0							// 1 = variables Projekt
 #define SSTM_PU			0							// Sammelstˆrmelde-Eingang f¸r Pumpen
 #define SSTM_ANL		0							// Sammelstˆrmelde-Eingang Anlage
-#define ANFORD			0		//***AnFre ACHTUNG NICHT BENUTZEN, da im R36CPool seit 23.02.2010 ge‰ndert !!!!!!!!!!!!!!!!
+#define ANFORD      0             // auch in Steuer.c benutzt
 #define ANF_EXT			0							// Anzahl Anforderungen externer Regler, gilt f¸r NT und Kessel
 
 // allgemein
 #define QUIT_TASTE	1							// 1 = Quittungstaste vorhanden
 #define FER					0							// = 1 : Ferienprogramm aktiv
 #define HEIZGRD			0							// Heizgradtage
-#define ARCHIV_ANL	1
+#define ARCHIV_ANL  1             // Archivierung mit Ferro-Ram
+#define ARCHIV_SDM  1             // Josch-SDM : Archivierung mit SD-Card-Memory
 
 // Komtab-Copy
 #define COPY_TIMEOUT 			15			// Minuten beim Empfang
 
-#define COPY_RESERV_EMPF	1				// Anzahl der reservierten COPY_EMPF Eintr‰ge (Komtab-Nummern) Min=1, Max=16
+#define COPY_RESERV_EMPF  4       // Anzahl der reservierten COPY_EMPF Eintr‰ge (Komtab-Nummern) Min=1, Max=16
 #define COPY_EMPF					0				// Anzahl der ¸ber Bus zu empfangenen Datenelemente            Min=0, Max=COPY_RESERV_EMPF,  wenn > 0: Eintrag in CopyCheck.c erforderlich
 
-#define COPY_RESERV_SEND	1				// Anzahl der reservierten COPY_SEND Eintr‰ge (Komtab-Nummern) Min=1, Max=16
+#define COPY_RESERV_SEND  4       // Anzahl der reservierten COPY_SEND Eintr‰ge (Komtab-Nummern) Min=1, Max=16
 #define COPY_SEND					0				// Anzahl der ¸ber Bus zu sendenden Datenelemente              Min=0, Max=COPY_RESERV_SEND,  wenn > 0: Eintrag in CopyCheck.c erforderlich
 
 #define DIAG				1							// Diagnose f¸r Soft-W‰rmez‰hler
 #define ANALOG_AE		4							// Skalierung der 0-10V Eing‰nge, Grenzwert¸berwachung, Anzahl 0..8, immer die ersten n AE_UNI ab AE_UNI1 werden skaliert
 #define WRE100			0							// WRE100 Kommandos f¸r WRELES uund WREINIT werden unterst¸tzt
-#define MBUS_MASTER 0							// 1/0
-#define MBUSANZ			0							// Anzahl MBus-Z‰hler (maximal 6)
-#define ARCHIV_SDM	1							// Archivierung mit SD-Card
+#define MBUSANZ     0             // Anzahl MBus-Z‰hler (maximal 8)
+#define MBUS_MASTER 0             // 1/0
+#define STEUER_UNI  0             // 1/0 Benutzersteuerung mit UNI-Elementen (SteuerUni.c, parli_uni.h, UniStandard, UniDynam)
 // ModBus_Uni	#define MODBUS_MASTER 0						// 1= Master-ModBus	//AnFre
 // ModBus_Uni	#define MODBUS_SLAVE 	1						// 1= Slave-ModBus	//AnFre
 
@@ -124,6 +128,50 @@
 #define IMPLEMENT_S1			(GBUS_IMPL + MODBUS1_IMPL)
 #define IMPLEMENT_S2			(GBUS_IMPL + MODBUS1_IMPL)
 #define IMPLEMENT_S3			(GBUS_IMPL + MODBUS1_IMPL)		// Standard f¸r WILO-Pumpen
+#define MODBUS_MASTER     0       // 1 = Modbus als Master 
+#define MODBUS_SLAVE      0       // 1 = Modbus als Slave
+
+//---------------------------
+// Modbus 
+//---------------------------
+//#if ( ( ( IMPLEMENT_S1 & MODBUS1_IMPL) == MODBUS1_IMPL ) || ( ( IMPLEMENT_S2 & MODBUS1_IMPL) == MODBUS1_IMPL ) || ( ( IMPLEMENT_S3 & MODBUS1_IMPL) == MODBUS1_IMPL ))
+//  #define MODBUS_SIO    1
+//  #define MODBUS_UNI    1
+//  #define MODBUS_EXT    0          // >0: Verwendung von READ_MULTIPLE_COILS in der ModbusTabelle (Anzahl der 32-Bit Felder (ULONG ul_dig32[] ) 
+//
+//	// Pumpen mit Modbus
+//  #define WILO_MODBUS          0   // HIER Angeben ob Grundfos oder Wilo (beides zusammen geht nicht)  // Wilo basierend auf IF-Modul Modbus Stratos (2097808)
+//  #define GRUNDFOS_MODBUS      0   // HIER Angeben ob Grundfos oder Wilo (beides zusammen geht nicht)
+//
+//#else
+//  #define MODBUS_SIO           0
+//  #define MODBUS_UNI           0
+//  #define MODBUS_EXT           0
+//  #define WILO_MODBUS          0
+//  #define GRUNDFOS_MODBUS      0
+//#endif
+
+//---------------------------
+// Pumpen mit Genibus
+//---------------------------
+// Genibus-Pumpe ist nur aktivierbar, wenn keine Modbus-Pumpe ausgew‰hlt ist
+#if ( ( ( ( IMPLEMENT_S2 & GENI1_IMPL) == GENI1_IMPL ) || ( ( IMPLEMENT_S3 & GENI1_IMPL) == GENI1_IMPL ) ) && ( WILO_MODBUS == 0 && GRUNDFOS_MODBUS == 0 ) )
+  #define GENI         1
+#else
+  #define GENI         0
+#endif
+
+//--------------------------------------------------------------------------
+// f¸r alle Pumpen
+//--------------------------------------------------------------------------
+#if (GENI == 1 || WILO_MODBUS == 1 || GRUNDFOS_MODBUS == 1)
+//WILOR
+//  #define BUS_PU_MAX   2  // Pumpenanzahl gem‰ﬂ Projektspezifkationen setzen!
+#else	
+//  #define BUS_PU_MAX   0
+#endif
+
+/*****************************************************************************************************/
 
 #define TAE_ANZ			0							// Anzahl Analogeing‰nge Auﬂentemperatur, max.1	
 #define TAA_ANZ			1							// Anzahl Analogausg‰nge Auﬂentemperatur, max.4
@@ -141,6 +189,10 @@
 #define DA_UNI_ANZ	8							// min.1 max.8 universelle Digitalausgaenge definiert
 
 #define AA_UNI_ANZ	8							// min.1 max.8 universelle Analogausgaenge definiert
+
+#define RM_POWER_ANZ	0           // min 0 max.8 Analogeingaenge
+
+#define AE_DRUCK_ANZ	0           // min 0 max.8 Analogeingaenge
 
 // --------------- Heizkreis-Regelungen -----------------------------------
 #define HKANZ				2							// projektierte Anzahl von Heizkreisen
@@ -493,7 +545,7 @@
 
 // Anzahl der Pumpen am seriellen WILO-MOD-Pumpen-Bus
 #if ( ((IMPLEMENT_S1 & MODBUS1_IMPL) == MODBUS1_IMPL) || ((IMPLEMENT_S2 & MODBUS1_IMPL) == MODBUS1_IMPL) || ( (IMPLEMENT_S3 & MODBUS1_IMPL) == MODBUS1_IMPL) )
-#define MODBUS_SIO							1
+//#define MODBUS_SIO							1
 #define MODB_SLAVE_MAX					4		// wird bei WILO zu BUS_PU_MAX ***AnFre nur hier WILO-Pumpen-Anzahl eintragen
 #define MODB_MASTER_SLAVE_MODE 	1		// Master/Slave = 1/0
 #define DEVICE_MAX							4
@@ -502,7 +554,7 @@
 #define EASY_SENS		0
 #define WILO   			1	
 #define BELIMO			0	
-#define MODBUS_UNI	0
+//#define MODBUS_UNI	0
 
 #else
 #define MODBUS_SIO							0
@@ -512,7 +564,7 @@
 #define EASY_SENS		0
 #define WILO   			0
 #define BELIMO			0
-#define MODBUS_UNI	0
+//#define MODBUS_UNI	0
 #endif
 
 #if WILO == 1

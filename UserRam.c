@@ -21,6 +21,7 @@ char char_test1;
 char char_test2;
 int  int_test;
 mwsp *temperatur;
+mwsp mod_rt[2];
 
 int TaErsatz[12];
 UINT TaErsatzCtr;
@@ -94,39 +95,48 @@ char zaehlerNummer;
 #endif
 
 //--------------------------------------------------------------------------------------------------
-// ModBus_Uni	// Modbus
-// ModBus_Uni	#if ( ((IMPLEMENT_S1 & MODBUS1_IMPL) == MODBUS1_IMPL) || ((IMPLEMENT_S2 & MODBUS1_IMPL) == MODBUS1_IMPL) || ((IMPLEMENT_S3 & MODBUS1_IMPL) == MODBUS1_IMPL) )
-//				
-//// Jochen Teil
-//																											// Kommentare von JoSch
-////		unsigned int modbusDeviceNr;											// Modbus.c  + modbusparli.h
-////		int activeRow[3];																	// Modbus.c  + modbusparli.h
-////		unsigned char modbusSlaveAddresses[3];						// Modbus.c  + modbusparli.h  + modbusstandard.h
-////		unsigned char modbusSioParity[3];									// Modbus.c  + modbusparli.h  + modbusstandard.h
-////		unsigned char modbusConvertBuffer[3][256];				// Modbus.c		
-//
-//
-//// RKL + Jochen																							
-//		char modb_leng_tx[3];															// U_ModBusSio.c
-//		char modb_rts_prescaler[3];												// U_ModBusSio.c
-//		char modb_rts_timer[3];														// U_ModBusSio.c
-//		char modb_rx_buff_size;														// U_ModBusSio.c
-//		char modb_rx_status;															// Modbus.c										
-//		char modb_tx_count[3];														// U_ModBusSio.c
-//		char modb_rx_count[3];														// U_ModBusSio.c							
-//		char modb_rx_buffer_ready[3];											// U_ModBusSio.c							
-//		char modb_rx_int_state[3];												// U_ModBusSio.c							
-//		char modb_sio_errorflag[3];												// U_ModBusSio.c
-//		unsigned int EoF_timer[3];												// U_ModBusSio.c
-//		char timer_function[3];														// U_ModBusSio.c
-//		char func_code[3];																// U_ModBusSio.c  + Modbus.c	
-//		unsigned char byte_count_or_exception[3];					// U_ModBusSio.c  + Modbus.c
-//		unsigned int first_reg[3];												// U_ModBusSio.c  + Modbus.c	
-//		unsigned int cnt_regs[3];													// U_ModBusSio.c  + Modbus.c	
-//		void* reg_address[3];															// U_ModBusSio.c  + Modbus.c
-//		char modb_curr_adr[3];														// U_ModBusSio.c  + Modbus.c	
-//
-//#endif						
+//----------------------------------------------------------------------------------------------------
+// Modbus 
+//--------------------------------------------------------------------------------------------------
+#if MODBUS_UNI > 0
+
+unsigned int ModBusKonvertError;									// Modbus.c  + modbusparli.h
+unsigned int modbusDeviceNr;                      // Modbus.c  + modbusparli.h
+int activeRow[3];                                 // Modbus.c  + modbusparli.h
+unsigned char modbusSlaveAddresses[3];            // Modbus.c  + modbusparli.h  + modbusstandard.h
+unsigned char modbusSioParity[3];                 // Modbus.c  + modbusparli.h  + modbusstandard.h
+unsigned char modbusSioStopBits[3];               // Modbus.c  + modbusparli.h  + modbusstandard.h
+unsigned char modbusConvertBuffer[3][256];        // Modbus.c   
+
+char modb_leng_tx[3];                             // ModBusSio.c
+char modb_rts_prescaler[3];                       // ModBusSio.c
+char modb_rts_timer[3];                           // ModBusSio.c
+char modb_rx_buff_size;                           // ModBusSio.c
+char modb_rx_status;                              // Modbus.c                   
+char modb_tx_count[3];                            // ModBusSio.c
+char modb_rx_count[3];                            // ModBusSio.c              
+char modb_rx_buffer_ready[3];                     // ModBusSio.c              
+char modb_rx_int_state[3];                        // ModBusSio.c              
+char modb_sio_errorflag[3];                       // ModBusSio.c
+unsigned int EoF_timer[3];                        // ModBusSio.c
+char timer_function[3];                           // ModBusSio.c
+char func_code[3];                                // ModBusSio.c  + Modbus.c  
+unsigned char byte_count_or_exception[3];         // ModBusSio.c  + Modbus.c
+unsigned int first_reg[3];                        // ModBusSio.c  + Modbus.c  
+unsigned int cnt_regs[3];                         // ModBusSio.c  + Modbus.c  
+void* reg_address[3];                             // ModBusSio.c  + Modbus.c
+char modb_curr_adr[3];                            // ModBusSio.c  + Modbus.c  
+
+/*--------------- Modbus-Datenpunkte -----------------------------*/
+#if MODBUS_EXT > 0                               // bei Verwendung von READ_MULTIPLE_COILS in der ModbusTabelle
+ULONG ul_dig32[MODBUS_EXT];                      // READ_MULTIPLE_COILS für 32 Bit
+char  uc_dig[MODBUS_EXT*32];                     // Extraktion 32 Bit auf Einzelbytes im Task ModbusExtract
+char  uc_dig8[MODBUS_EXT*4];                     // Extraktion 32 Bit auf 4 * 8 Bit
+#endif
+
+#endif  // MODBUS_UNI
+
+//----------------------------------------------------------------------------------------------------				
 
 //--------------------------------------------------------------------------------------------------
 // Benutzung der Funktion Test-RS485
@@ -203,7 +213,7 @@ char funk_vis;
 #endif
 
 
-#if ( GENI || WILO )
+#if ( GENI || WILO )    // WILOAF
 
 PuBusStandard BusPuPara[BUS_PU_MAX];
 PuBusDynam BusPuData[BUS_PU_MAX];
@@ -306,6 +316,12 @@ unsigned int n37list[R37_MODMAX][13];		// 13 Ein/Ausgänge				R37
 unsigned int n38list[R38_MODMAX][14];		// 14 Analogeingänge			R38
 unsigned int n39list[R39_MODMAX][12];		// 12 Digitaleingänge			R39
 unsigned int n33list[R33_MODMAX][6];		//  6 Digitalausgänge			R33
+
+char ntext[18][21];											// 18 E/A je 20 ASCII
+char n37text[R37_MODMAX][13][21];				// 13 Ein/Ausgänge				R37 
+char n38text[R38_MODMAX][14][21];				// 13 Ein/Ausgänge				R37 
+char n39text[R39_MODMAX][12][21];				// 12 Digitaleingänge			R39
+char n33text[R33_MODMAX][6][21];				//  6 Digitalausgänge			R33
 
 
 //Sichtbarkeitsspeicher für Parametergruppen
@@ -604,7 +620,16 @@ char mod39sysinit;						// Merkmal für SysEEP_InitUser  (Kaltstart 66 wurde ausg
 
 char proc_IO;									// Auftragsmerker
 char iocnt;										// Counter über maximal 4 Module
+char iocnt_max;								// Counter über maximal 4 Module + R66 (mit  EA-Simulation)
 char oready;									// Flag: wenn Output-Task abgelaufen
+// EA-Simulation
+char names_anford;
+char projekt_anford;
+char r37text_cnt[4];
+char r38text_cnt[4];
+char r39text_cnt[4];
+char r33text_cnt[4];
+char r66text_cnt;
 //---------------------------------------------------------------------------
 
 // Sammelstörmeldung für Anzeige und LT
@@ -766,6 +791,8 @@ AlarmVar	alarmtab[SETAB_DEFL];
 char quit_taste;
 char un_qsm;								// 1 = Unquittierte Störungen vorhanden
 char unbek_Alarm;					// unbekannter Alarm (alarmtab - Index)
+char sstm_alarme;					// Merker für Alarme, für SSTM-Relais, Eintrag in parli für KomtabCopy
+char sstm_all;						// Merker für alle Alarme inclusive Fühler, Eintrag in parli für KomtabCopy
 
 UINT alarmlist_dae[SETAB_DEFL];		// aktuelle Alarme in einer Liste merken (für RFB):  2 Byte DAE-Nummer
 char alarmanz_dae;
@@ -818,6 +845,7 @@ char monHzGrdAnz;
 /***** ulsch : Waermemenge, Diagnose *****/
 #if WMENG > 0
 zaehlspWmeng wmengCtr[4];					// ZIN7 bis ZIN10 sind möglich
+zaehlsp wmengCalc[4];							// für interne Wärmemengen-Zähler, für Zählerobjekt benötigt
 #endif
 
 #if ( LEIST_BER > 0 )
@@ -933,9 +961,9 @@ char DS_TxBuf[DS_TXBUF_MAX];			// an den Master zu sendende Daten
 char DS_TxLeng;										// Datenanzahl zu senden
 
 // Empfangene Daten vom Master (Variable müssen vom Typ mwsp sein)
-//mwsp zentrale_ea;									// Beispiel für 1 Byte: Ein/Aus              
-//mwsp zentrale_istwert;						// Beispiel für 3 Byte: Temperatur mit Status
-//mwsp zentrale_sollwert;						// Beispiel für 2 Byte: Sollwert             
+mwsp zentrale_ea;									// Beispiel für 1 Byte: Ein/Aus              
+mwsp zentrale_istwert;						// Beispiel für 3 Byte: Temperatur mit Status
+mwsp zentrale_sollwert;						// Beispiel für 2 Byte: Sollwert             
 
 #endif
 
@@ -949,15 +977,15 @@ char proc_TI;											// DTimer Auftragsmerker
 char Slave[4];										// Slave 1 - 4 Adressen
 
 // Empfangene Daten von den Slaves  (Variable müssen vom Typ mwsp sein)
-//mwsp station1_ea;									// Beispiel für 1 Byte: Ein/Aus              
-//mwsp station1_istwert;						// Beispiel für 3 Byte: Temperatur mit Status
-//mwsp station1_sollwert;						// Beispiel für 2 Byte: Sollwert             
-//
-//	#if DM_SLAVES > 1
-//mwsp station2_ea;			
-//mwsp station2_istwert;
-//mwsp station2_sollwert;
-//	#endif
+mwsp station1_ea;									// Beispiel für 1 Byte: Ein/Aus              
+mwsp station1_istwert;						// Beispiel für 3 Byte: Temperatur mit Status
+mwsp station1_sollwert;						// Beispiel für 2 Byte: Sollwert             
+
+	#if DM_SLAVES > 1
+mwsp station2_ea;			
+mwsp station2_istwert;
+mwsp station2_sollwert;
+	#endif
 
 #endif
 
@@ -1040,7 +1068,15 @@ ULONG asdm_test_start;
 
 #endif // End ARCHIV_SDM == 1
 
+#if RM_POWER_ANZ
+mwsp *RM_POWER[RM_POWER_ANZ];
+sPowInpPara RmPowerPara[RM_POWER_ANZ];
+sPowInp rmPower[RM_POWER_ANZ];
+#endif
 
+#if AE_DRUCK_ANZ
+mwsp *AE_DRUCK[AE_DRUCK_ANZ];
+sAnaInpPara DruckPara[AE_DRUCK_ANZ];
+sAnaInp druck[AE_DRUCK_ANZ];
+#endif
 
-
-																		

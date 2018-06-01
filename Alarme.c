@@ -497,7 +497,7 @@ void Alarme(void)
 		}
 		
 		// QSM: Quittierbare Störmeldungen speichern oder löschen
-		if( alclass == FUEHLER || alclass == ANZEIGE || alclass == EREIGNIS)	// keine Alarmspeicherung
+		if( alclass == FUEHLER || alclass == ANZEIGE || alclass == ANZEIGE_ROT || alclass == EREIGNIS)	// keine Alarmspeicherung
 			;
 		else	
 		{	
@@ -513,6 +513,13 @@ void Alarme(void)
 					break;
 				case 3:																									// Transparentmodus
 					alarmtab[i].alspeicher = alarmtab[i].alstatus;				// kein Speichern, nur kopieren
+					if(quit_taste == 1)																		// Wenn keine echte Taste vorhanden, Softquittierung möglich (ANL: 96:) 
+					{ 
+//						quit_taste = 0;
+						quit_proc();
+						if(konv == JANEIN_FORM)															// Softalarm auch löschen
+							pADR[0] = 0;
+					}	
 					break;
 			}	
 		}			
@@ -533,17 +540,21 @@ void Alarme(void)
 			j |= alarmtab[i].alspeicher;			// Quittierbare Störmeldungen odern
 		}
 		
-		i = 0;															// Merker für SSTM-Relais
+		sstm_alarme = 0;										// Merker für Alarme, für SSTM-Relais, Eintrag in parli für KomtabCopy
+		sstm_all    = 0;										// Merker für alle Alarme inclusive Fühler, Eintrag in parli für KomtabCopy
 		if(abyte > 0)												// 1 = Alarm, 2 = Fühlerstörung
 		{
 			if( (abyte & 3) == 2)				 			// nur 2 = "blinkend" bedeutet Fühlerstörung
-				SetLedRot(2, 1);								// Einschaltdauer 2*5 ms , 1 Periode
+			{	SetLedRot(2, 1);								// Einschaltdauer 2*5 ms , 1 Periode
+				sstm_all = 1;
+			}	
 			else
 			{	SetLedRot(255, 1);							// immer an	
-				i = 1;
+				sstm_alarme = 1;
+				sstm_all = 1;
 			}	
 		}
-		SSTM[ANL]->wert = i;
+		SSTM[ANL]->wert = sstm_alarme;
 		
 		// Blinkmodus für gespeicherte Alarme
 		if(save_mode != 3)
@@ -610,6 +621,8 @@ void Alarme(void)
 	
 	#if QUIT_TASTE == 1
 		quit_taste =  QUITTS[ANL]->bwert;		// Zustand der Taste anzeigen
+	#else
+		quit_taste = 0;	
 	#endif	
 				 		
 

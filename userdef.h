@@ -11,6 +11,15 @@
 #define S2				1
 #define S3				2
 
+// Schnittstellen Eigenschaften
+#define NULL_MODE 0xFF					// dummy, (alternativ MASTER, SLAVE)
+#define NULL_PARI 0xFF          // dummy, (alternativ NOPAR, ODD, EVEN)
+#define NULL_STOP 0             // dummy, (alternativ 1, 2) 
+
+#define NOPAR     0
+#define ODD       1
+#define EVEN      2
+
 // Kennzeichen im Noinit-Rambereich
 #define RAMEX1		0x3456
 #define RAMEX			0x4567
@@ -33,6 +42,7 @@
 #define R38				2							// RIEcon 38
 #define R39				3							// RIEcon 39
 #define R33				4							// RIEcon 33
+#define R66				5							// RIEcon 66 EA-Simulation
 
 #define R3MAX			4							// maximal 4 Erweiterungsmodule möglich
 #define ZAUFMAX		28						// maximal Aufträge zum Zähler lesen
@@ -85,6 +95,7 @@
 #define EINZEL		10			// Element gehört zur Klasse Einzelalarme
 #define EREIGNIS	11			// Element gehört zur Klasse Ereignisse			(kein Sammelalarm, keine rote LED-Anzeige, keine LCD-Anzeige) 
 #define ANZEIGE		12			// Element gehört zur Klasse Anzeige			  (kein Sammelalarm, keine rote LED-Anzeige, nur   LCD-Anzeige)
+#define ANZEIGE_ROT	13			// wie ANZEIGE, aber rote LED ein
 
 //----------------------------------------------------------------------------------------------------
 // Alarm Funktionen in der parli.	Ausführung erfolgt in Alarme.c siehe void AlarmFunktion(char alfunc)
@@ -102,6 +113,11 @@
 #define EXP_WLP		33			// Expansionsgruppe WLP		in parli_wilo.h
 
 #define EXP_ZMB		34			// Expansionsgruppe ZMB		in parli_mbus.h
+#define MAX_EXP_RFS	12
+#define MAX_EXP_GBP	BUS_PU_MAX
+#define MAX_EXP_GEN	BUS_PU_MAX
+#define MAX_EXP_WLP	BUS_PU_MAX
+#define MAX_EXP_ZMB	MBUSANZ
 
 
 #define IDX0_FELD	99			// Kennzeichen für die Funktion get_feldadresse(...).
@@ -176,6 +192,8 @@
 					02 = univ.Analogeingang		AE_UNI		8	nur zur Anzeige oder mit projektspez. Funktion, ohne Funktion im Pool !					
 					03 = Adaptions-Kennwert		ADAPT			4
 					04 = Außentemperatur			TAE				4
+					05 = Leistungs-Analogeingang RM_POW	8	insbesondere für Kessel					
+					06 = Druck-Analogeingang 	AE_DRU		8	insbesondere für Kessel					
 					...
 					
 	Klasse:	Digitaleingänge											reservierte Speicherplätze
@@ -457,6 +475,24 @@
 #define ADAPT4		0x2034
 
 #define TAE1			0x2041
+
+#define RM_POW1		0x2051
+#define RM_POW2		0x2052
+#define RM_POW3		0x2053
+#define RM_POW4		0x2054
+#define RM_POW5		0x2055
+#define RM_POW6		0x2056
+#define RM_POW7		0x2057
+#define RM_POW8		0x2058
+
+#define AE_DRU1		0x2061
+#define AE_DRU2		0x2062
+#define AE_DRU3		0x2063
+#define AE_DRU4		0x2064
+#define AE_DRU5		0x2065
+#define AE_DRU6		0x2066
+#define AE_DRU7		0x2067
+#define AE_DRU8		0x2068
 
 //-------------------------------------------
 // Digitaleingänge

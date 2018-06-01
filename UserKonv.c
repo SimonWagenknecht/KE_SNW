@@ -22,6 +22,7 @@
 #include "uskonvform.h"
 #include "constext.h"
 #include "uconstext.h"
+#include "projdef.h"
 
 extern void ctoa(char *buf, char ch);
 extern void ctoa3(char	*buf,	unsigned char	ch);
@@ -32,6 +33,13 @@ extern UINT bin2(char* Visual_Ptr, char komma, char signflag);
 //extern const Parli Pgruppe[];
 void asci4s ( char* Visual_Ptr, long wert, char komma );
 extern void set_vornul(char* Visual_Ptr, char komma, char vorz, char ziffern, char overfl);
+
+#if MODBUS_UNI > 0
+extern char user_erste_zeile_modbus(char*	Visual_Ptr,	char gnum, char	pnum, unsigned char ucExp_num);
+#endif
+
+
+
 
 // nun in UserConst.c
 //-char ClearDisplay[] =
@@ -323,7 +331,70 @@ char User_Konv(char* Visual_Ptr, char *wert, char konv, char attr, char rw)
 	unsigned  long longwert;
 	char ret_komma;
 	char charwert;
+int intwert;
+	signed char s_char;
+	char vtext[7] = {0};
 
+// ZLT Funktionsnamen für Schnittstellen
+	switch(konv)
+	{
+		case FU_NAME_FORM:
+			if(rw ==	KONVRD)						// lesen
+			{	
+				charwert = wert[0];
+				asci1(Visual_Ptr,	charwert,	attr,	SIGNNO);
+				memcpy(&Visual_Ptr[14],	&fu_namen[charwert], 6);		// Funktionsnamentext
+			}
+			else												// schreiben
+			{	intwert	=	bin2(Visual_Ptr, attr, SIGNNO);
+				if(intwert > 255)
+					ret = FALSE;
+				else
+					wert[0] = (char)intwert;
+			}
+			break;
+		
+	}
+
+// Modbus
+#if MODBUS_UNI > 0
+	switch(konv)
+	{
+		case SIO_NAME_FORM:
+			s_char = wert[0];
+			if(s_char == -1)
+			{	
+				if((IMPLEMENT_S1 & MODBUS1_IMPL) == MODBUS1_IMPL)
+					strcat(vtext, "S1");
+				else
+					strcat(vtext, "__");
+					
+				if((IMPLEMENT_S2 & MODBUS1_IMPL) == MODBUS1_IMPL)
+					strcat(vtext, "S2");
+				else
+					strcat(vtext, "__");
+				
+				if((IMPLEMENT_S3 & MODBUS1_IMPL) == MODBUS1_IMPL)
+					strcat(vtext, "S3");
+				else
+					strcat(vtext, "__");
+				
+				strncpy(&Visual_Ptr[5],		"VARIABEL ",	9);
+				strncpy(&Visual_Ptr[14], vtext, 6); 
+			}
+			
+			else if(s_char == 0)	
+				strncpy(&Visual_Ptr[5],		"FEST  S1       ",	15);
+			else if(s_char == 1)	
+				strncpy(&Visual_Ptr[5],		"FEST  S2       ",	15);
+			else if(s_char == 2)	
+				strncpy(&Visual_Ptr[5],		"FEST  S3       ",	15);
+		break;
+	}	
+
+#endif
+
+#if ( GENI == 1 || WILO_MODBUS == 1 || GRUNDFOS_MODBUS == 1 )
 #if BUS_PU_MAX > 0
 	
 	switch(konv)
@@ -385,8 +456,8 @@ char User_Konv(char* Visual_Ptr, char *wert, char konv, char attr, char rw)
 
 	}
 
-#endif
-
+	#endif	// if BUS_PU_MAX
+#endif		// if BUS_PUMPEN
 
 #if ( ((IMPLEMENT_S1 & MODBUS1_IMPL) == MODBUS1_IMPL) || ((IMPLEMENT_S2 & MODBUS1_IMPL) == MODBUS1_IMPL) || ((IMPLEMENT_S3 & MODBUS1_IMPL) == MODBUS1_IMPL) )
 
@@ -714,7 +785,7 @@ char User_Konv(char* Visual_Ptr, char *wert, char konv, char attr, char rw)
 	
 	}
 	
-#endif
+#endif	// if ( MBUSANZ
 
 
 	return ( ret );
@@ -748,55 +819,63 @@ unsigned char user_erste_zeile(char*	Visual_Ptr,	char gnum, char	pnum, unsigned 
 
 // Beispiel Funkempfang
 	#if ( ((IMPLEMENT_S1 & FUNK1_IMPL) == FUNK1_IMPL) || ((IMPLEMENT_S2 & FUNK1_IMPL) == FUNK1_IMPL) || ((IMPLEMENT_S3 & FUNK1_IMPL) == FUNK1_IMPL) )
-	if(strcmp(Pgruppe[gnum].grkz,"RFS;") == 0)
+if(ucReturn == 0)							// wenn noch nicht benutzt
 	{
-		if(alfunc == EXP_RFS)
-		{	// in der Parametergruppe RFS soll das ausgewählte Gerät als Nummer im Gruppennamen erscheinen
-			ctoa(&Visual_Ptr[1],bedien_rf_nummer);
-			ucMax_expander = 12;
-			ucReturn = ucMax_expander;
+		if(strcmp(Pgruppe[gnum].grkz,"RFS;") == 0)
+		{
+			if(alfunc == EXP_RFS)
+			{	// in der Parametergruppe RFS soll das ausgewählte Gerät als Nummer im Gruppennamen erscheinen
+				ctoa(&Visual_Ptr[1],bedien_rf_nummer);
+				ucMax_expander = 12;
+				ucReturn = ucMax_expander;
+			}
 		}
-	}
+	}	
 	#endif
 	
 // Änderung neue Genibus-Implementierung
-#if USE_GENIBUS
-	if ( strcmp ( Pgruppe[gnum].grkz,"GEN;") == 0 )
-	{
-		if ( alfunc == EXP_GEN )	
-		{	// in der Parametergruppe GEN soll das ausgewählte Gerät als Nummer im Gruppennamen erscheinen
-			if ( uc_genibus_device_nr == 0 )
-				uc_genibus_device_nr = 1;
-			else if ( uc_genibus_device_nr > GENI_DEVICE_MAX )
-				uc_genibus_device_nr = GENI_DEVICE_MAX;
-			ctoa ( &Visual_Ptr[1],uc_genibus_device_nr );
-			ucMax_expander = GENI_DEVICE_MAX;
-			ucReturn = ucMax_expander;
+#if GENI == 1
+		if(ucReturn == 0)							// wenn noch nicht benutzt
+		{
+			if ( strcmp ( Pgruppe[gnum].grkz,"GEN;") == 0 )
+			{
+				if ( alfunc == EXP_GEN )	
+				{	// in der Parametergruppe GEN soll das ausgewählte Gerät als Nummer im Gruppennamen erscheinen
+					if ( uc_genibus_device_nr == 0 )
+						uc_genibus_device_nr = 1;
+					else if ( uc_genibus_device_nr > GENI_DEVICE_MAX )
+						uc_genibus_device_nr = GENI_DEVICE_MAX;
+					ctoa ( &Visual_Ptr[1],uc_genibus_device_nr );
+					ucMax_expander = GENI_DEVICE_MAX;
+					ucReturn = ucMax_expander;
+				}
+			}
 		}
-	}
-		
-	if ( strcmp ( Pgruppe[gnum].grkz,"GBP:") == 0 )
-	{
-		if ( alfunc == EXP_GBP )
-		{	// in der Parametergruppe GBP soll das ausgewählte Gerät als Nummer im Gruppennamen erscheinen
-			if ( uc_genibus_device_nr == 0 )
-				uc_genibus_device_nr = 1;
-			else if ( uc_genibus_device_nr > BUS_PU_MAX )
-				uc_genibus_device_nr = BUS_PU_MAX;
-			ctoa ( &Visual_Ptr[1],uc_genibus_device_nr );
-			ucMax_expander = BUS_PU_MAX;
-			ucReturn = ucMax_expander;
-		}
-	}	
-#endif	
-
+			
+		if(ucReturn == 0)							// wenn noch nicht benutzt
+		{
+			if ( strcmp ( Pgruppe[gnum].grkz,"GBP:") == 0 )
+			{
+				if ( alfunc == EXP_GBP )
+				{	// in der Parametergruppe GBP soll das ausgewählte Gerät als Nummer im Gruppennamen erscheinen
+					if ( uc_genibus_device_nr == 0 )
+						uc_genibus_device_nr = 1;
+					else if ( uc_genibus_device_nr > BUS_PU_MAX )
+						uc_genibus_device_nr = BUS_PU_MAX;
+					ctoa ( &Visual_Ptr[1],uc_genibus_device_nr );
+					ucMax_expander = BUS_PU_MAX;
+					ucReturn = ucMax_expander;
+				}
+			}
+		}	
+	#endif	// if GENI == 1	
 	#if ( WILO )
 	if ( strcmp ( Pgruppe[gnum].grkz,"WLP:") == 0 )
 	{
 		if( alfunc == EXP_WLP)
 		{	// in der Parametergruppe WLP soll das ausgewählte Gerät als Nummer im Gruppennamen erscheinen
-			ctoa ( &Visual_Ptr[1],SerialDeviceNr );
-			if( SerialDeviceNr < 10 )
+			ctoa ( &Visual_Ptr[1],SerialDeviceNr ); // WILOAF
+			if( SerialDeviceNr < 10 )               // WILOAF
 				Visual_Ptr[1] = 'L';			// verbesserte Darstellung
 			ucMax_expander = BUS_PU_MAX;
 			ucReturn = ucMax_expander;
@@ -807,6 +886,8 @@ unsigned char user_erste_zeile(char*	Visual_Ptr,	char gnum, char	pnum, unsigned 
 
 	#if ( ( IMPLEMENT_S3 & MBUS1_IMPL ) ==  MBUS1_IMPL )
 		#if ( MBUSANZ > 0 )
+if(ucReturn == 0)							// wenn noch nicht benutzt
+		{
 			if(strcmp(Pgruppe[gnum].grkz,"ZMB:") == 0)
 			{
 				if(alfunc == EXP_ZMB)
@@ -816,8 +897,17 @@ unsigned char user_erste_zeile(char*	Visual_Ptr,	char gnum, char	pnum, unsigned 
 					ucReturn = ucMax_expander;
 				}
 			}
+}	
 		#endif
 	#endif													// ( IMPLEMENT_S3 & MBUS1_IMPL ==  MBUS1_IMPL )
+
+// Modbus
+	#if MODBUS_UNI > 0
+		if(ucReturn == 0)							// wenn noch nicht benutzt
+		{
+			ucReturn = user_erste_zeile_modbus(Visual_Ptr,	gnum, pnum, ucExp_num);
+		}	
+	#endif
 
 	return(ucReturn);
 	
@@ -949,27 +1039,27 @@ char HzgGrd_Konvert(char* Visual_Ptr, char *wert, char konv, char attr, char rw)
 //--------------------------------------------------------------------------------------
 void usertext_erste_zeile(char*	Visual_Ptr,	char gnum, char	pnum)
 {
-	char idx;
-	char text[16] = {0};
-	
-	if(strcmp(Pgruppe[gnum].grkz,"ANL:") == 0)
-	{
-		if(strcmp(Pgruppe[gnum].Param[pnum].num, "*97:") == 0) // ***AnFre 30.05.2013 'EXTERNE SSM  '
-		{
-			strcpy(text, extAlarmText);
-			if(text[0] != 0)
-				strcpy(&Visual_Ptr[5],  text);
-		}
-	}		
-	if(strcmp(Pgruppe[gnum].grkz,"QSM:") == 0)
-	{
-		if(pnum == 10) // ***AnFre 30.05.2013 'EXTERNE SSM  '
-		{
-			strcpy(text, extAlarmText);
-			if(text[0] != 0)
-				strcpy(&Visual_Ptr[5],  text);
-		}
-	}		
+char idx;
+//	char text[16] = {0};
+//	
+//	if(strcmp(Pgruppe[gnum].grkz,"ANL:") == 0)
+//	{
+//		if(strcmp(Pgruppe[gnum].Param[pnum].num, "*96:") == 0) // ***AnFre 30.05.2013 'EXTERNE SSM  '
+//		{
+//			strcpy(text, extAlarmText);
+//			if(text[0] != 0)
+//				strcpy(&Visual_Ptr[5],  text);
+//		}
+//	}		
+//	if(strcmp(Pgruppe[gnum].grkz,"QSM:") == 0)
+//	{
+//		if(pnum == 9) // ***AnFre 30.05.2013 'EXTERNE SSM  '
+//		{
+//			strcpy(text, extAlarmText);
+//			if(text[0] != 0)
+//				strcpy(&Visual_Ptr[5],  text);
+//		}
+//	}
 }
 
 

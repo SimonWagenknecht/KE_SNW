@@ -32,6 +32,12 @@ typedef struct {
 	char	betriebSm;	
 	UINT	betriebRmCtr;
 
+// Änderung neue Genibus-Implementierung
+	unsigned char uc_betriebsart;							// Aktuelle Betriebsart <- aus AUTO bzw HAND ermittelt in PumpeParametrieren
+	unsigned char uc_regelart;								// Aktuelle Regelart
+	unsigned int  ui_sollwert;								// Aktueller Sollwert
+
+// Wilo
 	char betriebsArtSoll[16];	// ASCII	
 	char betriebsArtIst[16];	// ASCII	
 	char regelArtSoll[16];		// ASCII	
@@ -55,6 +61,7 @@ typedef struct {
 	char was;							// Wasserzählerzähler
 	char elt;							// Elektrozähler
 	char klm;							// Klimazähler (Wärme/Kälte)
+	char vol;
 } Sichtbarkeit;
 
 
@@ -67,7 +74,7 @@ typedef struct {
 	int		tRuecklauf;
 	int		tDifferenz;
 	ULONG	volStrom;
-	ULONG	leistung;
+	long	leistung;
 	ULONG	kaelte;
 	struct {
 			char wmeng 	: 4;
@@ -105,6 +112,7 @@ typedef struct {
 	char std;
 } uhrzeit;
 
+
 //#####ulsch: skalierbare Analogeingänge
 typedef struct {
 	int		Skal0;										// Skalierung des Spannungs-Messwerts  0 V	
@@ -122,6 +130,18 @@ typedef struct {
 	char ugwSM;											// SM UGW
 	char ogwSM;											// SM OGW
 } sAnaInp;
+
+typedef struct {
+	int		Skal0;										// Skalierung LEISTUNG 0 %  [V]	
+	int		Skal10;										// Skalierung des Messwerts  10V [%]		
+	UINT	ZkFilt;										// Glaettungszeitkonstante der AE [s]	( Sprungantwort: 66 % nach ZK )
+} sPowInpPara;
+
+typedef struct {
+	UINT	mwFilt;										// geglaetteter Messwert							[%] * 10
+	float	fl_mwFilt;								// geglaetteter Messwert		
+	mwsp	mwSkal;										// skalierter und geglaetteter Messwert
+} sPowInp;
 
 // ***AnFre Zeitsruktur
 typedef struct zeit {
@@ -169,6 +189,9 @@ typedef struct anl{
 
 	// Steuercode für MBUS
 	char mbcode[MBUSANZ > 0 ? MBUSANZ : 1 ];	// Nummern der Kaltstartparametersätze für jeden MBUS-Zähler [MB_PROFILE]
+
+// Steuercode für SteuerUni
+	char unicode[1];			// Nummern der Kaltstartparametersätze für jede UNI-Steuerung [UNI_PROFILE]
 
 	// Namen für Prozess Ein- und Ausgänge (Namensvereinbarung in "userdef.h")
 	// Aus den Namen werden Steuercodes generiert
@@ -288,6 +311,9 @@ typedef struct ra38{
 	char					adr;				// DeviceAdresse bzw. Moduladresse
 	char					errcnt;			// Fehlerzähler Datenübertragung
 	char					error;			// Anzeige des Datenübertragungsfehlers
+	
+	// Lifetest
+	unsigned int  life;				// 14 Bit, Bit0=1 -> Fühler IN 1 aktiviert usw.
 	
 	// Datue senden an R38
 	unsigned int inpUsed;
@@ -1300,6 +1326,23 @@ typedef struct sd {
  
 //---------------------------------------------------------------------
 
+/* Struktur der Regelparameter Benutzersteuerung mit UNI-Elementen */
+// Statische Parameter (mit Standdardwerten)
+typedef struct uns {
+	char	Loader;			// Testparameter
+	
+} UniStandard;
+#define UNISLENG sizeof (struct uns)
+
+// Dynamische Parameter	
+typedef struct und {
+	UINT counter;			// Testparameter
+	char starter;
+
+} UniDynam;	
+	
+//---------------------------------------------------------------------
+
 // #####ulsch : Ferienprogramm #####
 typedef struct ferienZeit {
 	datum ferienBeg;
@@ -1518,23 +1561,11 @@ typedef struct {
 	char rdta_flag;							// Flag für erfolgte Datenübertragung					
 }dm_param;	
 	
-/******** GENIbus-Strukturen ********/
-// Control
-typedef struct gc{
-	char pu_adr;
-	char pu_func;				// HZG,  WW, oder deaktiviert
-	char pu_func_shad;
-	char prod_name[16];
-	char pu_operation;
-	char pu_control;
-	char setpoint;
-	char pu_al_reset;
-	char comand_reply;	// Für Auswertung Kommandos Outp: 	0 = deaktiviert, 0x80 = OK, sonst Error-Codes
-	char value_reply;		// Für Auswertung Daten Inp:    		0 = deaktiviert, 0x80 = OK, sonst Error-Codes
-	char error_count;
-	char error_flag;
-}control_value;
-#define GCLENG sizeof(struct gc)
+
+// Änderung neue Genibus-Implementierung	
+	#if GENI == 1
+		#include "GeniBus/genibus_struct.h"	
+	#endif
 //---------------------------------------------------------------
 
 // Measure Values
@@ -1562,7 +1593,7 @@ typedef struct gm{
 //#define GMLENG sizeof(struct gm)
 //---------------------------------------------------------------
 
-
+// WILOAF
 /******** Modbus-Const-Strukturen für Wilo, Belimo,********/
 // Const
 typedef struct reg_rq{
@@ -1678,13 +1709,26 @@ typedef struct mbds{
 typedef struct fe_info {
 	UINT	akt_DP;		// aktuelle Datenpage-Nr.
 	char	num_DP;		// Anzahl der Einträge in der Datenpage
-	char	off_DP;		// Offset zum nächsten Eintrag (+4 Byte Zeitstempel)
+	char	off_DP;		// Offset zum nächsten Eintrag (+4 Byte Zeitstempel +1 Byte Status)
 	char	akt_VP;		// aktuelle Verweispage-Nr.
 	char	num_VP;		// Anzahl der Einträge in der Verweispage
 	char	num_HP;		// Anzahl der Einträge in der Hauptpage
 	char	ovr_HP;		// Anzahl der Datenpage-Überläufe (Ringpuffer)
 }ferro_info;
 
+
+// Struktur für SD-Karte: Aufbau des Bereiches für ein DAE
+// nur Information !! Die Struktur kann der Compiler nicht verarbeiten, weil die SD-Card-Adressen den Speicherbereich des Prozessors überschreiten.  
+//typedef struct sdm {
+//	pages hp[1];				// Hauptpage
+//	pages vp[16];				// Verweispages
+//	pages dp[2031];			// Datenpages
+//} dae_page;		
+
+//typedef struct pag {
+//	char page[0x20];
+//} pages;	
+	
 //---------------------------------------------------------------
 
 /* Funktionsprototypen */
@@ -1704,6 +1748,8 @@ char TempMitt(mwsp* pT1, mwsp* pT2, mwsp* pTmitt);
 char get_alspeicher_idx(char *p_wert);
 char get_alspeicher(char *p_wert);
 void set_alspeicher(char *p_wert, char ea);
+float anti_windup(float fl_y_rel, int Kp, int Wup, float fl_ei);
+int y_stell(float fl_y_rel);
 
 /***** ulsch : Archivspeicher *****/
 void WritePageToArchiv ( char *TxBuf, char *RxBuf, char prot );		

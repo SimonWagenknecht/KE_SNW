@@ -1040,20 +1040,6 @@ ULONG asdm_test_start;
 
 #endif // End ARCHIV_SDM == 1
 
-// ***AnFre : Kaltwasser TWW *********************************************/
-extern zaehlspVolstr volstrCtr;	
-// ***AnFre 03.09.2009 Diagnose KWZ
-extern diagnoseKWZ kwd;											// dyn. Parameter
-extern diagParamKWZ kws;										// stat. Parameter
-extern char ZeitLoesch; 											// Zeiten löschen (auch bei KS66=1)
-extern ULONG timeDiff;			// Zeit-Zaehler 100ms
-extern ULONG lasttimeDiff;	// Zeit-Zaehler letzter Impuls 100ms
-
-
-extern UINT	CO2_Faktor;				// CO2-Faktor 0,000 [kg/kWh]
-extern ULONG	CO2_Einspar;			// CO2-Einsparung in 0 kg
-extern char	Tyfocor;					// Anteil Tyfocor in Vol.% (nur 40, 50 oder 60)
-
 
 
 

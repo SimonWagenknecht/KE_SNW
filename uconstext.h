@@ -5,6 +5,10 @@
 
 /*    Header für externe Konstanten im Flash-Bereich des Users		*/
 
+/* User-Compilierungszeit und Datum	*/
+extern const char user_compile_time[];
+extern const char user_compile_date[];
+
 
 /* Typ und Version des gesamten Projektes									*/
 extern const char Kategorie_Typ[];
@@ -25,6 +29,7 @@ extern const char KeViess[];
 extern const char KesBegr[];
 extern const char KesAllg[];
 extern const char KesPu[];
+extern const char KesTyp[][16];
                             
 extern const char Ntmod[];
 extern const char Hkmod_fuss[];
@@ -34,9 +39,16 @@ extern const char Hkmod[][16];
 
 extern const char Monatswerte[];
 
-extern const char Wwmod[];
+extern const char Wwmod[][16];
 
 extern const char Stoermeld[];
+
+extern const char ModBusMasterSlave[];
+extern const char ModBusMaster[];	
+extern const char ModBusSlave[];	
+
+
+
 // ***AnFre
 extern const char Solmod[];
 extern const char Sosmod[];
@@ -82,7 +94,21 @@ extern const UINT c_Baudrate_S3;
 extern const char c_Funktion_S1;
 extern const char c_Funktion_S2;
 extern const char c_Funktion_S3;
-// ***AnFre für WILO-ModBus
+
+extern const char c_Parity_S1; 
+extern const char c_Parity_S2; 
+extern const char c_Parity_S3; 
+extern const char c_Stopbits_S1;
+extern const char c_Stopbits_S2;
+extern const char c_Stopbits_S3;
+
+
+
+
+
+
+
+// ***AnFre für WILO-ModBus //WILOAF
 extern const char c_ModbusBaudWilo;		// WILO Pumpenparameter "A" Achtung! immer 5 = 9600 Baud
 extern const char c_ModbusSioWilo;		// WILO Pumpenparameter "C" SIO-Einstellung Parität und StopBit
 
@@ -166,6 +192,9 @@ extern const NtStandard  Nt_Standparam[];
 extern const char SO_PROFILE ;
 extern const SoStandard  So_Standparam[];
 
+/*  Liste von Standardwerten für Benutzersteuerung mit UNI-Elementen	*/
+extern const char UNI_PROFILE ;
+extern const UniStandard  Uni_Standparam[];
 
 //	Liste von Standardwerten für Skalierung von Analogausgängen
 extern const aask R36_37_Standparam[][5];
@@ -173,9 +202,18 @@ extern const aask R36_37_Standparam[][5];
 //#####ulsch: skalierbare Analogeingänge
 extern const sAnaInpPara AnaInpStandardPara[];
 
+#if RM_POWER_ANZ
+extern const sPowInpPara RmPowerStandardPara[];
+#endif
+#if AE_DRUCK_ANZ
+extern const sAnaInpPara DruckStandardPara[];
+#endif
 
 // Dimensionsnamen für Zähler
 extern const zdname ze_dim_namen[];
+
+// Funktionsnamen für Schnittstellen
+extern const char fu_namen[9][7];
 
 /* Zählerdimensionierungen für Systemstart 	*/
 extern const zaehldim ze_dimsys[];

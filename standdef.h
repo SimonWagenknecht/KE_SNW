@@ -17,41 +17,46 @@
 // Im Regler R36B (Renesas CPL) wurde der EEPROM durch ein FERRO-RAM ersetzt. Der Begriff EEPROM wird weiterhin verwendet.
 
 /* ------------------------ Projekt ------------------------------*/
-// Projekttyp
-#define PROJ_TYP_ADR				0x0200	// 1 Byte
 
 // Erweiterungsmodule
-#define R37_1_BUS_ADR				0x0201	// 2 Byte		BUS-Kennzeichen +  ADRESSE auf dem BUS
-#define R37_2_BUS_ADR				0x0203
-#define R37_3_BUS_ADR				0x0205
-#define R37_4_BUS_ADR				0x0207
-                          	
-#define R38_1_BUS_ADR				0x0211	// 2 Byte		BUS-Kennzeichen +  ADRESSE auf dem BUS
-#define R38_2_BUS_ADR				0x0213
-#define R38_3_BUS_ADR				0x0215
-#define R38_4_BUS_ADR				0x0217
-                          	
-#define R39_1_BUS_ADR				0x0221	// 2 Byte		BUS-Kennzeichen +  ADRESSE auf dem BUS
-#define R39_2_BUS_ADR				0x0223
-#define R39_3_BUS_ADR				0x0225
-#define R39_4_BUS_ADR				0x0227
-                          	
-#define R39_1_DIGART_ADR		0x0230	// 2 Byte
-#define R39_2_DIGART_ADR		0x0232	// 2 Byte
-#define R39_3_DIGART_ADR		0x0234	// 2 Byte
-#define R39_4_DIGART_ADR		0x0236	// 2 Byte
-                          	
-#define R33_1_BUS_ADR				0x0238	// 2 Byte		BUS-Kennzeichen +  ADRESSE auf dem BUS
-#define R33_2_BUS_ADR				0x023A
-#define R33_3_BUS_ADR				0x023C
-#define R33_4_BUS_ADR				0x023E
-																		
+#define R37_1_BUS_ADR       0x0200  // 2 Byte   BUS-Kennzeichen +  ADRESSE auf dem BUS
+#define R37_2_BUS_ADR       0x0202
+#define R37_3_BUS_ADR       0x0204
+#define R37_4_BUS_ADR       0x0206
+                            
+#define R38_1_BUS_ADR       0x0208  // 2 Byte   BUS-Kennzeichen +  ADRESSE auf dem BUS
+#define R38_2_BUS_ADR       0x020A
+#define R38_3_BUS_ADR       0x020C
+#define R38_4_BUS_ADR       0x020E
+// Lifetest R38
+#define R38_1_LIFE_ADR      0x0210  // 2 Byte   Bitmuster
+#define R38_2_LIFE_ADR      0x0212
+#define R38_3_LIFE_ADR      0x0214
+#define R38_4_LIFE_ADR      0x0216
+                            
+#define R39_1_BUS_ADR       0x0218  // 2 Byte   BUS-Kennzeichen +  ADRESSE auf dem BUS
+#define R39_2_BUS_ADR       0x021A
+#define R39_3_BUS_ADR       0x021C
+#define R39_4_BUS_ADR       0x021E
+                            
+#define R39_1_DIGART_ADR    0x0220  // 2 Byte
+#define R39_2_DIGART_ADR    0x0222  // 2 Byte
+#define R39_3_DIGART_ADR    0x0224  // 2 Byte
+#define R39_4_DIGART_ADR    0x0226  // 2 Byte
+                            
+#define R33_1_BUS_ADR       0x0228  // 2 Byte   BUS-Kennzeichen +  ADRESSE auf dem BUS
+#define R33_2_BUS_ADR       0x022A
+#define R33_3_BUS_ADR       0x022C
+#define R33_4_BUS_ADR       0x022E
+                                    
 // Skalierungen der Analogausgänge R37
-#define	R37_1_AA_SKAL_ADR		0x0240	// 16 Byte
-#define	R37_2_AA_SKAL_ADR		0x0250	// 16 Byte
-#define	R37_3_AA_SKAL_ADR		0x0260	// 16 Byte
-#define	R37_4_AA_SKAL_ADR		0x0270	// 16 Byte
+#define R37_1_AA_SKAL_ADR   0x0230  // 16 Byte
+#define R37_2_AA_SKAL_ADR   0x0240  // 16 Byte
+#define R37_3_AA_SKAL_ADR   0x0250  // 16 Byte
+#define R37_4_AA_SKAL_ADR   0x0260  // 16 Byte
 
+// Projekttyp
+#define PROJ_TYP_ADR        0x0270  // 1 Byte
 
 /* ---------------------- Steuer ---------------------------------*/
 #define TA1MZK_ADR					0x0280	// 1 Byte
@@ -64,6 +69,9 @@
 #define VERSION_ADR					0x028C	// 3 Byte
 #define	SOMBEGIN_ADR				0x0290	// 2 Byte					// ***AnFre Sommer-Datum
 #define	SOMEND_ADR					0x0292	// 2 Byte
+
+//$ Test
+#define ASDM_TEST_START_ADR 0x0290  // 4 Byte
 
 #define KLIMA_ADR						0x0294	// 1 Byte 				// ***AnFre 
 #define DTKLIMA_ADR					0x0296	// 2 Byte					// ***AnFre 
@@ -256,6 +264,13 @@
 																		// extern int TmanfSkalMinSpg;
 																		// extern int TmanfSkalMaxSpg;
 																		
+
+/* ------------------------ Benutzersteuerung mit UNI-Elementen --------*/
+#define STEUER_UNI_ADR      0x1180  // 1 Page
+
+
+
+
 #define GB_TX_TIMER1_ADR		0x1158	// 1 Byte																	
 
 //--***AnFre-------------------------------------------------------
@@ -282,7 +297,8 @@
 
 // skalierbare Analogeingänge
 #define ANAINPPARA_ADR			0x1580		// 2 Pages belegt (max. 12 Byte Parameter pro Eingang)
-
+#define DRUCKPARA_ADR      	0x1600    // 2 Pages belegt (12 Byte Parameter pro Eingang)
+#define RMPOWERPARA_ADR     0x1680 		// 1 Page (6 Byte Parameter pro Eingang)
 
 // MBUS
 #define MBUS_PARA_ADR				0x1700		// 1 Pages für max. 8 Zähler
@@ -434,6 +450,14 @@
 #define ZAEHLMB6_NAME_ADR		0x1CC0
 #define ZAEHLMB6_NUMM_ADR		0x1CD0
 
+#define ZAEHLMB7_DIM_ADR    0x1CE0
+//#define ZAEHLMB7_NAME_ADR   0x1CF0
+//#define ZAEHLMB7_NUMM_ADR   0x1D00
+
+#define ZAEHLMB8_DIM_ADR    0x1D10
+//#define ZAEHLMB8_NAME_ADR   0x1D20
+//#define ZAEHLMB8_NUMM_ADR   0x1D30
+
 
 
 // Speicher für aktuellen Zählwert (Sicherung jede Minute)
@@ -471,7 +495,9 @@
 //#define	ZAEHLERMB4_ADR	0x20D8		// 8 Byte		
 //#define	ZAEHLERMB5_ADR	0x20E0		// 8 Byte		
 //#define	ZAEHLERMB6_ADR	0x20E8		// 8 Byte		
-
+//optionale Erweiterung auf 8 Zähler
+//#define ZAEHLERMB7_ADR  0x20F0    // 8 Byte   
+//#define ZAEHLERMB8_ADR  0x20F8    // 8 Byte  
 // Speicher für Vorjahres-Zählwert
 #define ZVJ_OFFSET				0x100
 // R36
@@ -508,6 +534,9 @@
 //#define	VJZAEHLMB4_ADR	0x21D8		// 8 Byte		
 //#define	VJZAEHLMB5_ADR	0x21E0		// 8 Byte		
 //#define	VJZAEHLMB6_ADR	0x21E8		// 8 Byte		
+//optionale Erweiterung auf 8 Zähler
+//#define VJZAEHLMB7_ADR  0x21F0    // 8 Byte   
+//#define VJZAEHLMB8_ADR  0x21F8    // 8 Byte   
 
 // Speicher für Verbrauchswerte des aktuellen Monats  (Sicherung jede Minute) 
 // R36
@@ -546,6 +575,8 @@
 //#define VERBRAUMB4_ADR	0x228C		// 4 Byte	
 //#define VERBRAUMB5_ADR	0x2290		// 4 Byte	
 //#define VERBRAUMB6_ADR	0x2294		// 4 Byte	
+//#define VERBRAUMB7_ADR  0x2298    // 4 Byte 
+//#define VERBRAUMB8_ADR  0x229C    // 4 Byte 
 	
 	
 // Monatspeicher für Verbräuche	(4 Byte pro Monat) (Sicherung jede Stunde) 
@@ -587,206 +618,226 @@
 //#define ZMVMB4_ADR			0x3080
 //#define ZMVMB5_ADR			0x3100
 //#define ZMVMB6_ADR			0x3180
+//#define ZMVMB7_ADR      0x3200
+//#define ZMVMB8_ADR      0x3280
 
 //++++++++++++++++++++++++++++++++++++++++++++++++
 // Zähler-Fehlerspeicher
 //++++++++++++++++++++++++++++++++++++++++++++++++
 #define ZFEHLER_OFFS			0x20		// 32 Byte Offset zum nächsten Zähler
 // R36
-#define Z01LH_ADR					0x3200	// 6 Byte Datum 		letzte  Low-High-Flanke 
-#define Z01HL_ADR					0x3206	// 6 Byte Datum 		letzte  High-Low-Flanke
-#define Z01EF_ADR					0x320C	// 6 Byte Datum 		Erstes  Auftreten
-#define Z01EFA_ADR				0x3212	// 1 Byte Fehlerart Erstes  Auftreten
-#define Z01LF_ADR					0x3213	// 6 Byte Datum 		Letztes Auftreten
-#define Z01LFA_ADR				0x3219	// 1 Byte Fehlerart Letztes Auftreten
-#define CLEARDONGLE01_ADR	0x321A	// 2 Byte Dongle-Nummer des PC-Bedieners
-#define CLEARTAG01_ADR		0x321C	// 1 Byte Fehlerlöschung Tag
-#define CLEARMON01_ADR		0x321D	// 1 Byte Fehlerlöschung Monat
-#define CLEARJAHR01_ADR		0x321E	// 1 Byte Fehlerlöschung Jahr (+1 Gap)
+#define Z01LH_ADR         0x3300  // 6 Byte Datum     letzte  Low-High-Flanke 
+#define Z01HL_ADR         0x3306  // 6 Byte Datum     letzte  High-Low-Flanke
+#define Z01EF_ADR         0x330C  // 6 Byte Datum     Erstes  Auftreten
+#define Z01EFA_ADR        0x3312  // 1 Byte Fehlerart Erstes  Auftreten
+#define Z01LF_ADR         0x3313  // 6 Byte Datum     Letztes Auftreten
+#define Z01LFA_ADR        0x3319  // 1 Byte Fehlerart Letztes Auftreten
+#define CLEARDONGLE01_ADR 0x331A  // 2 Byte Dongle-Nummer des PC-Bedieners
+#define CLEARTAG01_ADR    0x331C  // 1 Byte Fehlerlöschung Tag
+#define CLEARMON01_ADR    0x331D  // 1 Byte Fehlerlöschung Monat
+#define CLEARJAHR01_ADR   0x331E  // 1 Byte Fehlerlöschung Jahr (+1 Gap)
 
-//#define Z02LH_ADR				0x3220	// 32 Byte
-//#define Z03LH_ADR				0x3240	// 32 Byte
-//#define Z04LH_ADR				0x3260	// 32 Byte
-//#define Z05LH_ADR				0x3280	// 32 Byte
-//#define Z06LH_ADR				0x32A0	// 32 Byte
-//#define Z07LH_ADR				0x32C0	// 32 Byte
-//#define Z08LH_ADR				0x32E0	// 32 Byte
-#define CLEARDONGLE_OFFS	(CLEARDONGLE01_ADR - Z01LH_ADR)
+//#define Z02LH_ADR       0x3320  // 32 Byte
+//#define Z03LH_ADR       0x3340  // 32 Byte
+//#define Z04LH_ADR       0x3360  // 32 Byte
+//#define Z05LH_ADR       0x3380  // 32 Byte
+//#define Z06LH_ADR       0x33A0  // 32 Byte
+//#define Z07LH_ADR       0x33C0  // 32 Byte
+//#define Z08LH_ADR       0x33E0  // 32 Byte
+#define CLEARDONGLE_OFFS  (CLEARDONGLE01_ADR - Z01LH_ADR)
 
 // R37_1
-#define Z11LH_ADR					0x3300	// 6 Byte Datum 		letzte  Low-High-Flanke 
-#define Z11HL_ADR					0x3306	// 6 Byte Datum 		letzte  High-Low-Flanke
-#define Z11EF_ADR					0x330C	// 6 Byte Datum 		Erstes  Auftreten
-#define Z11EFA_ADR				0x3312	// 1 Byte Fehlerart Erstes  Auftreten
-#define Z11LF_ADR					0x3313	// 6 Byte Datum 		Letztes Auftreten
-#define Z11LFA_ADR				0x3319	// 1 Byte Fehlerart Letztes Auftreten
-#define CLEARDONGLE11_ADR	0x331A	// 2 Byte Dongle-Nummer des PC-Bedieners
-#define CLEARTAG11_ADR		0x331C	// 1 Byte Fehlerlöschung Tag
-#define CLEARMON11_ADR		0x331D	// 1 Byte Fehlerlöschung Monat
-#define CLEARJAHR11_ADR		0x331E	// 1 Byte Fehlerlöschung Jahr (+1 Gap)
-//#define Z12LH_ADR				0x3320	// 32 Byte
-//#define Z13LH_ADR				0x3340	// 32 Byte
-//#define Z14LH_ADR				0x3360	// 32 Byte
-//#define Z15LH_ADR				0x3380	// 32 Byte
-//#define Z16LH_ADR				0x33A0	// 32 Byte
+#define Z11LH_ADR         0x3400  // 6 Byte Datum     letzte  Low-High-Flanke 
+#define Z11HL_ADR         0x3406  // 6 Byte Datum     letzte  High-Low-Flanke
+#define Z11EF_ADR         0x340C  // 6 Byte Datum     Erstes  Auftreten
+#define Z11EFA_ADR        0x3412  // 1 Byte Fehlerart Erstes  Auftreten
+#define Z11LF_ADR         0x3413  // 6 Byte Datum     Letztes Auftreten
+#define Z11LFA_ADR        0x3419  // 1 Byte Fehlerart Letztes Auftreten
+#define CLEARDONGLE11_ADR 0x341A  // 2 Byte Dongle-Nummer des PC-Bedieners
+#define CLEARTAG11_ADR    0x341C  // 1 Byte Fehlerlöschung Tag
+#define CLEARMON11_ADR    0x341D  // 1 Byte Fehlerlöschung Monat
+#define CLEARJAHR11_ADR   0x341E  // 1 Byte Fehlerlöschung Jahr (+1 Gap)
+//#define Z12LH_ADR       0x3420  // 32 Byte
+//#define Z13LH_ADR       0x3440  // 32 Byte
+//#define Z14LH_ADR       0x3460  // 32 Byte
+//#define Z15LH_ADR       0x3480  // 32 Byte
+//#define Z16LH_ADR       0x34A0  // 32 Byte
 
 // R37_2
-#define Z21LH_ADR					0x3400	// 6 Byte Datum 		letzte  Low-High-Flanke 
-#define Z21HL_ADR					0x3406	// 6 Byte Datum 		letzte  High-Low-Flanke
-#define Z21EF_ADR					0x340C	// 6 Byte Datum 		Erstes  Auftreten
-#define Z21EFA_ADR				0x3412	// 1 Byte Fehlerart Erstes  Auftreten
-#define Z21LF_ADR					0x3413	// 6 Byte Datum 		Letztes Auftreten
-#define Z21LFA_ADR				0x3419	// 1 Byte Fehlerart Letztes Auftreten
-#define CLEARDONGLE21_ADR	0x341A	// 2 Byte Dongle-Nummer des PC-Bedieners
-#define CLEARTAG21_ADR		0x341C	// 1 Byte Fehlerlöschung Tag
-#define CLEARMON21_ADR		0x341D	// 1 Byte Fehlerlöschung Monat
-#define CLEARJAHR21_ADR		0x341E	// 1 Byte Fehlerlöschung Jahr (+1 Gap)
-//#define Z22LH_ADR				0x3420	// 32 Byte
-//#define Z23LH_ADR				0x3440	// 32 Byte
-//#define Z24LH_ADR				0x3460	// 32 Byte
-//#define Z25LH_ADR				0x3480	// 32 Byte
-//#define Z26LH_ADR				0x34A0	// 32 Byte
+#define Z21LH_ADR         0x3500  // 6 Byte Datum     letzte  Low-High-Flanke 
+#define Z21HL_ADR         0x3506  // 6 Byte Datum     letzte  High-Low-Flanke
+#define Z21EF_ADR         0x350C  // 6 Byte Datum     Erstes  Auftreten
+#define Z21EFA_ADR        0x3512  // 1 Byte Fehlerart Erstes  Auftreten
+#define Z21LF_ADR         0x3513  // 6 Byte Datum     Letztes Auftreten
+#define Z21LFA_ADR        0x3519  // 1 Byte Fehlerart Letztes Auftreten
+#define CLEARDONGLE21_ADR 0x351A  // 2 Byte Dongle-Nummer des PC-Bedieners
+#define CLEARTAG21_ADR    0x351C  // 1 Byte Fehlerlöschung Tag
+#define CLEARMON21_ADR    0x351D  // 1 Byte Fehlerlöschung Monat
+#define CLEARJAHR21_ADR   0x351E  // 1 Byte Fehlerlöschung Jahr (+1 Gap)
+//#define Z22LH_ADR       0x3520  // 32 Byte
+//#define Z23LH_ADR       0x3540  // 32 Byte
+//#define Z24LH_ADR       0x3560  // 32 Byte
+//#define Z25LH_ADR       0x3580  // 32 Byte
+//#define Z26LH_ADR       0x35A0  // 32 Byte
 
 // MBus
-#define ZMB1LH_ADR				0x3500	// 6 Byte Datum 		letzte  Low-High-Flanke 
-#define ZMB1HL_ADR				0x3506	// 6 Byte Datum 		letzte  High-Low-Flanke
-#define ZMB1EF_ADR				0x350C	// 6 Byte Datum 		Erstes  Auftreten
-#define ZMB1EFA_ADR				0x3512	// 1 Byte Fehlerart Erstes  Auftreten
-#define ZMB1LF_ADR				0x3513	// 6 Byte Datum 		Letztes Auftreten
-#define ZMB1LFA_ADR				0x3519	// 1 Byte Fehlerart Letztes Auftreten
-#define CLEARDONGLEMB1_ADR	0x351A	// 2 Byte Dongle-Nummer des PC-Bedieners
-#define CLEARTAGMB1_ADR		0x351C	// 1 Byte Fehlerlöschung Tag
-#define CLEARMONMB1_ADR		0x351D	// 1 Byte Fehlerlöschung Monat
-#define CLEARJAHRMB1_ADR	0x351E	// 1 Byte Fehlerlöschung Jahr (+1 Gap)
-//#define ZMB2LH_ADR			0x3520	// 32 Byte
-//#define ZMB3LH_ADR			0x3540	// 32 Byte
-//#define ZMB4LH_ADR			0x3560	// 32 Byte
-//#define ZMB5LH_ADR			0x3580	// 32 Byte
-//#define ZMB6LH_ADR			0x35A0	// 32 Byte
+#define ZMB1LH_ADR        0x3600  // 6 Byte Datum     letzte  Low-High-Flanke 
+#define ZMB1HL_ADR        0x3606  // 6 Byte Datum     letzte  High-Low-Flanke
+#define ZMB1EF_ADR        0x360C  // 6 Byte Datum     Erstes  Auftreten
+#define ZMB1EFA_ADR       0x3612  // 1 Byte Fehlerart Erstes  Auftreten
+#define ZMB1LF_ADR        0x3613  // 6 Byte Datum     Letztes Auftreten
+#define ZMB1LFA_ADR       0x3619  // 1 Byte Fehlerart Letztes Auftreten
+#define CLEARDONGLEMB1_ADR  0x361A  // 2 Byte Dongle-Nummer des PC-Bedieners
+#define CLEARTAGMB1_ADR   0x361C  // 1 Byte Fehlerlöschung Tag
+#define CLEARMONMB1_ADR   0x361D  // 1 Byte Fehlerlöschung Monat
+#define CLEARJAHRMB1_ADR  0x361E  // 1 Byte Fehlerlöschung Jahr (+1 Gap)
+//#define ZMB2LH_ADR      0x3620  // 32 Byte
+//#define ZMB3LH_ADR      0x3640  // 32 Byte
+//#define ZMB4LH_ADR      0x3660  // 32 Byte
+//#define ZMB5LH_ADR      0x3680  // 32 Byte
+//#define ZMB6LH_ADR      0x36A0  // 32 Byte
+//#define ZMB7LH_ADR      0x36C0  // 32 Byte
+//#define ZMB8LH_ADR      0x36E0  // 32 Byte
 
 //++++++++++++++++++++++++++++++++++++++++++++++++
 // Zähler-Initialisierung
 //++++++++++++++++++++++++++++++++++++++++++++++++
-#define ZINIT_OFFS						8				// 8 Byte Offset zum nächsten Zähler
+#define ZINIT_OFFS            8       // 8 Byte Offset zum nächsten Zähler
 // R36
-#define INITDONGLE01_ADR			0x3600	// 2 Byte Dongle-Nummer des PC-Bedieners
-#define INITTAG01_ADR					0x3602	// 1 Byte Initialisierung Tag
-#define INITMON01_ADR					0x3603	// 1 Byte Initialisierung Monat
-#define INITJAHR01_ADR				0x3604	// 1 Byte Initialisierung Jahr (+3 Gap)
-//#define INITDONGLE02_ADR		0x3608	// 8 Byte 
-//#define INITDONGLE03_ADR		0x3610	// 8 Byte 
-//#define INITDONGLE04_ADR		0x3618	// 8 Byte 
-//#define INITDONGLE05_ADR		0x3628	// 8 Byte 
-//#define INITDONGLE06_ADR		0x3630	// 8 Byte 
-//#define INITDONGLE07_ADR		0x3638	// 8 Byte 
-//#define INITDONGLE08_ADR		0x3640	// 8 Byte 
+#define INITDONGLE01_ADR      0x3700  // 2 Byte Dongle-Nummer des PC-Bedieners
+#define INITTAG01_ADR         0x3702  // 1 Byte Initialisierung Tag
+#define INITMON01_ADR         0x3703  // 1 Byte Initialisierung Monat
+#define INITJAHR01_ADR        0x3704  // 1 Byte Initialisierung Jahr (+3 Gap)
+//#define INITDONGLE02_ADR    0x3708  // 8 Byte 
+//#define INITDONGLE03_ADR    0x3710  // 8 Byte 
+//#define INITDONGLE04_ADR    0x3718  // 8 Byte 
+//#define INITDONGLE05_ADR    0x3728  // 8 Byte 
+//#define INITDONGLE06_ADR    0x3730  // 8 Byte 
+//#define INITDONGLE07_ADR    0x3738  // 8 Byte 
+//#define INITDONGLE08_ADR    0x3740  // 8 Byte 
 
 // R37_1
-#define INITDONGLE11_ADR			0x3650	// 2 Byte Dongle-Nummer des PC-Bedieners
-#define INITTAG11_ADR					0x3652	// 1 Byte Initialisierung Tag
-#define INITMON11_ADR					0x3653	// 1 Byte Initialisierung Monat
-#define INITJAHR11_ADR				0x3654	// 1 Byte Initialisierung Jahr (+3 Gap)
-//#define INITDONGLE12_ADR		0x3658	// 8 Byte
-//#define INITDONGLE13_ADR		0x3660	// 8 Byte
-//#define INITDONGLE14_ADR		0x3668	// 8 Byte
-//#define INITDONGLE15_ADR		0x3670	// 8 Byte
-//#define INITDONGLE16_ADR		0x3678	// 8 Byte
+#define INITDONGLE11_ADR      0x3750  // 2 Byte Dongle-Nummer des PC-Bedieners
+#define INITTAG11_ADR         0x3752  // 1 Byte Initialisierung Tag
+#define INITMON11_ADR         0x3753  // 1 Byte Initialisierung Monat
+#define INITJAHR11_ADR        0x3754  // 1 Byte Initialisierung Jahr (+3 Gap)
+//#define INITDONGLE12_ADR    0x3758  // 8 Byte
+//#define INITDONGLE13_ADR    0x3760  // 8 Byte
+//#define INITDONGLE14_ADR    0x3768  // 8 Byte
+//#define INITDONGLE15_ADR    0x3770  // 8 Byte
+//#define INITDONGLE16_ADR    0x3678  // 8 Byte
 
 // R37_2
-#define INITDONGLE21_ADR			0x3680	// 2 Byte Dongle-Nummer des PC-Bedieners
-#define INITTAG21_ADR					0x3682	// 1 Byte Initialisierung Tag
-#define INITMON21_ADR					0x3683	// 1 Byte Initialisierung Monat
-#define INITJAHR21_ADR				0x3684	// 1 Byte Initialisierung Jahr (+3 Gap)
-//#define INITDONGLE22_ADR		0x3688	// 8 Byte
-//#define INITDONGLE23_ADR		0x3690	// 8 Byte
-//#define INITDONGLE24_ADR		0x3698	// 8 Byte
-//#define INITDONGLE25_ADR		0x36A0	// 8 Byte
-//#define INITDONGLE26_ADR		0x36A8	// 8 Byte
+#define INITDONGLE21_ADR      0x3780  // 2 Byte Dongle-Nummer des PC-Bedieners
+#define INITTAG21_ADR         0x3782  // 1 Byte Initialisierung Tag
+#define INITMON21_ADR         0x3783  // 1 Byte Initialisierung Monat
+#define INITJAHR21_ADR        0x3784  // 1 Byte Initialisierung Jahr (+3 Gap)
+//#define INITDONGLE22_ADR    0x3788  // 8 Byte
+//#define INITDONGLE23_ADR    0x3790  // 8 Byte
+//#define INITDONGLE24_ADR    0x3798  // 8 Byte
+//#define INITDONGLE25_ADR    0x37A0  // 8 Byte
+//#define INITDONGLE26_ADR    0x37A8  // 8 Byte
 
 // MBus
-#define INITDONGLEMB1_ADR			0x36B0	// 2 Byte Dongle-Nummer des PC-Bedieners
-#define INITTAGMB1_ADR				0x36B2	// 1 Byte Initialisierung Tag
-#define INITMONMB1_ADR				0x36B3	// 1 Byte Initialisierung Monat
-#define INITJAHRMB1_ADR				0x36B4	// 1 Byte Initialisierung Jahr (+3 Gap)
-//#define INITDONGLEMB2_ADR		0x36B8	// 8 Byte
-//#define INITDONGLEMB3_ADR		0x36C0	// 8 Byte
-//#define INITDONGLEMB4_ADR		0x36C8	// 8 Byte
-//#define INITDONGLEMB5_ADR		0x36D0	// 8 Byte
-//#define INITDONGLEMB6_ADR		0x36D8	// 8 Byte
+#define INITDONGLEMB1_ADR     0x37B0  // 2 Byte Dongle-Nummer des PC-Bedieners
+#define INITTAGMB1_ADR        0x37B2  // 1 Byte Initialisierung Tag
+#define INITMONMB1_ADR        0x37B3  // 1 Byte Initialisierung Monat
+#define INITJAHRMB1_ADR       0x37B4  // 1 Byte Initialisierung Jahr (+3 Gap)
+//#define INITDONGLEMB2_ADR   0x37B8  // 8 Byte
+//#define INITDONGLEMB3_ADR   0x37C0  // 8 Byte
+//#define INITDONGLEMB4_ADR   0x37C8  // 8 Byte
+//#define INITDONGLEMB5_ADR   0x37D0  // 8 Byte
+//#define INITDONGLEMB6_ADR   0x37D8  // 8 Byte
+//#define INITDONGLEMB7_ADR   0x37E0  // 8 Byte
+//#define INITDONGLEMB8_ADR   0x37E8  // 8 Byte
 
 //++++++++++++++++++++++++++++++++++++++++++++++++
 // Zähler-Synchronisierung
 //++++++++++++++++++++++++++++++++++++++++++++++++
-#define SYNC_OFFS							0x18		// 24 Byte Offset zum nächsten Zähler
+#define SYNC_OFFS             0x18    // 24 Byte Offset zum nächsten Zähler
 // R36
-#define SYNCAKTU01_ADR				0x3700	// 8 Byte Synchronisationswert aktuell
-#define SYNCVORJ01_ADR				0x3708	// 8 Byte Synchronisationswert Vorjahr
-#define SYNCDONGLE01_ADR			0x3710	// 2 Byte Dongle-Nummer des PC-Bedieners
-#define SYNCTAG01_ADR					0x3712	// 1 Byte Synchronisation Tag
-#define SYNCMON01_ADR					0x3713	// 1 Byte Synchronisation Monat
-#define SYNCJAHR01_ADR				0x3714	// 1 Byte Synchronisation Jahr (+3 Gap)
-//#define SYNCAKTU02_ADR			0x3718	// 24 Byte 
-//#define SYNCAKTU03_ADR			0x3730	// 24 Byte 
-//#define SYNCAKTU04_ADR			0x3748	// 24 Byte 
-//#define SYNCAKTU05_ADR			0x3760	// 24 Byte 
-//#define SYNCAKTU06_ADR			0x3778	// 24 Byte 
-//#define SYNCAKTU07_ADR			0x3790	// 24 Byte 
-//#define SYNCAKTU08_ADR			0x37A8	// 24 Byte 
-#define SDONGLE_OFF						(SYNCDONGLE01_ADR - SYNCAKTU01_ADR)
+#define SYNCAKTU01_ADR        0x3800  // 8 Byte Synchronisationswert aktuell
+#define SYNCVORJ01_ADR        0x3808  // 8 Byte Synchronisationswert Vorjahr
+#define SYNCDONGLE01_ADR      0x3810  // 2 Byte Dongle-Nummer des PC-Bedieners
+#define SYNCTAG01_ADR         0x3812  // 1 Byte Synchronisation Tag
+#define SYNCMON01_ADR         0x3813  // 1 Byte Synchronisation Monat
+#define SYNCJAHR01_ADR        0x3814  // 1 Byte Synchronisation Jahr (+3 Gap)
+//#define SYNCAKTU02_ADR      0x3818  // 24 Byte 
+//#define SYNCAKTU03_ADR      0x3830  // 24 Byte 
+//#define SYNCAKTU04_ADR      0x3848  // 24 Byte 
+//#define SYNCAKTU05_ADR      0x3860  // 24 Byte 
+//#define SYNCAKTU06_ADR      0x3878  // 24 Byte 
+//#define SYNCAKTU07_ADR      0x3890  // 24 Byte 
+//#define SYNCAKTU08_ADR      0x38A8  // 24 Byte 
+#define SDONGLE_OFF           (SYNCDONGLE01_ADR - SYNCAKTU01_ADR)
 
 // R37_1
-#define SYNCAKTU11_ADR				0x3800	// 8 Byte Synchronisationswert aktuell
-#define SYNCVORJ11_ADR				0x3808	// 8 Byte Synchronisationswert Vorjahr
-#define SYNCDONGLE11_ADR			0x3810	// 2 Byte Dongle-Nummer des PC-Bedieners
-#define SYNCTAG11_ADR					0x3812	// 1 Byte Synchronisation Tag
-#define SYNCMON11_ADR					0x3813	// 1 Byte Synchronisation Monat
-#define SYNCJAHR11_ADR				0x3814	// 1 Byte Synchronisation Jahr (+3 Gap)
-//#define SYNCAKTU12_ADR			0x3818	// 24 Byte 
-//#define SYNCAKTU13_ADR			0x3830	// 24 Byte 
-//#define SYNCAKTU14_ADR			0x3848	// 24 Byte 
-//#define SYNCAKTU15_ADR			0x3860	// 24 Byte 
-//#define SYNCAKTU16_ADR			0x3878	// 24 Byte 
+#define SYNCAKTU11_ADR        0x3900  // 8 Byte Synchronisationswert aktuell
+#define SYNCVORJ11_ADR        0x3908  // 8 Byte Synchronisationswert Vorjahr
+#define SYNCDONGLE11_ADR      0x3910  // 2 Byte Dongle-Nummer des PC-Bedieners
+#define SYNCTAG11_ADR         0x3912  // 1 Byte Synchronisation Tag
+#define SYNCMON11_ADR         0x3913  // 1 Byte Synchronisation Monat
+#define SYNCJAHR11_ADR        0x3914  // 1 Byte Synchronisation Jahr (+3 Gap)
+//#define SYNCAKTU12_ADR      0x3918  // 24 Byte 
+//#define SYNCAKTU13_ADR      0x3930  // 24 Byte 
+//#define SYNCAKTU14_ADR      0x3948  // 24 Byte 
+//#define SYNCAKTU15_ADR      0x3960  // 24 Byte 
+//#define SYNCAKTU16_ADR      0x3978  // 24 Byte 
 
 // R37_2
-#define SYNCAKTU21_ADR				0x3900	// 8 Byte Synchronisationswert aktuell
-#define SYNCVORJ21_ADR				0x3908	// 8 Byte Synchronisationswert Vorjahr
-#define SYNCDONGLE21_ADR			0x3910	// 2 Byte Dongle-Nummer des PC-Bedieners
-#define SYNCTAG21_ADR					0x3912	// 1 Byte Synchronisation Tag
-#define SYNCMON21_ADR					0x3913	// 1 Byte Synchronisation Monat
-#define SYNCJAHR21_ADR				0x3914	// 1 Byte Synchronisation Jahr (+3 Gap)
-//#define SYNCAKTU22_ADR			0x3918	// 24 Byte 
-//#define SYNCAKTU23_ADR			0x3930	// 24 Byte 
-//#define SYNCAKTU24_ADR			0x3948	// 24 Byte 
-//#define SYNCAKTU25_ADR			0x3960	// 24 Byte 
-//#define SYNCAKTU26_ADR			0x3978	// 24 Byte 
+#define SYNCAKTU21_ADR        0x3A00  // 8 Byte Synchronisationswert aktuell
+#define SYNCVORJ21_ADR        0x3A08  // 8 Byte Synchronisationswert Vorjahr
+#define SYNCDONGLE21_ADR      0x3A10  // 2 Byte Dongle-Nummer des PC-Bedieners
+#define SYNCTAG21_ADR         0x3A12  // 1 Byte Synchronisation Tag
+#define SYNCMON21_ADR         0x3A13  // 1 Byte Synchronisation Monat
+#define SYNCJAHR21_ADR        0x3A14  // 1 Byte Synchronisation Jahr (+3 Gap)
+//#define SYNCAKTU22_ADR      0x3A18  // 24 Byte 
+//#define SYNCAKTU23_ADR      0x3A30  // 24 Byte 
+//#define SYNCAKTU24_ADR      0x3A48  // 24 Byte 
+//#define SYNCAKTU25_ADR      0x3A60  // 24 Byte 
+//#define SYNCAKTU26_ADR      0x3A78  // 24 Byte 
 
 // MBus
-#define SYNCAKTUMB1_ADR				0x3A00	// 8 Byte Synchronisationswert aktuell
-#define SYNCVORJMB1_ADR				0x3A08	// 8 Byte Synchronisationswert Vorjahr
-#define SYNCDONGLEMB1_ADR			0x3A10	// 2 Byte Dongle-Nummer des PC-Bedieners
-#define SYNCTAGMB1_ADR				0x3A12	// 1 Byte Synchronisation Tag
-#define SYNCMONMB1_ADR				0x3A13	// 1 Byte Synchronisation Monat
-#define SYNCJAHRMB1_ADR				0x3A14	// 1 Byte Synchronisation Jahr (+3 Gap)
-//#define SYNCAKTUMB2_ADR			0x3A18	// 24 Byte 
-//#define SYNCAKTUMB3_ADR			0x3A30	// 24 Byte 
-//#define SYNCAKTUMB4_ADR			0x3A48	// 24 Byte 
-//#define SYNCAKTUMB5_ADR			0x3A60	// 24 Byte 
-//#define SYNCAKTUMB6_ADR			0x3A78	// 24 Byte 
+#define SYNCAKTUMB1_ADR       0x3B00  // 8 Byte Synchronisationswert aktuell
+#define SYNCVORJMB1_ADR       0x3B08  // 8 Byte Synchronisationswert Vorjahr
+#define SYNCDONGLEMB1_ADR     0x3B10  // 2 Byte Dongle-Nummer des PC-Bedieners
+#define SYNCTAGMB1_ADR        0x3B12  // 1 Byte Synchronisation Tag
+#define SYNCMONMB1_ADR        0x3B13  // 1 Byte Synchronisation Monat
+#define SYNCJAHRMB1_ADR       0x3B14  // 1 Byte Synchronisation Jahr (+3 Gap)
+//#define SYNCAKTUMB2_ADR     0x3B18  // 24 Byte 
+//#define SYNCAKTUMB3_ADR     0x3B30  // 24 Byte 
+//#define SYNCAKTUMB4_ADR     0x3B48  // 24 Byte 
+//#define SYNCAKTUMB5_ADR     0x3B60  // 24 Byte 
+//#define SYNCAKTUMB6_ADR     0x3B78  // 24 Byte 
+//#define SYNCAKTUMB7_ADR     0x3B90  // 24 Byte 
+//#define SYNCAKTUMB8_ADR     0x3BA8  // 24 Byte 
 
 
 //-----------------------------------------------------------------------------------------
 //// Monatsspeicher für Zählerstände (nach Struktur wie im R50, Sicherung jede Stunde)
-//#define ZQ_OFFSET				0x100		// Offset zur nächsten Zähleradresse
-//#define ZQ0_ADR					0x4000	// 4*64 Byte Speicherdatum, 
-//#define ZQ1_ADR					0x4100	// 4*64 Byte Werte Zähler1   
-//#define ZQ2_ADR					0x4200	// 4*64 Byte Werte Zähler2   
-//#define ZQ3_ADR					0x4300	// 4*64 Byte Werte Zähler3   
-//#define ZQ4_ADR					0x4400	// 4*64 Byte Werte Zähler4   
-//#define ZQ5_ADR					0x4500	// 4*64 Byte Werte Zähler5   
-//#define ZQ6_ADR					0x4600	// 4*64 Byte Werte Zähler6   
-//#define ZQ7_ADR					0x4700	// 4*64 Byte Werte Zähler7   
-//#define ZQ8_ADR					0x4800	// 4*64 Byte Werte Zähler8   
+//#define ZQ_OFFSET       0x100   // Offset zur nächsten Zähleradresse
+//#define ZQ0_ADR         0x4000  // 4*64 Byte Speicherdatum, 
+//#define ZQ1_ADR         0x4100  // 4*64 Byte Werte Zähler1   
+//#define ZQ2_ADR         0x4200  // 4*64 Byte Werte Zähler2   
+//#define ZQ3_ADR         0x4300  // 4*64 Byte Werte Zähler3   
+//#define ZQ4_ADR         0x4400  // 4*64 Byte Werte Zähler4   
+//#define ZQ5_ADR         0x4500  // 4*64 Byte Werte Zähler5   
+//#define ZQ6_ADR         0x4600  // 4*64 Byte Werte Zähler6   
+//#define ZQ7_ADR         0x4700  // 4*64 Byte Werte Zähler7   
+//#define ZQ8_ADR         0x4800  // 4*64 Byte Werte Zähler8   
 
+// Änderung neue Genibus-Implementierung
+#if GENI == 1
+  #define GENI_DEV1_ADR   0x4600
+  #define GENI_DEV2_ADR   0x4640
+  #define GENI_DEV3_ADR   0x4680
+  #define GENI_DEV4_ADR   0x46C0
+  #define GENI_DEV5_ADR   0x4700
+  #define GENI_DEV6_ADR   0x4740
+  #define GENI_DEV7_ADR   0x4780  
+  #define GENI_DEV8_ADR   0x47C0  
+  #define GENI_OWN_ADR    0x4800        
+#endif
 
 #define BUS_PU_PARA_ADR				0x4900		// 8 Pages für max. 8 Pumpen
 #define BUS_PU_PARA_LENG			64				// maximal 64 Byte pro Pumpe 
@@ -850,10 +901,14 @@
 #define MERKER_STD_ADR	0x70A5	// 1 Byte
 
 /***** ulsch : Diagnose *****/
-#define DIAG_PARA				0x70C0		// max. 1 Page im EEPROM
-// ***AnFre 03.09.2009 Diagnose KWZ-Volumenstrom
-#define DIAG_PARA_ADR		0x7100		// 16 Byte im EEPROM
-// ***AnFre 06.06.2012 Diagnose: gemittelte Rücklauftemp. HK1
+#define DIAG_PARA         0x70C0    // max. 1 Page im EEPROM
+//#####ulsch: HA-R-0114/HB-CH
+#define DIAG2_PARA        0x7100    // max. 1 Page im EEPROM
+
+
+
+
+
 #define TH2_SUMME_ADR		0x7120		// 4 Byte
 #define TH2_ZAEHLER_ADR	0x7124		// 2 Byte
 #define TH2_MON_ADR			0x7126		// 24 Byte
@@ -903,30 +958,22 @@
 //-#define WMENG4_VJMON_ADR	0x73C0		// 48 Byte im EEPROM
 //-
 
-// ModBus_Uni	// joja - modbus Geräteadressen
-// ModBus_Uni	#if MODBUS_UNI > 0
-// ModBus_Uni		#include "Modbus/modbusstanddef.h"		// 0x7400 - 0x7483
-// ModBus_Uni	#endif
-
+// joja - modbus Geräteadressen
+#if MODBUS_UNI > 0
+  #include "Modbus/modbusstanddef.h"    // 0x7400 - 0x7483
+#endif
 
 
 //-------------------------------------------------------------------------------------------------------------
 // *********** Achtung: zusätzlicher Ferro-RAM: R36-EM		XEEPADR
 
-/***** ulsch : Diagnose *****/
-#define DIAG_ADR					0x7E80		// 2*38 = 76 [0x4C] Byte 
-// 24.09.2014 für 1.Wärmezähler			ACHTUNG 38 [0x26] Byte feste Länge in xicbus -> BICRD
-#define FLOWMAXDIAG_ADR		0x7E80		// 4 Byte im Ferro-RAM	( sechstletzte Page )
-#define LEISTMAXDIAG_ADR	0x7E84		// 2 Byte im Ferro-RAM	( sechstletzte Page )
-#define FLOWDIAG_ADR 			0x7E86		// 4*2 Byte im Ferro-RAM
-#define LEISTDIAG_ADR 		0x7E8E		// 4*2 Byte im Ferro-RAM
 // 24.09.2014 für 2.Wärmezähler entfernt in ustruct.h und Diag_xxx.c !!!!!!!!!!!!!!
 //#define LADANZDIAG_ADR 		0x7E96		// 2 Byte im Ferro-RAM
 //#define LADZEITDIAG_ADR 	0x7E98		// 2 Byte im Ferro-RAM
 //#define WWVORANZDIAG_ADR 	0x7E9A		// 2 Byte im Ferro-RAM
 //#define WWVORZEITDIAG_ADR 0x7E9C		// 2 Byte im Ferro-RAM
-#define TVPMAXDIAG_ADR		0x7E96		// 8 Byte im Ferro-RAM ( sizeof extrTemp )
-#define TVPMINDIAG_ADR		0x7E9E		// 8 Byte im Ferro-RAM ( sizeof extrTemp )
+//#define TVPMAXDIAG_ADR		0x7E96		// 8 Byte im Ferro-RAM ( sizeof extrTemp )
+//#define TVPMINDIAG_ADR		0x7E9E		// 8 Byte im Ferro-RAM ( sizeof extrTemp )
 // 24.09.2014 für 2.Wärmezähler			ACHTUNG 38 [0x26] Byte feste Länge in xicbus -> BICRD
 #define FLOWMAX2DIAG_ADR	0x7EA6		// 4 Byte im Ferro-RAM	( sechstletzte Page )
 #define LEISTMAX2DIAG_ADR	0x7EAA		// 2 Byte im Ferro-RAM	( sechstletzte Page )
@@ -940,6 +987,39 @@
 
 
 #define K_DUMMY_ADR			0x7FFE	// 2 Byte		die letzten Bytes im EEPROM
+
+//--------------------------------------------------------------------------------
+
+// Adressen im Ferro-RAM
+//#####ulsch: FW-R-0202/KA-WB
+/***** ulsch : Diagnose *****/
+#define DIAG2_ADR         0x7E80
+#define FLOWMAXDIAG2_ADR  0x7E80    // 4 Byte im Ferro-RAM  ( sechstletzte Page )
+#define LEISTMAXDIAG2_ADR 0x7E84    // 2 Byte im Ferro-RAM  ( sechstletzte Page )
+#define FLOWDIAG2_ADR     0x7E86    // 4*2 Byte im Ferro-RAM
+#define LEISTDIAG2_ADR    0x7E8E    // 4*2 Byte im Ferro-RAM
+#define LADANZDIAG2_ADR   0x7E96    // 2 Byte im Ferro-RAM
+#define LADZEITDIAG2_ADR  0x7E98    // 2 Byte im Ferro-RAM
+#define WWVORANZDIAG2_ADR 0x7E9A    // 2 Byte im Ferro-RAM
+#define WWVORZEITDIAG2_ADR 0x7E9C   // 2 Byte im Ferro-RAM
+#define TVPMAXDIAG2_ADR   0x7E9E    // 8 Byte im Ferro-RAM ( sizeof extrTemp )
+#define TVPMINDIAG2_ADR   0x7EA6    // 8 Byte im Ferro-RAM ( sizeof extrTemp )
+
+
+/***** ulsch : Diagnose *****/
+#define DIAG_ADR          0x7F40
+#define FLOWMAXDIAG_ADR   0x7F40    // 4 Byte im Ferro-RAM  ( drittletzte Page )
+#define LEISTMAXDIAG_ADR  0x7F44    // 2 Byte im Ferro-RAM  ( drittletzte Page )
+#define FLOWDIAG_ADR      0x7F46    // 4*2 Byte im Ferro-RAM
+#define LEISTDIAG_ADR     0x7F4E    // 4*2 Byte im Ferro-RAM
+#define LADANZDIAG_ADR    0x7F56    // 2 Byte im Ferro-RAM
+#define LADZEITDIAG_ADR   0x7F58    // 2 Byte im Ferro-RAM
+#define WWVORANZDIAG_ADR  0x7F5A    // 2 Byte im Ferro-RAM
+#define WWVORZEITDIAG_ADR 0x7F5C    // 2 Byte im Ferro-RAM
+#define TVPMAXDIAG_ADR    0x7F5E    // 8 Byte im Ferro-RAM ( sizeof extrTemp )
+#define TVPMINDIAG_ADR    0x7F66    // 8 Byte im Ferro-RAM ( sizeof extrTemp )
+
+
 
 #endif	// STANDDEF_H_INCLUDED
 

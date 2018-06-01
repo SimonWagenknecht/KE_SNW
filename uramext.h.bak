@@ -1008,7 +1008,8 @@ extern char	asdm_status;
 extern char	asdm_action;
 extern char	sdm_ret;										// Fehleranzeige
 extern char	asdm_minut;
-extern ULONG asdm_time;									// Zeitmarke
+extern ULONG asdm_time;									// Zeitmarke aktuell
+extern ULONG read_time;									// Zeitmarke: Erster Zeitstempel der Datenpage, deren Eintrag in der Verweispage fehlt
 extern char asdm_buffer[64];						// Puffer für Zeitstempel und Datenwert
 extern char	asdm_page[512];							// Puffer für eine Page
 extern ULONG timeout_max;
@@ -1020,6 +1021,7 @@ extern char	exp_index;
 extern UINT	dae_append;
 extern UINT	komtab_changed;
 extern char	daily_init;
+extern int  reset_dae;									// ferro Init für ein DAE
 
 extern UINT	ferro_adr;
 extern UINT	ferro_mnext;
@@ -1042,6 +1044,7 @@ extern ULONG search_vp_adr;							// gefundene Adresse der Verweispage.
 extern UINT  search_dp_num;							// gefundene Datenpagenummer in der Verweispage (1-2032)
 extern ULONG search_dp_adr;							// gefundene Adresse der Datenpage.
 extern UINT  search_ts_num;							// gefundene Zeitstempelnummer in der Datenpage
+extern char	 sd_buf[512];								// Puffer für eine Page
 
 #if SPEED_SAVE == 1			//$ Test
 extern ULONG asdm_test_start;

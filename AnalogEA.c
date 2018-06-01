@@ -21,6 +21,12 @@ void AnalogEA ( void )
 	static char anlauf = 1;
 	static char i = 8;
 
+	static char anlaufRm = 1;
+	static char k = 8;
+
+	static char anlaufDr = 1;
+	static char l = 8;
+
 	int mw;																			// aktueller Messwert
 	char stat;																	// aktueller Messwert-Status
 	int mwFilt;																	// gedämpfter Messwert
@@ -118,5 +124,119 @@ void AnalogEA ( void )
 		anaInp[i].ogwSM = FALSE;
 	
 #endif
-}				
 
+#if RM_POWER_ANZ
+	if ( ++k >= 8 )
+		k = 0;
+	if ( k < RM_POWER_ANZ )
+	{
+	// kanalspez.Vorbereitung		
+		mw = RM_POWER[k]->messw;
+		stat = RM_POWER[k]->stat;		
+		fl_mwFilt	= rmPower[k].fl_mwFilt;
+		mwFilt = rmPower[k].mwFilt;
+	
+	// allg. Berechnung des gedämpften und des skalierten Messwerts													
+		if ( anlaufRm )
+		{
+			mwFilt = mw;
+			fl_mwFilt = (float)mwFilt / 10 ;		
+		}	
+		else
+		{
+			fl_mwFilt = g_filter ( fl_mwFilt, mw, 1, RmPowerPara[k].ZkFilt );	// Sprungantwort 66 % nach ZkFilt	
+			mwFilt = (int)( fl_mwFilt * 10 );
+		}	
+	
+		if ( mwFilt < RmPowerPara[k].Skal0*10 )
+			mwSkal = 0;
+		else if ( mwFilt > RmPowerPara[k].Skal10*10 )
+			mwSkal = 1000;
+		else 				
+			mwSkal = Gerade_YvonX ( mwFilt, RmPowerPara[k].Skal0*10, 0, 1000, RmPowerPara[k].Skal10 );
+	
+	// speichern der berechneten Daten		
+		rmPower[k].mwFilt = mwFilt;
+		rmPower[k].fl_mwFilt = fl_mwFilt;
+		rmPower[k].mwSkal.messw = mwSkal;
+		rmPower[k].mwSkal.stat = stat;
+		
+		if ( anlaufRm && k == ( RM_POWER_ANZ - 1 ) )
+			anlaufRm = 0;																// Anlauf ist füe alle Eingänge erledigt
+	}
+#endif
+
+#if AE_DRUCK_ANZ
+	if ( ++l >= 8 )
+		l = 0;
+	if ( l < AE_DRUCK_ANZ )
+	{
+	// kanalspez.Vorbereitung		
+		mw = AE_DRUCK[l]->messw;
+		stat = AE_DRUCK[l]->stat;		
+		fl_mwFilt	= druck[l].fl_mwFilt;
+		mwFilt = druck[l].mwFilt;
+	
+	// allg. Berechnung des gedämpften und des skalierten Messwerts													
+		if ( anlaufDr )
+		{
+			mwFilt = mw;
+			fl_mwFilt = (float)mwFilt / 10 ;		
+		}	
+		else
+		{
+			fl_mwFilt = g_filter ( fl_mwFilt, mw, 1, DruckPara[l].ZkFilt );	// Sprungantwort 66 % nach ZkFilt	
+			mwFilt = (int)( fl_mwFilt * 10 );
+		}	
+	
+	
+		if ( mwFilt < DruckPara[l].Skal0*10 )
+			mwSkal = 0;
+		else if ( mwFilt > 1000 )
+			mwSkal = DruckPara[l].Skal10;
+		else
+			mwSkal = Gerade_YvonX ( mwFilt, DruckPara[l].Skal0*10, 0, 1000, DruckPara[l].Skal10 );
+	
+	// speichern der berechneten Daten		
+		druck[l].mwFilt = mwFilt;
+		druck[l].fl_mwFilt = fl_mwFilt;
+		druck[l].mwSkal.messw = mwSkal;
+		druck[l].mwSkal.stat = stat;
+		
+		if ( anlaufDr && l == ( AE_DRUCK_ANZ - 1 ) )
+			anlaufDr = 0;																// Anlauf ist füe alle Eingänge erledigt
+	
+	// Grenzwertüberwachung
+		if ( druck[l].mwSkal.stat == 0 )
+		{
+			if ( DruckPara[l].UGW != 0 )
+			{
+				if ( druck[l].mwSkal.messw <= DruckPara[l].UGW )
+					druck[l].ugwSM = TRUE;
+				else if ( druck[l].mwSkal.messw >= DruckPara[l].UGW + DruckPara[l].Hyst )
+					druck[l].ugwSM = FALSE;	
+			}
+			else
+				druck[l].ugwSM = FALSE;					
+		}
+		else
+			druck[l].ugwSM = FALSE;
+	
+		if ( druck[l].mwSkal.stat == 0 )
+		{
+			if ( DruckPara[l].OGW != 0 )
+			{
+				if ( druck[l].mwSkal.messw >= DruckPara[l].OGW )
+					druck[l].ogwSM = TRUE;
+				else if ( druck[l].mwSkal.messw <= DruckPara[l].OGW - DruckPara[l].Hyst )
+					druck[l].ogwSM = FALSE;	
+			}
+			else
+				druck[l].ogwSM = FALSE;					
+		}
+		else
+			druck[l].ogwSM = FALSE;
+	}	
+#endif
+
+}				
