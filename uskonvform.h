@@ -26,8 +26,8 @@
   #define PU_CTR_FORM             200
   #define PU_FUNC_FORM            201
 //#define GB_STATE_FORM           202
-//#define BUS_STAT_FORM           203
-//#define CHARBUF_FORM            204
+#define BUS_STAT_FORM           203
+#define CHARBUF_FORM            204
   #define PU_OPR_FORM             205
 //#define PU_ZWECK_FORM           206
 

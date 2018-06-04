@@ -416,37 +416,37 @@ const Pgrup ke1[] = {
 
 //*------------------------------ Modbus ----------------------------------------*/
 
-#if WILO_MODBUS == 1
-	#include "parli_wilo.h"
+#if WILO == 1
+	//#include "parli_wilo.h"
 #endif
 
 /*------------------------------ Ferienprogramm ----------------------------------------*/
-#if FER == 1
-const Pgrup fer[] = {
-	{"***:"," FERIENPROGRAMM ","       ", P&Leer15,							ASCII_FORM, 0, P&vis,		V1, 0, 0},
-	{" 10:"," FERIENBEGINN 1 ","       ", P&ferien[0].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 11:"," FERIENENDE 1   ","       ", P&ferien[0].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 12:"," FERIENBEGINN 2 ","       ", P&ferien[1].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 13:"," FERIENENDE 2   ","       ", P&ferien[1].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 14:"," FERIENBEGINN 3 ","       ", P&ferien[2].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 15:"," FERIENENDE 3   ","       ", P&ferien[2].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 16:"," FERIENBEGINN 4 ","       ", P&ferien[3].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 17:"," FERIENENDE 4   ","       ", P&ferien[3].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 18:"," FERIENBEGINN 5 ","       ", P&ferien[4].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 19:"," FERIENENDE 5   ","       ", P&ferien[4].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 20:"," FERIENBEGINN 6 ","       ", P&ferien[5].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 21:"," FERIENENDE 6   ","       ", P&ferien[5].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 22:"," FERIENBEGINN 7 ","       ", P&ferien[6].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 23:"," FERIENENDE 7   ","       ", P&ferien[6].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 24:"," FERIENBEGINN 8 ","       ", P&ferien[7].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 25:"," FERIENENDE 8   ","       ", P&ferien[7].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 26:"," FERIENBEGINN 9 ","       ", P&ferien[8].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 27:"," FERIENENDE 9   ","       ", P&ferien[8].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 28:"," FERIENBEGINN 10","       ", P&ferien[9].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{" 29:"," FERIENENDE 10  ","       ", P&ferien[9].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
-	{"*80:"," FERIEN ?       ","       ", P&ferienStat,		 		 JANEIN_FORM, 0, P&vis,		V1, 0, 0},
-};
-#endif
+//#if FER == 1
+//const Pgrup fer[] = {
+//	{"***:"," FERIENPROGRAMM ","       ", P&Leer15,							ASCII_FORM, 0, P&vis,		V1, 0, 0},
+//	{" 10:"," FERIENBEGINN 1 ","       ", P&ferien[0].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 11:"," FERIENENDE 1   ","       ", P&ferien[0].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 12:"," FERIENBEGINN 2 ","       ", P&ferien[1].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 13:"," FERIENENDE 2   ","       ", P&ferien[1].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 14:"," FERIENBEGINN 3 ","       ", P&ferien[2].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 15:"," FERIENENDE 3   ","       ", P&ferien[2].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 16:"," FERIENBEGINN 4 ","       ", P&ferien[3].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 17:"," FERIENENDE 4   ","       ", P&ferien[3].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 18:"," FERIENBEGINN 5 ","       ", P&ferien[4].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 19:"," FERIENENDE 5   ","       ", P&ferien[4].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 20:"," FERIENBEGINN 6 ","       ", P&ferien[5].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 21:"," FERIENENDE 6   ","       ", P&ferien[5].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 22:"," FERIENBEGINN 7 ","       ", P&ferien[6].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 23:"," FERIENENDE 7   ","       ", P&ferien[6].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 24:"," FERIENBEGINN 8 ","       ", P&ferien[7].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 25:"," FERIENENDE 8   ","       ", P&ferien[7].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 26:"," FERIENBEGINN 9 ","       ", P&ferien[8].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 27:"," FERIENENDE 9   ","       ", P&ferien[8].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 28:"," FERIENBEGINN 10","       ", P&ferien[9].ferienBeg, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{" 29:"," FERIENENDE 10  ","       ", P&ferien[9].ferienEnd, DATE_FORM, 1, P&vis,		V1, 0, 0},
+//	{"*80:"," FERIEN ?       ","       ", P&ferienStat,		 		 JANEIN_FORM, 0, P&vis,		V1, 0, 0},
+//};
+//#endif
 
 /*----------------------- Quittierbare Gespeicherte Störmeldungen ---------------------------*/
 
@@ -905,7 +905,7 @@ const Pgrup tes[] = {
  {" 81;"," noi_us_main_cnt"," s     ", P&noi_user_main_cnt,US_CHAR, 0, P&hid4,	V0, 0, 0},
  {" 82;"," noi_mainex     ","       ", P&noi_mainex,				US_INT, 0, P&hid4,	V0, 0, 0},
 {" ->;"," noi_rts_cnt    ","       ", P&noi_rts_cnt,			 US_CHAR, 0, P&hid4,	V0, 0, 0},
- 
+{" 83;"," spcnt SPEICH   ","       ", P&spcnt,						 US_CHAR, 0, P&hid4,	V0, 0, 0},
  {" 84;"," sms-anzahl     ","       ", P&sms_anz,					 US_CHAR, 0, P&hid4,	V0, 0, 0},
  {" 85;"," sms-count      ","       ", P&sms_count,		 		 US_CHAR, 0, P&hid4,	V0, 0, 0},
  {"[86;"," sstm           ","       ", P&sstm[0],			 HEXBUF_FORM, 0, P&hid4,	V0, 0, 0},
@@ -1272,10 +1272,9 @@ const Parli Pgruppe[] = {
  {"GEC;", gec, sizeof(gec) / PGLENG, P&tes_vis},	// ToDo vis für Geni 
 #endif
 
-
-#if WILO_MODBUS == 1
-		{"WLP:", wlp, sizeof(wlp) / PGLENG, P&anl_vis},
-#endif
+//#if WILO_MODBUS == 1
+	//	{"WLP:", wlp, sizeof(wlp) / PGLENG, P&anl_vis},
+//#endif
 
 // #####ulsch : Ferienprogramm #####
 #if FER == 1
