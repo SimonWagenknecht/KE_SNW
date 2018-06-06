@@ -501,8 +501,8 @@ void Pumpenbus_KE ( char ke )
 		ked[ke].busPuEin = pu_control[pu].pu_operation;	
 #endif
 
-#if WILO > 0	
-		ked[ke].busPuEin = modb_data[pu].output_value1_temp;	
+#if WILO_MODBUS > 0	
+		ked[ke].busPuEin = modWiloPu[pu].output_value1_temp;	
 #endif
 
 	}

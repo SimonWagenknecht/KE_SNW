@@ -160,9 +160,9 @@ const Pgrup hk2[] = {
 	{"*->:"," WILO-BUS NETZ-P","       ", P&BusPuPara[PU_BUS_HK2 - 1].Funktion,PU_FUNC_FORM,0, P&vis,	V1, 0, IDX0_FELD},
 	{"*->;"," BUS-ADRESSE    ","       ", P&BusPuPara[PU_BUS_HK2 - 1].Adresse,		 US_CHAR,  0, P&wilo4,V1, 0, IDX0_FELD},
 	{"*->:"," REGELART IST   ","       ", P&BusPuData[PU_BUS_HK2 - 1].regelArtIst,ASCII_FORM,15,P&wilo4,V1,0, IDX0_FELD},
-	{"*->;"," DREHZAHL IST   "," 1/min ", P&modb_data[PU_BUS_HK2 - 1].input_reg5, 	US_INT,  0, P&wilo4,V1, 0, IDX0_FELD},
-	{"*->;"," DIFFERENZDRUCK "," mWS   ", P&modb_data[PU_BUS_HK2 - 1].input_reg0, 	US_INT,	 1, P&wilo4,V1, 0, IDX0_FELD},
-	{"*->;"," FOERDERSTROM   "," m/h  ", P&modb_data[PU_BUS_HK2 - 1].input_reg1, 	US_INT,	 1, P&wilo4,V1, 0, IDX0_FELD},
+	{"*->;"," DREHZAHL IST   "," 1/min ", P&modWiloPu[PU_BUS_HK2 - 1].wiloInReg.mwspSpeed.messw, 	US_INT,  0, P&wilo4,V1, 0, IDX0_FELD},
+	{"*->;"," DIFFERENZDRUCK "," mWS   ", P&modWiloPu[PU_BUS_HK2 - 1].wiloInReg.mwspActualDifferentialPressure.messw, 	US_INT,	 1, P&wilo4,V1, 0, IDX0_FELD},
+	{"*->;"," FOERDERSTROM   "," m/h  ", P&modWiloPu[PU_BUS_HK2 - 1].wiloInReg.mwspFlowRate.messw, 	US_INT,	 1, P&wilo4,V1, 0, IDX0_FELD},
 
 //#if PU_BUS_HK2 > 0								// Bus-Pumpe
 //	{"*75:"," BUS-PUMPE EIN ?","       ", P&hkd[HK2].busPuEin, 			 JANEIN_FORM, 0, P&vis,		V1, 0, 0},	//Ausgang nach Pumpe

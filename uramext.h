@@ -201,96 +201,86 @@ extern char funk_vis;
 	extern unsigned char uc_genibus_func_test;
 #endif
 
+//----------------------------------------------------------------------------------------------------
+// Wilo-Pumpen mit MODBUS
+//--------------------------------------------------------------------------------------------------
+#if WILO_MODBUS == 1
 
-#if ( GENI || WILO ) // WILOAF
+	extern char cWiloPuCount; // Anzeigecounter für Anzuzeigende Pumpe in parli-Anzeige
+
+	extern PuBusStandard *wiloPuBusPara;						// Modbus Struktur für Pumpenparameter (Adresse usw)
+	extern PuBusDynam *wiloPuBusData;
+
+	extern ModBusWiloPumpen modWiloPuData; 					// Modbus Struktur für Modbustabelle (Datenanzeige und Daten holen getrennt halten!!!)
+	extern ModBusWiloPumpen modWiloPu[BUS_PU_MAX];	// Struktur für Pumpenparamter aus Kommunikation übertragen auf die jeweiligen Wilo Pumpen 
+
+#endif	
+//----------------------------------------------------------------------------------------------------
+// Grundfos-Pumpen mit MODBUS
+//----------------------------------------------------------------------------------------------------
+#if GRUNDFOS_MODBUS == 1
+
+
+#endif
+
+//----------------------------------------------------------------------------------------------------
+// für alle Pumpen
+//----------------------------------------------------------------------------------------------------
+#if ( GENI == 1 || WILO_MODBUS == 1 || GRUNDFOS_MODBUS == 1)
 
 extern PuBusStandard BusPuPara[BUS_PU_MAX];
 extern PuBusDynam BusPuData[BUS_PU_MAX];
 extern char ssmBusPu;
 extern char ssmPuCtr;
-
-#endif
-
-
-#if ( ((IMPLEMENT_S1 & MODBUS1_IMPL) == MODBUS1_IMPL) || ((IMPLEMENT_S2 & MODBUS1_IMPL) == MODBUS1_IMPL) || ((IMPLEMENT_S3 & MODBUS1_IMPL) == MODBUS1_IMPL) )
-// Für Modbus
-extern unsigned int mbtest_out[];
-extern char modb_curr_port;
-extern char modb_power_on;
-extern char modb_tsk_wdg_count;
-extern char modb_bus_status;
-extern char modb_leng_tx;
-extern char modb_rts_prescaler;
-extern char modb_rts_timer;	
-extern char rq_idx;		// wegen parli temp. hier
-extern char bus_tio_count;
-extern char modb_state_control;	// Statemachine control 
-extern char modb_rx_buff_size;
-extern char modb_rx_status;
-extern char modb_tx_count;
-extern char modb_rx_count;
-extern char modb_rx_buffer_ready;
-extern char modb_rx_int_state;
-extern char modb_rx_rxtio;
-extern char modb_sio_errorflag;
-extern char EoF_timer;
-extern char bus_timeout_com;
-extern char bus_timeout_com_shad;
-extern char pu_timeout_com;
-extern char timer_function;
-extern char Bus_restart;
-extern char cycle_timer;
-extern char cycle_timer1;
-extern char func_code;
-extern char cycle_count;
-extern char master_slave_func;
-extern unsigned int first_reg;
-extern unsigned int cnt_regs;
-extern unsigned int modb_adr_offset;
-extern char save_tx_count;
-extern char modb_slave_idx;
-extern char bit_value;
-extern unsigned int reg_value;
-//extern char tx_data_buff[];
-extern char input_reg_idx;
-extern char holding_reg_idx;
-extern char modb_curr_adr;
-extern char	SerialDeviceNr;
-extern char TestHandMode;
-extern char TaskTimer1;
-
-extern modb_control_value	modb_control[MODB_SLAVE_MAX];
-
-extern char TestpuMax;
-
-#if ( WILO )
-
-extern modb_data_value	modb_data[MODB_SLAVE_MAX];
-extern int input_reg6_celsius[];
-extern char SerialDeviceNr;
-extern char ModbusSioWilo;			// WILO Pumpenparameter "C" SIO-Einstellung Parität und StopBit
-extern char	ModbusBaudWilo;			// WILO Pumpenparameter "A" Baudrate immer 5 = 9600
-#endif
-
-#if ( BELIMO )
-extern char modb_device_idx;
-extern char Gateway_Device_idx;
-extern char Gateway_Device_wr_idx;
-extern unsigned char Gateway_Device_Present[DEVICE_MAX];
-extern unsigned char Gateway_Device_Dissable[DEVICE_MAX];
-extern unsigned int Modb_holding_reg[DEVICE_MAX][MODB_HOLDING_REGS];
-extern unsigned int ModB_output_value[DEVICE_MAX][MODB_WR_HOLDING_REGS];
-extern unsigned int ModB_out_value_shad[DEVICE_MAX][MODB_WR_HOLDING_REGS];
-extern ULONG op_hours[DEVICE_MAX];
-#endif
-
-#if ( KWB_KESSEL )
-extern char ModbusAlarm[MODB_SLAVE_MAX][256];
-#endif
-
 #endif
 
 //----------------------------------------------------------------------------------------------------
+// Modbus 
+//--------------------------------------------------------------------------------------------------
+#if MODBUS_UNI > 0
+
+extern unsigned int ModBusKonvertError;                  // Modbus.c  + modbusparli.h
+extern unsigned int modbusDeviceNr;                      // Modbus.c  + modbusparli.h
+extern int activeRow[3];                                 // Modbus.c  + modbusparli.h
+extern unsigned char modbusSlaveAddresses[3];            // Modbus.c  + modbusparli.h  + modbusstandard.h
+extern unsigned char modbusSioParity[3];                 // Modbus.c  + modbusparli.h  + modbusstandard.h
+extern unsigned char modbusSioStopBits[3];               // Modbus.c  + modbusparli.h  + modbusstandard.h
+extern unsigned char modbusConvertBuffer[3][256];        // Modbus.c   
+
+extern unsigned char modbusDeviceAddresses[];            // (nicht im UserRam.c) Modbus.c  + ModbusTabelle.c + modbusparli.h  + modbusstandard.h 
+extern modbusTableRowMasterData modbusTableData[];       // (nicht im UserRam.c) Modbus.c  + ModbusTabelle.c
+extern modbusTableRowSlaveData modbusSlaveTableData[];   // (nicht im UserRam.c) Modbus.c  + ModbusTabelle.c
+
+extern char modb_leng_tx[3];                             // ModBusSio.c
+extern char modb_rts_prescaler[3];                       // ModBusSio.c
+extern char modb_rts_timer[3];                           // ModBusSio.c
+extern char modb_rx_buff_size;                           // ModBusSio.c
+extern char modb_rx_status;                              // Modbus.c                   
+extern char modb_tx_count[3];                            // ModBusSio.c
+extern char modb_rx_count[3];                            // ModBusSio.c              
+extern char modb_rx_buffer_ready[3];                     // ModBusSio.c              
+extern char modb_rx_int_state[3];                        // ModBusSio.c              
+extern char modb_sio_errorflag[3];                       // ModBusSio.c
+extern unsigned int EoF_timer[3];                        // ModBusSio.c
+extern char timer_function[3];                           // ModBusSio.c
+extern char func_code[3];                                // ModBusSio.c  + Modbus.c  
+extern unsigned char byte_count_or_exception[3];         // ModBusSio.c  + Modbus.c
+extern unsigned int first_reg[3];                        // ModBusSio.c  + Modbus.c  
+extern unsigned int cnt_regs[3];                         // ModBusSio.c  + Modbus.c  
+extern void* reg_address[3];                             // ModBusSio.c  + Modbus.c
+extern char modb_curr_adr[3];                            // ModBusSio.c  + Modbus.c  
+
+/*--------------- Modbus-Datenpunkte -----------------------------*/
+#if MODBUS_EXT > 0       // bei Verwendung von READ_MULTIPLE_COILS in der ModbusTabelle
+extern ULONG ul_dig32[];                      // READ_MULTIPLE_COILS für 32 Bit
+extern char  uc_dig[];                        // Extraktion 32 Bit auf Einzelbytes im Task ModbusExtract
+extern char  uc_dig8[];										 		// Extraktion 32 Bit auf 4 * 8 Bit
+#endif
+
+#endif  // MODBUS_UNI
+
+//----------------------------------------------------------------------------------------------------
+
 
 // Variabler Kategorie-Typ
 extern char KatVar_Typ[16];
@@ -447,6 +437,8 @@ extern mwsp *TAE[];						// Außentemperatur
 extern int TaeSkalMin;
 extern int TaeSkalMax;
 #endif
+
+extern mwsp **aepadr;							// Arbeitsspeicher
 
 #if TAA_ANZ == 1
 extern int TaaSkalMin;

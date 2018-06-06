@@ -32,6 +32,8 @@ typedef struct {
 	char	betriebSm;	
 	UINT	betriebRmCtr;
 
+	UINT sollwert;
+
 // Änderung neue Genibus-Implementierung
 	unsigned char uc_betriebsart;							// Aktuelle Betriebsart <- aus AUTO bzw HAND ermittelt in PumpeParametrieren
 	unsigned char uc_regelart;								// Aktuelle Regelart
@@ -42,7 +44,7 @@ typedef struct {
 	char betriebsArtIst[16];	// ASCII	
 	char regelArtSoll[16];		// ASCII	
 	char regelArtIst[16];			// ASCII	
-	UINT sollwert;
+
 } PuBusDynam;
 
 // MBUS
@@ -154,6 +156,17 @@ typedef struct datum {
 	char monat;
 	char tag;
 } datum;
+
+struct sKes {
+	char ke1 : 1;
+	char ke2 : 1;
+	char ke3 : 1;
+	char ke4 : 1;
+	char ke5 : 1;
+	char ke6 : 1;
+	char ke7 : 1;
+	char ke8 : 1;
+};
 
 /*--------------------------------------------------------------------*/
 /* Struktur von RIEcon36 - Heizungsanlagen														*/
@@ -1593,117 +1606,91 @@ typedef struct gm{
 //#define GMLENG sizeof(struct gm)
 //---------------------------------------------------------------
 
-// WILOAF
-/******** Modbus-Const-Strukturen für Wilo, Belimo,********/
-// Const
-typedef struct reg_rq{
-	UINT reg_adr;					// 
-	UINT reg_cnt;					// 
-	char obj_typ;					//
-	const char *conv_table;
-}reg_request;	
 
-/******** Modbus-Control-Strukturen für Wilo ********/
-// Control
-typedef struct mbcs{
-	char slave_adr;
-	char exeption_code;
-	char bus_timeout;
-	char pu_timeout;
-	char clear_flag;
-	char Pu_function;
-	char Pu_function_shad;
-	char tio_count;
-	char error_count;
-	char rx_errorflag;
-	char tx_errorflag;
-}modb_control_value;
-#define MBCSLENG sizeof(struct mbcs)
+/**************** Modbus-Daten-Struktur für Wilo ****************/
 
-/******** Modbus-Daten-Struktur für Wilo ********/
-// Data
-typedef struct mbds{
-	UINT input_reg0;  	  		// Actual Differential Pressure		0.1 m WS1          
-	UINT input_reg1;  	  		// Flow Rate											0.1 m³/h           
-	UINT input_reg2;  	  		// Power Consumption							1 kWh              
-	UINT input_reg3;  	  		// Power Rating										1 W                
-	UINT input_reg4;      		// Mains Current									0.1 A                   
-	UINT input_reg5;  	  		// Speed													1 rpm                   
-	UINT input_reg6;  	  		// Medium Temperature							0.1 K                   
-	UINT input_reg7;  	  		// Current Operation Mode					See Table 5.3.          
-	UINT input_reg8;  	  		// Pump Module										See Table 5.5.          
-	UINT input_reg9;  	  		// Pump Type											See Table 5.6.          
-	UINT input_reg10; 	  		// Max Speed											1 rpm                   
-	UINT input_reg11; 	  		// Min Speed											1 rpm                   
-	UINT input_reg12; 	  		// Supported Errors								See Table 5.9.            
-	UINT input_reg13; 	  		// Supported Service Messages			See Table 5.7.            
-	UINT input_reg14; 	  		// Max Power Rating								1 W 
-	UINT input_reg15; 	  		// Service Message								See Table 5.7.      
-	UINT input_reg16; 	  		// Error Type											See Table 5.8.      
-	UINT input_reg17; 	  		// Error Message									See Table 5.9.      
-	UINT input_reg18; 	  		// Pump Status										See Table 5.10.   
-	UINT input_reg19; 	  		// State Diagnostics							See Table 5.11.   
-	UINT input_reg20; 	  		// Reserve  
-	UINT SetPoint_Input;			// Sollwert 	  Ist, auf Geni-Konvention zurück dekodiert		
-	UINT Operation_Input;			// Betriebsart Ist, auf Geni-Konvention zurück dekodiert	
-	UINT Control_Input;				// Regelart Ist, auf Geni-Konvention zurück dekodiert	
+/*-------- Input Register für Wilo Pumpen für IF-Modul Modbus Stratos (2097808) --------*/
+typedef struct {
+	
+	// Input Register												// Adresse		Einheit		Darstellung (Nachkomma)		Anmerkung
+	mwsp mwspActualDifferentialPressure; 		// 1					m H2O			0.1 											
+	mwsp mwspFlowRate; 									 		// 2					m H2O			0.1												
+	mwsp mwspPowerConsumption;							// 3					kWh				1		 											
+	mwsp mwspPowerRating;										// 4					W					1
+	mwsp mwspOperationHours;								// 5					h					10
+	mwsp mwspMainsCurrent;									// 6					A					0.1
+	mwsp mwspSpeed;													// 7					min-1			1
+	mwsp mwspMediumTemperature;							// 8					K					0.1
+	mwsp mwspOperatingHoursDP;							// 9					h					10												Nicht verwendet
+	mwsp mwspCurrentOperationMode;					// 10		
+	
+	mwsp mwspPumpModule;										// 16		
+	mwsp mwspPumpType;											// 17		
+	mwsp mwspMaxSpeed;											// 18					min-1			1
+	mwsp mwspMinSpeed;											// 19					min-1			1
+	
+	mwsp mwspSupportedErrors;		          	// 26
+	mwsp mwspSupportedServiceMessages;			// 27
+	mwsp mwspMaxPowerRating;			        	// 28					W					1 
+	
+	mwsp mwspServiceMessage;		          	// 35
+	mwsp mwspErrorType;		                	// 36
+	mwsp mwspErrorMessage;		            	// 37
+	mwsp mwspPumpStatus;		              	// 38
+	mwsp mwspStateDiagnostics;		        	// 39
 
-//ulsch
-//-	UINT output_value_shad0;  // Sollwert, 		VergleichsRegister, 		
-//-	UINT output_value_shad1;  // Betriebsart, VergleichsRegister, 		
-//-	UINT output_value_shad2;  // Regelart, 		VergleichsRegister, 
-//-	UINT holding_reg0;  			// Sollwert, 		Kopie des HoldingRegister 1  der Pu, 		
-//-	UINT holding_reg1;  			// Betriebsart, Kopie des HoldingRegister 40 der Pu 		
-//-	UINT holding_reg2;  			// Regelart,		Kopie des HoldingRegister 42 der Pu		
-	UINT output_value_shad[HOLDING_REG_CNT];	// VergleichsRegister
-													  // Sollwert		
-														// Betriebsart
-														// Regelart
-														// Bus Command Timer
-	UINT holding_reg[HOLDING_REG_CNT];
-														// Sollwert, 		Kopie des HoldingRegister 1  der Pu,
-														// Betriebsart, Kopie des HoldingRegister 40 der Pu 
-														// Regelart,		Kopie des HoldingRegister 42 der Pu
-														// Bus Command Timer, Kopie des HoldingRegister 300 der Pu
-															// 0 = unknown
-															// 1 = OFF
-															// 2 = SET (IF-Module wechselt zu ACTIVE und startet Timer 5 min
-															// 3 = ACTIVE
-															// 4 = RESET
-															// 5 = MANUAL (set value ist gültig, aber lokales Pumpen-Menü bleibt offen. "last write wins"
-	char message0;						// Global-Flag Doppelbelegung z. Zt. noch keine Anzeige mehrerer Zustände 
-	char message1;            // Service Message,   aus dem Bitmuster von Input_reg15 dekodierter Charwert für UserKonv.c		
-	char message2;            // Error Type,			  aus dem Bitmuster von Input_reg16 "						
-	char message3;            // Error Message,		  aus dem Bitmuster von Input_reg17 "				
-	char message4;            // Pump Status,			  aus dem Bitmuster von Input_reg18 "					
-	char message5;            // State Diagnostics, aus dem Bitmuster von Input_reg19 "		
-	char message1_text[16];   // Service Message,  Text-Anzeige in parli_Wilo.h
-	char message2_text[16];   // Error Type,			 Text-Anzeige in parli_Wilo.h
-	char message3_text[16];   // Error Message,		 Text-Anzeige in parli_Wilo.h
-	char message4_text[16];   // Pump Status,			 Text-Anzeige in parli_Wilo.h				
-	char message5_text[16];   // State Diagnostics,Text-Anzeige in parli_Wilo.h
-	ULONG op_hours;   				// Operation Hours	10 h   
-	ULONG op_hours_dp;				// z. Zt. nicht relevant
-	int input_reg6_celsius;  	// Medium Temperature							0.1 °C                   
+}wiloInputRegister;
+#define WILO_INPUT_REG_ANZ sizeof(wiloInputRegister)/sizeof(mwsp) // Anzahl der InputRegister bei Wilo Pumpen
 
-	char busSmWar;
+/*--------  Holding Register für Wilo Pumpen für IF-Modul Modbus Stratos (2097808) --------*/
+typedef struct {
+	// Holding Register 										// Adresse		Einheit		Darstellung (Nachkomma)		Anmerkung
+	mwsp mwspSetValue;											// 1					%					0.5
+	mwsp mwspPumpCommand;		                // 40				  
+	mwsp mwspOperationMode;		              // 42	 
+	mwsp mwspBusCommandTimer;		            // 300	 
 
-// ab hier nicht löschen in Funktion ClearValues()
-//ulsch
-	UINT output_value[HOLDING_REG_CNT];
-														// Sollwert, 		OutputRegister, auf Wilo-Konvention dekodiert
-														// Betriebsart, OutputRegister, auf Wilo-Konvention dekodiert
-														// Regelart, 		OutputRegister, auf Wilo-Konvention dekodiert
-														// Bus Command Timer	
-//-	UINT output_value0;				// Sollwert, 		OutputRegister, auf Wilo-Konvention dekodiert
-//-	UINT output_value1;				// Betriebsart, OutputRegister, auf Wilo-Konvention dekodiert
-//-	UINT output_value2;				// Regelart, 		OutputRegister, auf Wilo-Konvention dekodiert
-	UINT output_value0_temp;	// Sollwert Soll		in 10-tel %
-	UINT output_value1_temp;	// Betriebsart Soll, 	OutputRegister, auf Wilo-Konvention dekodiert
-	UINT output_value2_temp;	// Regelart Soll, 		OutputRegister, auf Wilo-Konvention dekodiert
-}modb_data_value;
-#define MBDSLENG sizeof(struct mbds)
+}wiloHoldingRegister;
+#define WILO_HOLDING_REG_ANZ sizeof(wiloHoldingRegister)/sizeof(mwsp)	// Anzahl der HoldingRegister bei Wilo Pumpen
 
+/*-------- Wilo Pumpen Gesamtstruktur für IF-Modul Modbus Stratos (2097808) --------*/
+typedef struct {
+	
+ 	wiloInputRegister wiloInReg; 			// Input Register		
+	 	 
+	wiloHoldingRegister wiloHoldReg; 	// Holding Register
+
+	
+	char busSmWar;										// Fehlerdiagnose
+                      				
+	UINT SetPoint_Input;							// Sollwert 	  Ist, auf Wilo-Konvention zurück dekodiert		
+	UINT Operation_Input;							// Betriebsart Ist, auf Wilo-Konvention zurück dekodiert	
+	UINT Control_Input;								// Regelart Ist, auf Wilo-Konvention zurück dekodiert	
+	                          				
+	UINT output_value1_temp;					// Betriebsart, OutputRegister, auf Wilo-Konvention dekodiert
+	UINT output_value2_temp;					// Regelart, 		OutputRegister, auf Wilo-Konvention dekodiert 
+	
+	ULONG op_hours;										// Input Register "mwspOperationHours" mal 10 (für Anzeige)
+	signed int siMediumTemperature;		// Medium Temperatur in Celsius
+	
+	unsigned char ucGlobalFlag; 			// Global-Flag Doppelbelegung z. Zt. noch keine Anzeige mehrerer Zustände 
+	unsigned char ucServiceMessage; 	// Service Message,   aus dem Bitmuster von mwspServiceMessage dekodierter Charwert für UserKonv.c		
+	unsigned char ucErrorType;      	// Error Type,			  aus dem Bitmuster von mwspErrorType dekodierter Charwert für UserKonv.c					
+	unsigned char ucErrorMessage;   	// Error Message,		  aus dem Bitmuster von mwspErrorMessage dekodierter Charwert für UserKonv.c			
+	unsigned char ucPumpStatus;     	// Pump Status,			  aus dem Bitmuster von mwspPumpStatus dekodierter Charwert für UserKonv.c				
+	unsigned char ucStateDiagnostics; // State Diagnostics, aus dem Bitmuster von mwspStateDiagnostics dekodierter Charwert für UserKonv.c
+
+	unsigned char strServiceMessage[16];	// Service Message,  Text-Anzeige in parli_Wilo.h
+	unsigned char strErrorType[16];   		// Error Type,			 Text-Anzeige in parli_Wilo.h
+	unsigned char strErrorMessage[16];  	// Error Message,		 Text-Anzeige in parli_Wilo.h
+	unsigned char strPumpStatus[16];   		// Pump Status,			 Text-Anzeige in parli_Wilo.h				
+	unsigned char strStateDiagnostics[16];// State Diagnostics,Text-Anzeige in parli_Wilo.h	
+	
+	unsigned char ucNeustart;						// Merker für Neustart
+}ModBusWiloPumpen;                                           
+
+
+// ***** josch: Archiv SD-Card-Memory ********************************************************* 
 // ***** Josch-SDM : Archiv SD-Card-Memory ********************************************************* 
 // Struktur für Ferro-Ram: Infobereich für den Schnellzugriff bei der Auswahl der Pages auf der SD-Karte
 typedef struct fe_info {

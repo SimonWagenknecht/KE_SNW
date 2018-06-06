@@ -36,14 +36,14 @@ void PumpenbusParli ( void );			// ***AnFre 12.12.2012 Parameter für ALLE WILO-P
 
 void Steuer(void)
 {
-	char i, j;
+	char i, j, aus;
 	int zk_sec, taa;
 	float fl_wert = 0;
 	int maxAnf = 0;
 
 	int aktDatum;	// Sommerzeit ***AnFre 11.12.2008
 	static char flipflop;
-	
+	int bla = WILO_MODBUS;
 	flipflop ^= 1;
 	
 	// ***AnFre 30.05.2013 ext. SSM-Bezeichnung in den RAM eintragen
@@ -965,12 +965,15 @@ void PumpenbusSM ( void )
 		sm = FALSE;
 		if ( BusPuPara[pu].Funktion == 1 && BusPuPara[pu].Hand == 0 )		// nur im Remote Mode und bei Automatik-Betrieb testen
 		{
-#if GENI
-			if ( pu_control[pu].pu_operation == pu_value[pu].pu_operation_inp			// Betriebsart
-				&& pu_control[pu].pu_control == pu_value[pu].pu_control_inp )				// Regelart
-#else	// WILO
-			if ( modb_data[pu].output_value1_temp == modb_data[pu].Operation_Input			// Betriebsart
-				&& modb_data[pu].output_value2_temp == modb_data[pu].Control_Input )			// Regelart
+#if GENI == 1
+			if ( ( BusPuData[pu].uc_betriebsart == Geni_Values[pu].uc_operation_reply )	&&		// Betriebsart (Bits in act_mode1 siehe Seite 4 UPE)
+				 	 ( BusPuData[pu].uc_regelart == Geni_Values[pu].uc_control_reply ) )				// Regelart
+#elif WILO_MODBUS == 1
+			if ( modWiloPu[pu].output_value1_temp == modWiloPu[pu].Operation_Input			// Betriebsart
+				&& modWiloPu[pu].output_value2_temp == modWiloPu[pu].Control_Input )			// Regelart
+#elif GRUNDFOS_MODBUS == 1
+
+
 #endif
 			{
 				BusPuData[pu].betriebRmCtr	= 0;
@@ -995,9 +998,20 @@ void PumpenbusSM ( void )
 	for ( pu = 0; pu < BUS_PU_MAX; pu++ )
 		if ( BusPuData[pu].puAlarm || BusPuData[pu].busSm || BusPuData[pu].betriebSm )
 			ssm = TRUE;
-	ssmBusPu = ssm;
 
-// Pumpenstörung in den Parametergruppen (HK1, HKN, SOL, ...)
+	if ( ssm == TRUE )
+	{
+		if ( ssmPuCtr < 0xFF )
+			++ssmPuCtr;
+	}
+	else
+		ssmPuCtr = 0;
+			
+	ssmBusPu = ( ssmPuCtr > 5 ) ? TRUE : FALSE;
+
+		
+
+// Pumpenstörung in den Parametergruppen (HKn, WW1, KE1, ...)
 #if PU_BUS_HK1 > 0 
 	pu = PU_BUS_HK1 - 1;
 	hkd[HK1].busPuSm = BusPuData[pu].puAlarm || BusPuData[pu].busSm || BusPuData[pu].betriebSm;
@@ -1024,27 +1038,17 @@ void PumpenbusSM ( void )
 // ***AnFre 12.12.2012 zusätzliche Parameter in Parli-Gruppen SOL: HK1: HKN:  für ALLE WILO-Pumpen 
 void PumpenbusParli ( void )
 {
-	char pu;
-	for(pu=0; pu<BUS_PU_MAX; pu++)
-	{
-		memcpy ( modb_data[pu].message1_text, wilo_servstat_set[modb_data[pu].message1], 15 );
-		memcpy ( modb_data[pu].message2_text, wilo_error_set[modb_data[pu].message2],		 15 );
-		memcpy ( modb_data[pu].message3_text, wilo_errorstat_set[modb_data[pu].message3],15 );
-		memcpy ( modb_data[pu].message4_text, wilo_pustat_set[modb_data[pu].message4],	 15 );
-		memcpy ( modb_data[pu].message5_text, wilo_statdiag_set[modb_data[pu].message5], 15 );
-	}
-
 	// SOL: Solar-Pumpe
 	if ( BusPuPara[PU_BUS_SOL - 1].Funktion == 1 )
 	{	
 		wilo1 = SICHTSERV1;																											// Pumpen-Bus-Parameter hid1
-		sod[SO1].solPuEinAnz = modb_data[PU_BUS_SOL - 1].output_value1_temp;		// Betriebsart Ein/Aus Befehl nach Pumpe
-		if ( modb_data[PU_BUS_SOL - 1].Operation_Input < 4 )										// Operation_Input = 4: Keine Bus-Pumpe 
-			sod[SO1].solPuBmAnz	 = modb_data[PU_BUS_SOL - 1].Operation_Input;			// Betriebsart Ein/Aus Meldung von Pumpe
+		sod[SO1].solPuEinAnz = modWiloPu[PU_BUS_SOL - 1].output_value1_temp;		// Betriebsart Ein/Aus Befehl nach Pumpe
+		if ( modWiloPu[PU_BUS_SOL - 1].Operation_Input < 4 )										// Operation_Input = 4: Keine Bus-Pumpe 
+			sod[SO1].solPuBmAnz	 = modWiloPu[PU_BUS_SOL - 1].Operation_Input;			// Betriebsart Ein/Aus Meldung von Pumpe
 		else
 			sod[SO1].solPuBmAnz	 = 0;
 		sod[SO1].solPuSmAnz	 = sod[SO1].busSolPuSm;															// Störungs-Meldung von Pumpe
-		sod[SO1].solPuLzAnz	 = modb_data[PU_BUS_SOL - 1].op_hours;							// Pumpen-Betriebszeit
+		sod[SO1].solPuLzAnz	 = modWiloPu[PU_BUS_SOL - 1].op_hours;							// Pumpen-Betriebszeit
 	}
 	else
 	{
@@ -1059,13 +1063,13 @@ void PumpenbusParli ( void )
 	if ( BusPuPara[PU_BUS_PUF - 1].Funktion == 1 )
 	{	
 		wilo2 = SICHTSERV1;																											// Pumpen-Bus-Parameter hid1
-		sod[SO1].pufPuEinAnz = modb_data[PU_BUS_PUF - 1].output_value1_temp;		// Betriebsart Ein/Aus Befehl nach Pumpe
-		if ( modb_data[PU_BUS_PUF - 1].Operation_Input < 4 )										// Operation_Input = 4: Keine Bus-Pumpe 
-			sod[SO1].pufPuBmAnz	 = modb_data[PU_BUS_PUF - 1].Operation_Input;			// Betriebsart Ein/Aus Meldung von Pumpe
+		sod[SO1].pufPuEinAnz = modWiloPu[PU_BUS_PUF - 1].output_value1_temp;		// Betriebsart Ein/Aus Befehl nach Pumpe
+		if ( modWiloPu[PU_BUS_PUF - 1].Operation_Input < 4 )										// Operation_Input = 4: Keine Bus-Pumpe 
+			sod[SO1].pufPuBmAnz	 = modWiloPu[PU_BUS_PUF - 1].Operation_Input;			// Betriebsart Ein/Aus Meldung von Pumpe
 		else
 			sod[SO1].pufPuBmAnz	 = 0;
 		sod[SO1].pufPuSmAnz	 = sod[SO1].busPufPuSm;															// Störungs-Meldung von Pumpe
-		sod[SO1].pufPuLzAnz	 = modb_data[PU_BUS_PUF - 1].op_hours;							// Pumpen-Betriebszeit
+		sod[SO1].pufPuLzAnz	 = modWiloPu[PU_BUS_PUF - 1].op_hours;							// Pumpen-Betriebszeit
 	}
 	else
 	{
@@ -1080,13 +1084,13 @@ void PumpenbusParli ( void )
 	if ( BusPuPara[PU_BUS_HK1 - 1].Funktion == 1 )
 	{	
 		wilo3 = SICHTSERV1;																											// Pumpen-Bus-Parameter hid1
-		hkd[HK1].puEinAnz = modb_data[PU_BUS_HK1 - 1].output_value1_temp;				// Betriebsart Ein/Aus Befehl nach Pumpe
-		if ( modb_data[PU_BUS_HK1 - 1].Operation_Input < 4 )										// Operation_Input = 4: Keine Bus-Pumpe 
-			hkd[HK1].puBmAnz	 = modb_data[PU_BUS_HK1 - 1].Operation_Input;				// Betriebsart Ein/Aus Meldung von Pumpe
+		hkd[HK1].puEinAnz = modWiloPu[PU_BUS_HK1 - 1].output_value1_temp;				// Betriebsart Ein/Aus Befehl nach Pumpe
+		if ( modWiloPu[PU_BUS_HK1 - 1].Operation_Input < 4 )										// Operation_Input = 4: Keine Bus-Pumpe 
+			hkd[HK1].puBmAnz	 = modWiloPu[PU_BUS_HK1 - 1].Operation_Input;				// Betriebsart Ein/Aus Meldung von Pumpe
 		else
 			hkd[HK1].puBmAnz	 = 0;
 		hkd[HK1].puSmAnz	 = hkd[HK1].busPuSm;																	// Störungs-Meldung von Pumpe
-		hkd[HK1].puLzAnz	 = modb_data[PU_BUS_HK1 - 1].op_hours;								// Pumpen-Betriebszeit
+		hkd[HK1].puLzAnz	 = modWiloPu[PU_BUS_HK1 - 1].op_hours;								// Pumpen-Betriebszeit
 	}
 	else
 	{
@@ -1101,13 +1105,13 @@ void PumpenbusParli ( void )
 	if ( BusPuPara[PU_BUS_HK2 - 1].Funktion == 1 )
 	{	
 		wilo4 = SICHTSERV1;																											// Pumpen-Bus-Parameter hid1
-		hkd[HK2].puEinAnz = modb_data[PU_BUS_HK2 - 1].output_value1_temp;				// Betriebsart Ein/Aus Befehl nach Pumpe
-		if ( modb_data[PU_BUS_HK2 - 1].Operation_Input < 4 )										// Operation_Input = 4: Keine Bus-Pumpe 
-			hkd[HK2].puBmAnz	 = modb_data[PU_BUS_HK2 - 1].Operation_Input;				// Betriebsart Ein/Aus Meldung von Pumpe
+		hkd[HK2].puEinAnz = modWiloPu[PU_BUS_HK2 - 1].output_value1_temp;				// Betriebsart Ein/Aus Befehl nach Pumpe
+		if ( modWiloPu[PU_BUS_HK2 - 1].Operation_Input < 4 )										// Operation_Input = 4: Keine Bus-Pumpe 
+			hkd[HK2].puBmAnz	 = modWiloPu[PU_BUS_HK2 - 1].Operation_Input;				// Betriebsart Ein/Aus Meldung von Pumpe
 		else
 			hkd[HK2].puBmAnz	 = 0;
 		hkd[HK2].puSmAnz	 = hkd[HK2].busPuSm;																	// Störungs-Meldung von Pumpe
-		hkd[HK2].puLzAnz	 = modb_data[PU_BUS_HK2 - 1].op_hours;								// Pumpen-Betriebszeit
+		hkd[HK2].puLzAnz	 = modWiloPu[PU_BUS_HK2 - 1].op_hours;								// Pumpen-Betriebszeit
 	}
 	else
 	{

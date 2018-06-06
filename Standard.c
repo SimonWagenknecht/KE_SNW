@@ -284,14 +284,6 @@ const bicvec bicuser1[]	=	{
 
 
 	//--------------- Pumpenbus ------------
-	//WILOAF
-// ***AnFre	WILO-Modbus
-//  Pumpenparameter "A" Baudrate 5 = 9600
-//  Pumpenparameter "C" SIO-Einstellung Parität und StopBit (2, 3, 6, 10)
-#if WILO > 0 
-	{	EEPADR,	(char *)&ModbusBaudWilo,						MODBUSBAUDWILO_ADR,		1, },
-	{	EEPADR,	(char *)&ModbusSioWilo,							MODBUSSIOWILO_ADR,		1, },
-#endif
 #if BUS_PU_MAX > 0
 	{ EEPADR,	(char	*)&BusPuPara[0],	    				BUS_PU_PARA_ADR,                    BUS_PU_LENG },
 #endif
@@ -593,6 +585,12 @@ const bicvec bicuser1[]	=	{
 	{EEPADR,	(char	*)&sod[SO2].lzKolPuH,	SOLH1_ADR			+ 2,					2},	
 	{EEPADR,	(char	*)&sod[SO2].lzPufPuH,	PUFH1_ADR,		+ 2,					2},	
 #endif
+
+/* ------------------------ Benutzersteuerung mit UNI-Elementen --------*/
+#if STEUER_UNI == 1
+	{EEPADR,	(char	*)&unis[0],					STEUER_UNI_ADR,		UNISLENG},
+#endif	
+
 
 //----------------------------------------------------------------------------------------
 

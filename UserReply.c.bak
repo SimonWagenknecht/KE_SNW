@@ -2403,7 +2403,7 @@ void SysEEP_InitUser_66(void)
 
 	/*** AnFre 03.09.2009 : Diagnose-Parameter KWZ-Volumenstrom *****/
 	kws.FlowBereich[0] = 700;	kws.FlowBereich[1] = 1600;	kws.FlowBereich[2] = 2300;	kws.FlowBereich[3] = 3000;
-	bicbus ( EEPADR, (char *)&kws, DIAG_PARA_ADR, sizeof(kws), BICWR );
+	bicbus ( EEPADR, (char *)&kws, DIAG_PARA, sizeof(kws), BICWR );
 	ZeitLoesch = 1;
 #endif
 	/* ***AnFre KWZ: Maximum löschen	*/

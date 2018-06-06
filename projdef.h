@@ -111,8 +111,7 @@
 #define MBUSANZ     0             // Anzahl MBus-Zähler (maximal 8)
 #define MBUS_MASTER 0             // 1/0
 #define STEUER_UNI  0             // 1/0 Benutzersteuerung mit UNI-Elementen (SteuerUni.c, parli_uni.h, UniStandard, UniDynam)
-// ModBus_Uni	#define MODBUS_MASTER 0						// 1= Master-ModBus	//AnFre
-// ModBus_Uni	#define MODBUS_SLAVE 	1						// 1= Slave-ModBus	//AnFre
+
 
 // ***** josch: Datenmanager
 #define DS_MODE				0						// Gerät im DS_Modus (Data Slave) ,	Auswertung in der Funktion DReply() 
@@ -129,83 +128,48 @@
 #define IMPLEMENT_S2			(GBUS_IMPL + MODBUS1_IMPL)
 #define IMPLEMENT_S3			(GBUS_IMPL + MODBUS1_IMPL)		// Standard für WILO-Pumpen
 //#define MODBUS_MASTER     0       // 1 = Modbus als Master 
-//#define MODBUS_SLAVE      0       // 1 = Modbus als Slave
+#define MODBUS_MASTER     1       // 1 = Modbus als Master 
+#define MODBUS_SLAVE      0       // 1 = Modbus als Slave
 
 //---------------------------
 // Modbus 
 //---------------------------
-//#if ( ( ( IMPLEMENT_S1 & MODBUS1_IMPL) == MODBUS1_IMPL ) || ( ( IMPLEMENT_S2 & MODBUS1_IMPL) == MODBUS1_IMPL ) || ( ( IMPLEMENT_S3 & MODBUS1_IMPL) == MODBUS1_IMPL ))
-//  #define MODBUS_SIO    1
-//  #define MODBUS_UNI    1
-//  #define MODBUS_EXT    0          // >0: Verwendung von READ_MULTIPLE_COILS in der ModbusTabelle (Anzahl der 32-Bit Felder (ULONG ul_dig32[] ) 
-//
-//	// Pumpen mit Modbus
-//  #define WILO_MODBUS          0   // HIER Angeben ob Grundfos oder Wilo (beides zusammen geht nicht)  // Wilo basierend auf IF-Modul Modbus Stratos (2097808)
-//  #define GRUNDFOS_MODBUS      0   // HIER Angeben ob Grundfos oder Wilo (beides zusammen geht nicht)
-//
-//#else
-//  #define MODBUS_SIO           0
-//  #define MODBUS_UNI           0
-//  #define MODBUS_EXT           0
-//  #define WILO_MODBUS          0
-//  #define GRUNDFOS_MODBUS      0
-//#endif
+#if ( ( ( IMPLEMENT_S1 & MODBUS1_IMPL) == MODBUS1_IMPL ) || ( ( IMPLEMENT_S2 & MODBUS1_IMPL) == MODBUS1_IMPL ) || ( ( IMPLEMENT_S3 & MODBUS1_IMPL) == MODBUS1_IMPL ))
+  #define MODBUS_SIO    1
+  #define MODBUS_UNI    1
+  #define MODBUS_EXT    0          // >0: Verwendung von READ_MULTIPLE_COILS in der ModbusTabelle (Anzahl der 32-Bit Felder (ULONG ul_dig32[] ) 
 
-// Änderung neue Genibus-Implementierung
-// Genibus verwenden?
-#if ( ( ( IMPLEMENT_S2 & GENI1_IMPL) == GENI1_IMPL ) || ( ( IMPLEMENT_S3 & GENI1_IMPL) == GENI1_IMPL ) )
-#define GENI		1
-#else
-#define GENI		0
-#endif
-// Änderung neue Genibus-Implementierung
-// Genibus verwenden?
-#if ( ( ( IMPLEMENT_S2 & GENI1_IMPL) == GENI1_IMPL ) || ( ( IMPLEMENT_S3 & GENI1_IMPL) == GENI1_IMPL ) )
-#define USE_GENIBUS		1								
-#else
-#define	USE_GENIBUS		0	
-#endif
-
-// Anzahl der Pumpen am seriellen WILO-MOD-Pumpen-Bus
-#if ( ((IMPLEMENT_S1 & MODBUS1_IMPL) == MODBUS1_IMPL) || ((IMPLEMENT_S2 & MODBUS1_IMPL) == MODBUS1_IMPL) || ( (IMPLEMENT_S3 & MODBUS1_IMPL) == MODBUS1_IMPL) )
-#define MODBUS_SIO							1
-#define MODB_SLAVE_MAX					4		// wird bei WILO zu BUS_PU_MAX ***AnFre nur hier WILO-Pumpen-Anzahl eintragen
-#define MODB_MASTER_SLAVE_MODE 	1		// Master/Slave = 1/0
-#define DEVICE_MAX							4
-// Modbus-Applikationen	0/1 z.Zt. nur jeweils eine App aktivierbar, noch kein Mischbetrieb möglich
-#define KWB_KESSEL	0	
-#define EASY_SENS		0
-#define WILO   			1	
-#define BELIMO			0	
-#define MODBUS_UNI	0
-#define MODBUS_EXT    0
 // Pumpen mit Modbus
   #define WILO_MODBUS          1   // HIER Angeben ob Grundfos oder Wilo (beides zusammen geht nicht)  // Wilo basierend auf IF-Modul Modbus Stratos (2097808)
   #define GRUNDFOS_MODBUS      0   // HIER Angeben ob Grundfos oder Wilo (beides zusammen geht nicht)
 
 #else
 #define MODBUS_SIO							0
-#define MODB_SLAVE_MAX					0
-// Modbus-Applikationen	0/1
-#define KWB_KESSEL	0
-#define EASY_SENS		0
-#define WILO   			0
-#define BELIMO			0
+
 #define MODBUS_UNI	0
 #define MODBUS_EXT    0
+  #define WILO_MODBUS          0
+  #define GRUNDFOS_MODBUS      0
 #endif
 
-#if WILO == 1
-#define	BUS_PU_MAX MODB_SLAVE_MAX
+//---------------------------
+// Pumpen mit Genibus
+//---------------------------
+// Genibus-Pumpe ist nur aktivierbar, wenn keine Modbus-Pumpe ausgewählt ist
+#if ( ( ( ( IMPLEMENT_S2 & GENI1_IMPL) == GENI1_IMPL ) || ( ( IMPLEMENT_S3 & GENI1_IMPL) == GENI1_IMPL ) ) && ( WILO_MODBUS == 0 && GRUNDFOS_MODBUS == 0 ) )
+  #define GENI         1
 #else
-	#if GENI == 1
-	#define	BUS_PU_MAX 1					// ersetzen durch Anzahl der Pumpen im Projekt, max.8
-	#else
-	#define	BUS_PU_MAX 0
-	#endif	//if GENI	
-#endif		//if WILO	
+  #define GENI         0
+#endif
 
-	
+//--------------------------------------------------------------------------
+// für alle Pumpen
+//--------------------------------------------------------------------------
+#if (GENI == 1 || WILO_MODBUS == 1 || GRUNDFOS_MODBUS == 1)
+  #define BUS_PU_MAX   4  // Pumpenanzahl gemäß Projektspezifkationen setzen!
+#else	
+  #define BUS_PU_MAX   0
+#endif
 #if ( (IMPLEMENT_S3 & ANYBUS1_IMPL) == ANYBUS1_IMPL )
 #define	ANYBUS_MODUL		1
 #define KOMTAB_ALL			1			// 1= gesamte Komtab, 0=benutzerdefiniert in AnybusTabelle.c

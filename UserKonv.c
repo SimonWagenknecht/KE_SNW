@@ -400,29 +400,6 @@ int intwert;
 	switch(konv)
 	{
 
-		case BUS_STAT_FORM:
-			if(rw ==	KONVRD)
-			{
-				if ( *wert <= 3 )
-					strcpy ( &Visual_Ptr[5],	bus_stat_set[*wert]);
-				else
-					strcpy ( &Visual_Ptr[5],	ClearDisplay );
-			}
-			break;				
-
-		case CHARBUF_FORM:								// CharBuffer mit Index für Bufferanfang anzeigen und routieren
-			if(rw ==	KONVRD)								// Wie HexBuf
-			{
-				htoa(&Visual_Ptr[1], hexbuf_idx);
-				Visual_Ptr[3] = ']';
-				
-				for(i	=	0; i < 15; i++)		// mit Leerzeichen füllen
-					Visual_Ptr[i+5]	=	' ';
-				
-				for(i = 0;	i	<	4;	i++)
-					ctoa3(&Visual_Ptr[i*4 + 5],	wert[i + hexbuf_idx]);	// char to ASCII
-			}
-			break;
 			
 		case PU_CTR_FORM:
 			if ( rw ==	KONVRD )
@@ -459,169 +436,7 @@ int intwert;
 	#endif	// if BUS_PU_MAX
 #endif		// if BUS_PUMPEN
 
-#if ( ((IMPLEMENT_S1 & MODBUS1_IMPL) == MODBUS1_IMPL) || ((IMPLEMENT_S2 & MODBUS1_IMPL) == MODBUS1_IMPL) || ((IMPLEMENT_S3 & MODBUS1_IMPL) == MODBUS1_IMPL) )
 
-	switch ( konv )
-	{
-		case EXEPTION_FORM:
-			if ( rw ==	KONVRD )
-			{
-				if ( *wert <= 6 )
-					strcpy ( &Visual_Ptr[5],	exeption_set[*wert]);
-				else if( *wert == 11 )
-					strcpy ( &Visual_Ptr[5],	target_exeption );
-				else
-					strcpy ( &Visual_Ptr[5],	undef_exeption );
-			}		
-			break;		
-
-
-		case	BUS_ERROR_FORM:
-			if ( rw ==	KONVRD )
-			{
-				if ( *wert <= 8 )
-					strcpy ( &Visual_Ptr[5],	bus_error_set[*wert]);
-				else
-					strcpy ( &Visual_Ptr[5],	ClearDisplay );
-			}		
-			break;
-
-		case ICOM_PPROG_FORM:
-			if ( rw ==	KONVRD )
-			{
-				if ( *wert <= 4 )
-					strcpy ( &Visual_Ptr[5],	icom_prog_set[*wert]);
-				else
-					strcpy ( &Visual_Ptr[5],	ClearDisplay );
-			}		
-			break;		
-
-		case ICOM_EA_FORM:
-			if ( rw ==	KONVRD )
-			{
-				if ( *wert <= 1 )
-					strcpy ( &Visual_Ptr[5],	icom_ea_set[*wert]);
-				else
-					strcpy ( &Visual_Ptr[5],	ClearDisplay );
-			}		
-			break;
-
-		case USV_STATUS_FORM:			
-			if ( rw ==	KONVRD )
-			{
-				if ( *wert <= 17 )
-					strcpy ( &Visual_Ptr[5],	usv_status[*wert]);
-				else
-					strcpy ( &Visual_Ptr[5],	ClearDisplay );
-			}		
-			break;
-
-//----------- Wilo-Status-Meldungen ------------
-#if ( WILO )
-		case MODB_STATE_FORM:
-			if(rw ==	KONVRD)
-			{
-			  ctoa(&Visual_Ptr[9], modb_slave_idx);
-				Visual_Ptr[11] = '/';
-			 	ctoa(&Visual_Ptr[12], modb_state_control);
-			}
-			break;			
-
-//		case WILO_SERVSTAT_FORM:			
-//			if ( rw ==	KONVRD )
-//			{
-//				if ( *wert <= 4 )
-//					strcpy ( &Visual_Ptr[5],	wilo_servstat_set[*wert]);
-//				else
-//					strcpy ( &Visual_Ptr[5],	UndefMessage );
-//			}		
-//			break;
-//
-//		case WILO_ERROR_FORM:			
-//			if ( rw ==	KONVRD )
-//			{
-//				if ( *wert <= 5 )
-//					strcpy ( &Visual_Ptr[5],	wilo_error_set[*wert]);
-//				else
-//					strcpy ( &Visual_Ptr[5],	UndefMessage );
-//			}		
-//			break;
-//
-//		case WILO_ERRORSTAT_FORM:			
-//			if ( rw ==	KONVRD )
-//			{
-//				if ( *wert <= 16 )
-//					strcpy ( &Visual_Ptr[5],	wilo_errorstat_set[*wert]);
-//				else
-//					strcpy ( &Visual_Ptr[5],	UndefMessage );
-//			}		
-//			break;
-//
-//		case WILO_PUSTAT_FORM:			
-//			if ( rw ==	KONVRD )
-//			{
-//				if ( *wert <= 15 )
-//					strcpy ( &Visual_Ptr[5],	wilo_pustat_set[*wert]);
-//				else
-//					strcpy ( &Visual_Ptr[5],	UndefMessage );
-//			}		
-//			break;
-//
-//		case WILO_STATDIAG_FORM:			
-//			if ( rw ==	KONVRD )
-//			{
-//				if ( *wert <= 12 )
-//					strcpy ( &Visual_Ptr[5],	wilo_statdiag_set[*wert]);
-//				else
-//					strcpy ( &Visual_Ptr[5],	UndefMessage );
-//			}		
-//			break;
-//----------------------------------------
-#endif	// WILO
-
-//----------- Belimo-Antriebe ------------
-		case BELI_CMD_FORM:			
-			if ( rw ==	KONVRD )
-			{
-				if ( *wert <= 4 )
-					strcpy ( &Visual_Ptr[5],	beli_cmd_set[*wert]);
-				else
-					strcpy ( &Visual_Ptr[5],	ClearDisplay );
-			}		
-			break;
-
-		case BELI_FORCE_FORM:			
-			if ( rw ==	KONVRD )
-			{
-				if ( *wert <= 6 )
-					strcpy ( &Visual_Ptr[5],	beli_force_set[*wert]);
-				else
-					strcpy ( &Visual_Ptr[5],	ClearDisplay );
-			}		
-			break;
-			
-		case BELI_SENSOR_FORM:			
-			if ( rw ==	KONVRD )
-			{
-				if ( *wert <= 4 )
-					strcpy ( &Visual_Ptr[5],	beli_sensor_set[*wert]);
-				else
-					strcpy ( &Visual_Ptr[5],	ClearDisplay );
-			}		
-			break;
-
-		case BELI_TYP_FORM:			
-			if ( rw ==	KONVRD )
-			{
-				if ( *wert <= 5 )
-					strcpy ( &Visual_Ptr[5],	beli_typ_set[*wert]);
-				else
-					strcpy ( &Visual_Ptr[5],	ClearDisplay );
-			}		
-			break;
-	}	
-		
-#endif
 
 
 #if ( MBUSANZ > 0 )
@@ -869,20 +684,27 @@ if(ucReturn == 0)							// wenn noch nicht benutzt
 			}
 		}	
 	#endif	// if GENI == 1	
-	#if ( WILO )
+
+	#if WILO_MODBUS == 1
+		if(ucReturn == 0)							// wenn noch nicht benutzt
+		{
 	if ( strcmp ( Pgruppe[gnum].grkz,"WLP:") == 0 )
 	{
 		if( alfunc == EXP_WLP)
 		{	// in der Parametergruppe WLP soll das ausgewählte Gerät als Nummer im Gruppennamen erscheinen
-			ctoa ( &Visual_Ptr[1],SerialDeviceNr ); // WILOAF
-			if( SerialDeviceNr < 10 )               // WILOAF
+					ctoa ( &Visual_Ptr[1],cWiloPuCount );
+					if( cWiloPuCount < 10 )
 				Visual_Ptr[1] = 'L';			// verbesserte Darstellung
 			ucMax_expander = BUS_PU_MAX;
 			ucReturn = ucMax_expander;
 		}
 	}
-
-	#endif
+		}	
+	#endif // WILO_MODBUS == 1
+	
+	#if GRUNDFOS_MODBUS == 1
+	
+	#endif // GRUNDFOS_MODBUS == 1
 
 	#if ( ( IMPLEMENT_S3 & MBUS1_IMPL ) ==  MBUS1_IMPL )
 		#if ( MBUSANZ > 0 )

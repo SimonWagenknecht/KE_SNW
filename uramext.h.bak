@@ -16,6 +16,7 @@ extern char char_test1;
 extern char char_test2;
 extern int  int_test;
 extern mwsp *temperatur;
+extern mwsp mod_rt[2];
 
 extern int TaErsatz[12];
 extern UINT TaErsatzCtr;
@@ -201,7 +202,7 @@ extern char funk_vis;
 #endif
 
 
-#if ( GENI || WILO )
+#if ( GENI || WILO ) // WILOAF
 
 extern PuBusStandard BusPuPara[BUS_PU_MAX];
 extern PuBusDynam BusPuData[BUS_PU_MAX];
@@ -303,6 +304,11 @@ extern unsigned int n38list[R38_MODMAX][14];		// 14 Analogeingänge			R38
 extern unsigned int n39list[R39_MODMAX][12];		// 12 Digitaleingänge			R39
 extern unsigned int n33list[R33_MODMAX][6];			//  6 Digitalausgänge			R33
 
+extern char ntext[18][21];											// 18 E/A je 20 ASCII
+extern char n37text[R37_MODMAX][13][21];				// 13 Ein/Ausgänge				R37 
+extern char n38text[R38_MODMAX][14][21];				// 13 Ein/Ausgänge				R37 
+extern char n39text[R39_MODMAX][12][21];				// 12 Digitaleingänge			R39
+extern char n33text[R33_MODMAX][6][21];					//  6 Digitalausgänge			R33
 
 //Sichtbarkeitsspeicher für Parametergruppen
 extern	char	anl_vis;		// Anlage
@@ -611,9 +617,18 @@ extern Ram39	mod39[];			// maximal 4 (dann keine weiteren Module)
 extern Ram33	mod33[];			// maximal 4 (dann keine weiteren Module)
 extern char mod39sysinit;		// Merkmal für SysEEP_InitUser  (Kaltstart 66 wurde ausgeführt)	
 																	
-extern char proc_IO;									// Auftragsmerker
-extern char iocnt;										// Counter über maximal 4 Module
-extern char oready;										// Flag: wenn Output-Task abgelaufen
+extern char proc_IO;				// Auftragsmerker
+extern char iocnt;					// Counter über maximal 4 Module       (ohne EA-Simulation)
+extern char iocnt_max;			// Counter über maximal 4 Module + R66 (mit  EA-Simulation)
+extern char oready;					// Flag: wenn Output-Task abgelaufen
+// EA-Simulation
+extern char names_anford;
+extern char projekt_anford;
+extern char r37text_cnt[];
+extern char r38text_cnt[];
+extern char r39text_cnt[];
+extern char r33text_cnt[];
+extern char r66text_cnt;
 //--------------------------------------------------------------
 
 // Sammelstörmeldung für Anzeige und LT
@@ -773,12 +788,18 @@ extern char ext3SammelSM;	//Anzeige EXT 2: Sammel-Alarm KES 02.10.2012
 // ***AnFre externer SSM Bezeichnung ändern
 extern char extAlarmText[];
 
+/* Regelparameter für Benutzersteuerung mit UNI-Elementen --------*/
+extern UniStandard unis[1];
+extern UniDynam    unid[1];
+
 /*--------------- Alarmtabelle -----------------------------------*/
 extern AlarmVar	alarmtab[];
 
 extern char quit_taste;
 extern char un_qsm;							// 1 = Unquittierte Störungen vorhanden
 extern char unbek_Alarm;				// unbekannter Alarm (alarmtab - Index)
+extern char sstm_alarme;				// Merker für Alarme, für SSTM-Relais, Eintrag in parli für KomtabCopy
+extern char sstm_all;						// Merker für alle Alarme inclusive Fühler, Eintrag in parli für KomtabCopy
 
 extern UINT alarmlist_dae[];		// aktuelle Alarme in einer Liste merken (für RFB):  2 Byte DAE-Nummer
 extern char alarmanz_dae;
@@ -831,6 +852,7 @@ extern char monHzGrdAnz;
 /***** ulsch : Waermemenge, Diagnose *****/
 #if WMENG > 0
 extern zaehlspWmeng wmengCtr[];
+extern zaehlsp wmengCalc[4];		// für interne Wärmemengen-Zähler, für Zählerobjekt benötigt
 #endif
 
 #if ( LEIST_BER > 0 )
@@ -961,15 +983,15 @@ extern char proc_TI;											// DTimer Auftragsmerker
 extern char Slave[4];											// Slave 1 - 4 Adressen
 
 // Empfangene Daten von den Slaves  (Variable müssen vom Typ mwsp sein)
-//extern mwsp station1_ea;									// Beispiel für 1 Byte: Ein/Aus              
-//extern mwsp station1_istwert;							// Beispiel für 3 Byte: Temperatur mit Status
-//extern mwsp station1_sollwert;						// Beispiel für 2 Byte: Sollwert             
-//
-//	#if DM_SLAVES > 1
-//extern mwsp station2_ea;			
-//extern mwsp station2_istwert;
-//extern mwsp station2_sollwert;
-//	#endif
+extern mwsp station1_ea;									// Beispiel für 1 Byte: Ein/Aus              
+extern mwsp station1_istwert;							// Beispiel für 3 Byte: Temperatur mit Status
+extern mwsp station1_sollwert;						// Beispiel für 2 Byte: Sollwert             
+
+	#if DM_SLAVES > 1
+extern mwsp station2_ea;			
+extern mwsp station2_istwert;
+extern mwsp station2_sollwert;
+	#endif
 
 #endif
 
@@ -1065,6 +1087,20 @@ extern ULONG lasttimeDiff;	// Zeit-Zaehler letzter Impuls 100ms
 extern UINT	CO2_Faktor;				// CO2-Faktor 0,000 [kg/kWh]
 extern ULONG	CO2_Einspar;			// CO2-Einsparung in 0 kg
 extern char	Tyfocor;					// Anteil Tyfocor in Vol.% (nur 40, 50 oder 60)
+
+#if RM_POWER_ANZ
+extern mwsp *RM_POWER[];
+extern sPowInpPara RmPowerPara[RM_POWER_ANZ];
+extern sPowInp rmPower[RM_POWER_ANZ];
+#endif
+
+#if AE_DRUCK_ANZ
+extern mwsp *AE_DRUCK[];
+extern sAnaInpPara DruckPara[AE_DRUCK_ANZ];
+extern sAnaInp druck[AE_DRUCK_ANZ];
+#endif
+
+
 
 #endif	// URAMEXT_H_INCLUDED
 

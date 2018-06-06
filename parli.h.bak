@@ -905,7 +905,7 @@ const Pgrup tes[] = {
  {" 81;"," noi_us_main_cnt"," s     ", P&noi_user_main_cnt,US_CHAR, 0, P&hid4,	V0, 0, 0},
  {" 82;"," noi_mainex     ","       ", P&noi_mainex,				US_INT, 0, P&hid4,	V0, 0, 0},
 {" ->;"," noi_rts_cnt    ","       ", P&noi_rts_cnt,			 US_CHAR, 0, P&hid4,	V0, 0, 0},
- 
+{" 83;"," spcnt SPEICH   ","       ", P&spcnt,						 US_CHAR, 0, P&hid4,	V0, 0, 0},
  {" 84;"," sms-anzahl     ","       ", P&sms_anz,					 US_CHAR, 0, P&hid4,	V0, 0, 0},
  {" 85;"," sms-count      ","       ", P&sms_count,		 		 US_CHAR, 0, P&hid4,	V0, 0, 0},
  {"[86;"," sstm           ","       ", P&sstm[0],			 HEXBUF_FORM, 0, P&hid4,	V0, 0, 0},

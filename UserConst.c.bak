@@ -98,8 +98,8 @@ const char c_Stopbits_S1            = NULL_STOP;            // NULL_STOP = dummy
 const char c_Mode_S2                = MASTER;            // NULL_MODE = dummy,  MASTER, SLAVE
 const UINT c_Baudrate_S2            = 9600;                    // 0         = dummy
 const char c_Funktion_S2            = MODBUS1_FU;              // NULL_FU   = dummy   GBUS_FU, MODBUS1_FU, MBUS1_FU, GENI1_FU...siehe projdef.h
-const char c_Parity_S2              = NULL_PARI;            // NULL_PARI = dummy,  NOPAR, EVEN, ODD 
-const char c_Stopbits_S2            = NULL_STOP;            // NULL_STOP = dummy,  1, 2 
+const char c_Parity_S2              = EVEN;            // NULL_PARI = dummy,  NOPAR, EVEN, ODD 
+const char c_Stopbits_S2            = 1;            // NULL_STOP = dummy,  1, 2 
 
 const char c_Mode_S3                = NULL_MODE;            // NULL_MODE = dummy,  MASTER, SLAVE
 const UINT c_Baudrate_S3            = 0;                    // 0         = dummy
@@ -115,108 +115,6 @@ const char c_ModbusBaudWilo					= 5;				// WILO Pumpenparameter "A" Achtung! imm
 const char c_ModbusSioWilo					= 6;				// WILO Pumpenparameter "C" SIO-Einstellung Parität und StopBit (2, 3, 6, 10)
 //------------------------------------------------------------------------------------------
 
-//---------- Bus-Pumpen ---------
-const char * pu_operation_set[]	=
-	{	
-		"PUMPE STOP     \0",		// 0
-		"PUMPE EIN      \0",		// 1
-		"MIN-DREHZAHL   \0",		// 2
-		"MAX-DREHZAHL   \0",		// 3
-	  "Keine Antwort !\0",		// 4	***AnFre 12.12.2012
-	};
-
-const char * pu_control_set[]	=
-	{	
-		"KONSTANTDRUCK  \0",		// 0
-		"PROPORT.DRUCK  \0",		// 1
-		"KONSTANTFREQU. \0",		// 2
-		"AUTOMATIK-MODE \0",		// 3
-	  "Keine Antwort !\0",		// 4	***AnFre 12.12.2012
-	};
-
-const char ClearDisplay[] =
-	{ "               \0"};
-
-const char * pu_func_set[]	=
-	{	
-		"DEAKTIVIERT!   \0",		// 0
-		"REMOTE MODE    \0",		// 1
-		"LOCAL MODE     \0",		// 2
-	};
-
-const char * wilo_servstat_set[]	=
-	{	
-		"Keine Meldung  \0",
-		"Servicebedarf  \0",				
-		"Lager wechseln \0",				
-		"Lager fetten   \0",				
-		"Dichtung tausch\0",				
-	};
-
-const char * wilo_error_set[]	=
-	{	
-		"Keine Meldung  \0",
-		"Modul-Fehler   \0",				
-		"Motor-Fehler   \0",				
-		"Nicht belegt   \0",				
-		"Pumpen-Fehler  \0",				
-		"Versorg.Spannun\0",				
-	};
-
-const char * wilo_errorstat_set[]	=
-	{	
-		"Keine Meldung  \0",
-		"Unterspannung  \0",		
-		"Ueberspannung  \0",
-		"Phase fehlt    \0",
-		"Trockenlauf    \0",
-		"Druck zu hoch  \0",
-		"Druck zu niedr.\0",
-		"Nicht belegt   \0",
-		"Nicht belegt   \0",
-		"UeberTemp Motor\0",
-		"Motorfehler    \0",
-		"Blockierung    \0",
-		"UeberTemp Modul\0",
-		"Modulfe.Warnung\0",
-		"Modulfehler    \0",
-		"Sensorfehler   \0",
-	};
-
-const char * wilo_pustat_set[]	=
-	{	
-		"Keine Meldung  \0",
-		"Betriebsm.  EIN\0",	
-		"Drehricht.Links\0",	
-		"Soll-Ist A.>10%\0",
-		"Extern Aus     \0",	
-		"Doppelpumpe    \0",	
-		"Lokale Bedien. \0",	
-		"Q/H nicht ermit\0",	
-		"Extern Min.    \0",	
-		"Nicht belegt   \0",
-		"Nicht belegt   \0",
-		"Nicht belegt   \0",
-		"Nicht belegt   \0",
-		"Nicht belegt   \0",
-		"Wink/Service   \0",	
-	};
-
-const char * wilo_statdiag_set[]	=
-	{	
-		"Keine Meldung  \0",
-		"Pu o.Modul-Fehl\0",
-		"Versorgung Eo.H\0",
-		"Nicht belegt   \0",
-		"Untere Regelgr.\0",
-		"Obere Regelgr. \0",
-		"Nicht belegt   \0",
-		"Sollwert-Fehler\0",
-		"Nicht belegt   \0",
-		"Lokale Bedien. \0",
-		"Nicht belegt   \0",
-		"Pumpe laeuft   \0",
-	};
 
 //-------------------------------
 
@@ -492,6 +390,10 @@ const Anlage Projekte[] = {
 		{0},	// Nummern der Kaltstartparametersätze für jeden MBUS-Zähler[MB_PROFILE]
 					// 0 = nicht vorhanden
 
+		// Steuercode für SteuerUni
+		{0},	// Nummern der Kaltstartparametersätze für jede UNI-Steuerung [UNI_PROFILE]
+					// 0 = nicht vorhanden
+
 		// Namen für Prozess Ein- und Ausgänge (Namensvereinbarung in "userdef.h")
 		// Aus den Namen werden Steuercodes generiert
 		TP_FREI,							// 				Eingang IN1		Pt1000 / ----- / -------	
@@ -578,6 +480,10 @@ const Anlage Projekte[] = {
 		{0},	// Nummern der Kaltstartparametersätze für jeden MBUS-Zähler[MB_PROFILE]
 							// 0 = nicht vorhanden
 
+// Steuercode für SteuerUni
+		{0},	// Nummern der Kaltstartparametersätze für jede UNI-Steuerung [UNI_PROFILE]
+					// 0 = nicht vorhanden
+
 		// Namen für Prozess Ein- und Ausgänge (Namensvereinbarung in "userdef.h")
 		// Aus den Namen werden Steuercodes generiert
 		TA1,			// Außentemp.						// 				Eingang IN1		Pt1000 / ----- / -------	
@@ -611,6 +517,7 @@ const Anlage Projekte[] = {
 		// NAMUR-Kennzeichnung für Digitale Eingänge R36
 		0x00,									// Bit=1...NAMUR-Eingang,	BIT0...7 = IN3...IN10
 	},
+	
 	
 };
 const char PROJTYPEN = sizeof(Projekte) / sizeof(Anlage);
@@ -2632,6 +2539,116 @@ const char CarTab[64] = {										//  Code:	Zeichen			in RFB
 	0x10,0x18,0x1C,0x1E,0x1C,0x18,0x10,0x00,	//  0x02:	Dreieck					'4'
 	0x00,0x00,0x00,0x04,0x00,0x00,0x00,0x00		//  0x03:	Mittelpunkt			'6'
 };
+
+//---------- Bus-Pumpen --------------------------------------------------
+const char * pu_operation_set[]	=
+	{	
+		"PUMPE STOP     \0",		// 0
+		"PUMPE EIN      \0",		// 1
+		"MIN-DREHZAHL   \0",		// 2
+		"MAX-DREHZAHL   \0",		// 3
+	  "Keine Antwort !\0",		// 4	***AnFre 12.12.2012
+	};
+
+const char * pu_control_set[]	=
+	{	
+		"KONSTANTDRUCK  \0",		// 0
+		"PROPORT.DRUCK  \0",		// 1
+		"KONSTANTFREQU. \0",		// 2
+		"AUTOMATIK-MODE \0",		// 3
+	  "Keine Antwort !\0",		// 4	***AnFre 12.12.2012
+	};
+
+
+const char ClearDisplay[] =
+	{ "               \0"};
+
+const char * pu_func_set[]	=
+	{	
+		"DEAKTIVIERT!   \0",		// 0
+		"REMOTE MODE    \0",		// 1
+		"LOCAL MODE     \0",		// 2
+	};
+
+const char * wilo_servstat_set[]	=
+	{	
+		"Keine Meldung  \0",
+		"Servicebedarf  \0",				
+		"Lager wechseln \0",				
+		"Lager fetten   \0",				
+		"Dichtung tausch\0",				
+		"Undef Meldung! \0",
+	};
+
+const char * wilo_error_set[]	=
+	{	
+		"Keine Meldung  \0",
+		"Modul-Fehler   \0",				
+		"Motor-Fehler   \0",				
+		"Nicht belegt   \0",				
+		"Pumpen-Fehler  \0",				
+		"Versorg.Spannun\0",				
+		"Undef Meldung! \0",
+	};
+
+const char * wilo_errorstat_set[]	=
+	{	
+		"Keine Meldung  \0",
+		"Unterspannung  \0",		
+		"Ueberspannung  \0",
+		"Phase fehlt    \0",
+		"Trockenlauf    \0",
+		"Druck zu hoch  \0",
+		"Druck zu niedr.\0",
+		"Nicht belegt   \0",
+		"Nicht belegt   \0",
+		"UeberTemp Motor\0",
+		"Motorfehler    \0",
+		"Blockierung    \0",
+		"UeberTemp Modul\0",
+		"Modulfe.Warnung\0",
+		"Modulfehler    \0",
+		"Sensorfehler   \0",
+		"Undef Meldung! \0",
+	};
+
+const char * wilo_pustat_set[]	=
+	{	
+		"Keine Meldung  \0",
+		"Betriebsm.  EIN\0",	
+		"Drehricht.Links\0",	
+		"Soll-Ist A.>10%\0",
+		"Extern Aus     \0",	
+		"Doppelpumpe    \0",	
+		"Lokale Bedien. \0",	
+		"Q/H nicht ermit\0",	
+		"Extern Min.    \0",	
+		"Nicht belegt   \0",
+		"Nicht belegt   \0",
+		"Nicht belegt   \0",
+		"Nicht belegt   \0",
+		"Nicht belegt   \0",
+		"Wink/Service   \0",	
+		"Undef Meldung! \0",
+	};
+
+const char * wilo_statdiag_set[]	=
+	{	
+		"Keine Meldung  \0",
+		"Pu o.Modul-Fehl\0",
+		"Versorgung Eo.H\0",
+		"Nicht belegt   \0",
+		"Untere Regelgr.\0",
+		"Obere Regelgr. \0",
+		"Nicht belegt   \0",
+		"Sollwert-Fehler\0",
+		"Nicht belegt   \0",
+		"Lokale Bedien. \0",
+		"Nicht belegt   \0",
+		"Pumpe laeuft   \0",
+		"Undef Meldung! \0",
+	};
+//---------- Ende Bus-Pumpen --------------------------------------------------
 
 
 
