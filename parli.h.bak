@@ -188,7 +188,7 @@ const Pgrup anl[] = {
 	#endif
 
 // WILOAF
-	#if ( WILO == 1 || GENI == 1 )
+	#if ( WILO_MODBUS == 1 || GENI == 1 )
 	{"*93:"," SSTM PUMPENBUS?","       ", P&ssmBusPu,			  		JANEIN_FORM, 0, P&vis,		A1, EINZEL, 0},
 	#endif
 // AnFre 17.11.2011 02.10.2012 geändert !!!
@@ -414,11 +414,7 @@ const Pgrup ke1[] = {
 	#include "parli_genibus.h"
 #endif
 
-//*------------------------------ Modbus ----------------------------------------*/
 
-#if WILO == 1
-	//#include "parli_wilo.h"
-#endif
 
 /*------------------------------ Ferienprogramm ----------------------------------------*/
 //#if FER == 1
@@ -670,7 +666,7 @@ const Pgrup rf[] = {
 
 //*------------------------------ Modbus WILO-Pumpen----------------------------------------*/
 
-#if WILO > 0
+#if WILO_MODBUS > 0
 	#include "parli_Wilo.h"
 #endif
 
@@ -1333,7 +1329,7 @@ const Parli Pgruppe[] = {
 //-----------------------------------------------------
 	{"ALK;", alk, sizeof(alk) / PGLENG, P&syc_vis},
 //WILOAF
-#if WILO == 1
+#if WILO_MODBUS == 1
 	{"WLP:", wlp, sizeof(wlp) / PGLENG, P&zlt_vis},
 #endif
 

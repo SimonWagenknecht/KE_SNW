@@ -1234,33 +1234,33 @@ const Parli Pgruppe[] = {
 #endif
 
 //-----------------------------------------------------
-#if HKANZ > 0
- {"HK1:", hk1, sizeof(hk1) / PGLENG, P&hk_vis[HK1]},
- #if ADAP_STAT_HK1 > 0
- {"AD1:", ad1, sizeof(ad1) / PGLENG, P&hk_vis[HK1]},
- #endif 
-#endif
-
-#if HKANZ > 1 
- {"HK2:", hk2, sizeof(hk2) / PGLENG, P&hk_vis[HK2]},
- #if ADAP_STAT_HK2 > 0
- {"AD2:", ad2, sizeof(ad2) / PGLENG, P&hk_vis[HK2]},
- #endif 
-#endif
-
-#if HKANZ > 2
- {"HK3:", hk3, sizeof(hk3) / PGLENG, P&hk_vis[HK3]},
- #if ADAP_STAT_HK3 > 0
- {"AD3:", ad3, sizeof(ad3) / PGLENG, P&hk_vis[HK3]},
- #endif 
-#endif
-
-#if HKANZ > 3
- {"HK4:", hk4, sizeof(hk4) / PGLENG, P&hk_vis[HK4]},
- #if ADAP_STAT_HK4 > 0
- {"AD4:", ad4, sizeof(ad4) / PGLENG, P&hk_vis[HK4]},
- #endif 
-#endif
+//#if HKANZ > 0
+// {"HK1:", hk1, sizeof(hk1) / PGLENG, P&hk_vis[HK1]},
+// #if ADAP_STAT_HK1 > 0
+// {"AD1:", ad1, sizeof(ad1) / PGLENG, P&hk_vis[HK1]},
+// #endif 
+//#endif
+//
+//#if HKANZ > 1 
+// {"HK2:", hk2, sizeof(hk2) / PGLENG, P&hk_vis[HK2]},
+// #if ADAP_STAT_HK2 > 0
+// {"AD2:", ad2, sizeof(ad2) / PGLENG, P&hk_vis[HK2]},
+// #endif 
+//#endif
+//
+//#if HKANZ > 2
+// {"HK3:", hk3, sizeof(hk3) / PGLENG, P&hk_vis[HK3]},
+// #if ADAP_STAT_HK3 > 0
+// {"AD3:", ad3, sizeof(ad3) / PGLENG, P&hk_vis[HK3]},
+// #endif 
+//#endif
+//
+//#if HKANZ > 3
+// {"HK4:", hk4, sizeof(hk4) / PGLENG, P&hk_vis[HK4]},
+// #if ADAP_STAT_HK4 > 0
+// {"AD4:", ad4, sizeof(ad4) / PGLENG, P&hk_vis[HK4]},
+// #endif 
+//#endif
 
 #if GENI == 1
  {"GBP:", gbp, sizeof(gbp) / PGLENG, P&anl_vis},

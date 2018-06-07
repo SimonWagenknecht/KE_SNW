@@ -43,7 +43,7 @@ void Steuer(void)
 
 	int aktDatum;	// Sommerzeit ***AnFre 11.12.2008
 	static char flipflop;
-	int bla = WILO_MODBUS;
+
 	flipflop ^= 1;
 	
 	// ***AnFre 30.05.2013 ext. SSM-Bezeichnung in den RAM eintragen

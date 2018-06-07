@@ -1,4 +1,4 @@
-// Diese Datei wurde automatisch am : 04.06.2018 um 10:53:51 generiert und entspricht der Systemversion nach 19.07.2017 10:21:03!!!
+// Diese Datei wurde automatisch am : 07.06.2018 um 09:17:15 generiert und entspricht der Systemversion nach 19.07.2017 10:21:03!!!
 // Path: C:\RIEcon36C\Softwarepool\Softwarepool_PES_2018\KE_SNW81\KE_R_1s03_JMX81\User\Komtabparser.exe
 
 #include "defins.h"
@@ -12,7 +12,7 @@
 const kotab KomTab[512] =  {
 lade "projdef.h" ...
 "projdef.h" mit 0 Fehler und 0 Warnungen verarbeitet!
-331 Definitionen geladen
+325 Definitionen geladen
 lade "parli.h" ...
 verarbeite "parli.h" ...
     verarbeitet "parli_Copy.h"!
@@ -37,16 +37,18 @@ verarbeite "parli.h" ...
     "x2zin1.h" mit 0 Fehler und 0 Warnungen verarbeitet!
     verarbeitet "parli_Dia_WZ1_WZ3_TN2_TH2.h"!
     "parli_Dia_WZ1_WZ3_TN2_TH2.h" mit 0 Fehler und 0 Warnungen verarbeitet!
+    verarbeitet "Modbus/modbusparli.h"!
+    "Modbus/modbusparli.h" mit 0 Fehler und 0 Warnungen verarbeitet!
     verarbeitet "parli_Wilo.h"!
     "parli_Wilo.h" mit 0 Fehler und 0 Warnungen verarbeitet!
     verarbeitet "parli_module.h"!
     "parli_module.h" mit 0 Fehler und 0 Warnungen verarbeitet!
 "parli.h" mit 0 Fehler und 0 Warnungen verarbeitet!
-19 Gruppen gefunden
+20 Gruppen gefunden
 1 aktive Parli
 schreibe aktive Parli in "parliaktiv.h"
 schreibe QSM-Gruppe in "qsm.h"
-Fehler: zuviele Komtabeinträge maximal: 512, momentan: 648
+Fehler: zuviele Komtabeinträge maximal: 512, momentan: 663
 schreibe die Daten für die Event-Tabelle in "evetab.h"
 schreibe die KommandoTabelle in "KomTab.c"
 	{   0,   0},	//	  0=anl[] {"***:"," RIEDEL  R66E   ","       ", P&Kategorie_Typ,				ASCII_FORM, 0, P&vis,		V1, 0, 0},
@@ -181,9 +183,9 @@ schreibe die KommandoTabelle in "KomTab.c"
 	{   2, 114},	//	129=hk2[] {"*->:"," WILO-BUS NETZ-P","       ", P&BusPuPara[PU_BUS_HK2 - 1].Funktion,PU_FUNC_FORM,0, P&vis,	V1, 0, IDX0_FELD},
 	{   2, 115},	//	130=hk2[] {"*->;"," BUS-ADRESSE    ","       ", P&BusPuPara[PU_BUS_HK2 - 1].Adresse,		 US_CHAR,  0, P&wilo4,V1, 0, IDX0_FELD},
 	{   2, 116},	//	131=hk2[] {"*->:"," REGELART IST   ","       ", P&BusPuData[PU_BUS_HK2 - 1].regelArtIst,ASCII_FORM,15,P&wilo4,V1,0, IDX0_FELD},
-	{   2, 117},	//	132=hk2[] {"*->;"," DREHZAHL IST   "," 1/min ", P&modb_data[PU_BUS_HK2 - 1].input_reg5, 	US_INT,  0, P&wilo4,V1, 0, IDX0_FELD},
-	{   2, 118},	//	133=hk2[] {"*->;"," DIFFERENZDRUCK "," mWS   ", P&modb_data[PU_BUS_HK2 - 1].input_reg0, 	US_INT,	 1, P&wilo4,V1, 0, IDX0_FELD},
-	{   2, 119},	//	134=hk2[] {"*->;"," FOERDERSTROM   "," m/h  ", P&modb_data[PU_BUS_HK2 - 1].input_reg1, 	US_INT,	 1, P&wilo4,V1, 0, IDX0_FELD},
+	{   2, 117},	//	132=hk2[] {"*->;"," DREHZAHL IST   "," 1/min ", P&modWiloPu[PU_BUS_HK2 - 1].wiloInReg.mwspSpeed.messw, 	US_INT,  0, P&wilo4,V1, 0, IDX0_FELD},
+	{   2, 118},	//	133=hk2[] {"*->;"," DIFFERENZDRUCK "," mWS   ", P&modWiloPu[PU_BUS_HK2 - 1].wiloInReg.mwspActualDifferentialPressure.messw, 	US_INT,	 1, P&wilo4,V1, 0, IDX0_FELD},
+	{   2, 119},	//	134=hk2[] {"*->;"," FOERDERSTROM   "," m/h  ", P&modWiloPu[PU_BUS_HK2 - 1].wiloInReg.mwspFlowRate.messw, 	US_INT,	 1, P&wilo4,V1, 0, IDX0_FELD},
 	{   2, 120},	//	135=hk2[] {"*80:"," BETRIEBS-REGIE ","       ", P&hkd[HK2].regie_txt, DYN_ASCII_FORM, 0, P&vis,		V1, 0, 0},
 	{   2, 121},	//	136=hk2[] {"*80:"," ABSENKPHASE ?  ","       ", P&hkd[HK2].absen,		 JANEIN_FORM, 0, P&vis,		V1, 0, 0},
 	{   2, 124},	//	137=hk2[] {"*81:"," ABSCHALTPHASE ?","       ", P&hkd[HK2].absch,		 JANEIN_FORM, 0, P&vis,		V1, 0, 0},
@@ -248,9 +250,9 @@ schreibe die KommandoTabelle in "KomTab.c"
 	{   3,  47},	//	196=hk1[] {"*->:"," WILO-BUS LAD-PU","       ", P&BusPuPara[PU_BUS_HK1 - 1].Funktion,	PU_FUNC_FORM,0, P&vis,	V1, 0, IDX0_FELD},
 	{   3,  48},	//	197=hk1[] {"*->;"," BUS-ADRESSE    ","       ", P&BusPuPara[PU_BUS_HK1 - 1].Adresse,		 US_CHAR,  0, P&wilo3,V1, 0, IDX0_FELD},
 	{   3,  49},	//	198=hk1[] {"*->:"," REGELART IST   ","       ", P&BusPuData[PU_BUS_HK1 - 1].regelArtIst,DYN_ASCII_FORM,15,P&wilo3,V1,0, IDX0_FELD},
-	{   3,  50},	//	199=hk1[] {"*->;"," DREHZAHL IST   "," 1/min ", P&modb_data[PU_BUS_HK1 - 1].input_reg5, 	US_INT,  0, P&wilo3,V1, 0, IDX0_FELD},
-	{   3,  51},	//	200=hk1[] {"*->;"," DIFFERENZDRUCK "," mWS   ", P&modb_data[PU_BUS_HK1 - 1].input_reg0, 	US_INT,	 1, P&wilo3,V1, 0, IDX0_FELD},
-	{   3,  52},	//	201=hk1[] {"*->;"," FOERDERSTROM   "," m/h  ", P&modb_data[PU_BUS_HK1 - 1].input_reg1, 	US_INT,	 1, P&wilo3,V1, 0, IDX0_FELD},
+	{   3,  50},	//	199=hk1[] {"*->;"," DREHZAHL IST   "," 1/min ", P&modWiloPu[PU_BUS_HK1 - 1].wiloInReg.mwspSpeed.messw, 	US_INT,  0, P&wilo3,V1, 0, IDX0_FELD},
+	{   3,  51},	//	200=hk1[] {"*->;"," DIFFERENZDRUCK "," mWS   ", P&modWiloPu[PU_BUS_HK1 - 1].wiloInReg.mwspActualDifferentialPressure.messw, 	US_INT,	 1, P&wilo3,V1, 0, IDX0_FELD},
+	{   3,  52},	//	201=hk1[] {"*->;"," FOERDERSTROM   "," m/h  ", P&modWiloPu[PU_BUS_HK1 - 1].wiloInReg.mwspFlowRate.messw, 	US_INT,	 1, P&wilo3,V1, 0, IDX0_FELD},
 	{   3,  64},	//	202=hk1[] {"*85:"," RUECKL.BEGR. ? ","       ", P&hkd[HK1].rlbegr,	 JANEIN_FORM, 0, P&vis,		V1, 0, 0},
 	{   3,  65},	//	203=hk1[] {"*86:"," SM REGELABW.?  ","       ", P&hkd[HK1].abwAlarm, JANEIN_FORM, 0, P&vis, 	A1, EINZEL,   0},
 	{   3,  66},	//	204=hk1[] {"*88:"," SM PU LK      ?","       ", P&hkd[HK1].puSmAnz,	 JANEIN_FORM, 0, P&vis,		E1, STANDARD, 0},
@@ -511,9 +513,9 @@ schreibe die KommandoTabelle in "KomTab.c"
 	{  12,  47},	//	459=hk1[] {"*->:"," WILO-BUS LAD-PU","       ", P&BusPuPara[PU_BUS_HK1 - 1].Funktion,	PU_FUNC_FORM,0, P&vis,	V1, 0, IDX0_FELD},
 	{  12,  48},	//	460=hk1[] {"*->;"," BUS-ADRESSE    ","       ", P&BusPuPara[PU_BUS_HK1 - 1].Adresse,		 US_CHAR,  0, P&wilo3,V1, 0, IDX0_FELD},
 	{  12,  49},	//	461=hk1[] {"*->:"," REGELART IST   ","       ", P&BusPuData[PU_BUS_HK1 - 1].regelArtIst,DYN_ASCII_FORM,15,P&wilo3,V1,0, IDX0_FELD},
-	{  12,  50},	//	462=hk1[] {"*->;"," DREHZAHL IST   "," 1/min ", P&modb_data[PU_BUS_HK1 - 1].input_reg5, 	US_INT,  0, P&wilo3,V1, 0, IDX0_FELD},
-	{  12,  51},	//	463=hk1[] {"*->;"," DIFFERENZDRUCK "," mWS   ", P&modb_data[PU_BUS_HK1 - 1].input_reg0, 	US_INT,	 1, P&wilo3,V1, 0, IDX0_FELD},
-	{  12,  52},	//	464=hk1[] {"*->;"," FOERDERSTROM   "," m/h  ", P&modb_data[PU_BUS_HK1 - 1].input_reg1, 	US_INT,	 1, P&wilo3,V1, 0, IDX0_FELD},
+	{  12,  50},	//	462=hk1[] {"*->;"," DREHZAHL IST   "," 1/min ", P&modWiloPu[PU_BUS_HK1 - 1].wiloInReg.mwspSpeed.messw, 	US_INT,  0, P&wilo3,V1, 0, IDX0_FELD},
+	{  12,  51},	//	463=hk1[] {"*->;"," DIFFERENZDRUCK "," mWS   ", P&modWiloPu[PU_BUS_HK1 - 1].wiloInReg.mwspActualDifferentialPressure.messw, 	US_INT,	 1, P&wilo3,V1, 0, IDX0_FELD},
+	{  12,  52},	//	464=hk1[] {"*->;"," FOERDERSTROM   "," m/h  ", P&modWiloPu[PU_BUS_HK1 - 1].wiloInReg.mwspFlowRate.messw, 	US_INT,	 1, P&wilo3,V1, 0, IDX0_FELD},
 	{  12,  64},	//	465=hk1[] {"*85:"," RUECKL.BEGR. ? ","       ", P&hkd[HK1].rlbegr,	 JANEIN_FORM, 0, P&vis,		V1, 0, 0},
 	{  12,  65},	//	466=hk1[] {"*86:"," SM REGELABW.?  ","       ", P&hkd[HK1].abwAlarm, JANEIN_FORM, 0, P&vis, 	A1, EINZEL,   0},
 	{  12,  66},	//	467=hk1[] {"*88:"," SM PU LK      ?","       ", P&hkd[HK1].puSmAnz,	 JANEIN_FORM, 0, P&vis,		E1, STANDARD, 0},
@@ -593,9 +595,9 @@ schreibe die KommandoTabelle in "KomTab.c"
 	{  13, 114},	//	541=hk2[] {"*->:"," WILO-BUS NETZ-P","       ", P&BusPuPara[PU_BUS_HK2 - 1].Funktion,PU_FUNC_FORM,0, P&vis,	V1, 0, IDX0_FELD},
 	{  13, 115},	//	542=hk2[] {"*->;"," BUS-ADRESSE    ","       ", P&BusPuPara[PU_BUS_HK2 - 1].Adresse,		 US_CHAR,  0, P&wilo4,V1, 0, IDX0_FELD},
 	{  13, 116},	//	543=hk2[] {"*->:"," REGELART IST   ","       ", P&BusPuData[PU_BUS_HK2 - 1].regelArtIst,ASCII_FORM,15,P&wilo4,V1,0, IDX0_FELD},
-	{  13, 117},	//	544=hk2[] {"*->;"," DREHZAHL IST   "," 1/min ", P&modb_data[PU_BUS_HK2 - 1].input_reg5, 	US_INT,  0, P&wilo4,V1, 0, IDX0_FELD},
-	{  13, 118},	//	545=hk2[] {"*->;"," DIFFERENZDRUCK "," mWS   ", P&modb_data[PU_BUS_HK2 - 1].input_reg0, 	US_INT,	 1, P&wilo4,V1, 0, IDX0_FELD},
-	{  13, 119},	//	546=hk2[] {"*->;"," FOERDERSTROM   "," m/h  ", P&modb_data[PU_BUS_HK2 - 1].input_reg1, 	US_INT,	 1, P&wilo4,V1, 0, IDX0_FELD},
+	{  13, 117},	//	544=hk2[] {"*->;"," DREHZAHL IST   "," 1/min ", P&modWiloPu[PU_BUS_HK2 - 1].wiloInReg.mwspSpeed.messw, 	US_INT,  0, P&wilo4,V1, 0, IDX0_FELD},
+	{  13, 118},	//	545=hk2[] {"*->;"," DIFFERENZDRUCK "," mWS   ", P&modWiloPu[PU_BUS_HK2 - 1].wiloInReg.mwspActualDifferentialPressure.messw, 	US_INT,	 1, P&wilo4,V1, 0, IDX0_FELD},
+	{  13, 119},	//	546=hk2[] {"*->;"," FOERDERSTROM   "," m/h  ", P&modWiloPu[PU_BUS_HK2 - 1].wiloInReg.mwspFlowRate.messw, 	US_INT,	 1, P&wilo4,V1, 0, IDX0_FELD},
 	{  13, 120},	//	547=hk2[] {"*80:"," BETRIEBS-REGIE ","       ", P&hkd[HK2].regie_txt, DYN_ASCII_FORM, 0, P&vis,		V1, 0, 0},
 	{  13, 121},	//	548=hk2[] {"*80:"," ABSENKPHASE ?  ","       ", P&hkd[HK2].absen,		 JANEIN_FORM, 0, P&vis,		V1, 0, 0},
 	{  13, 124},	//	549=hk2[] {"*81:"," ABSCHALTPHASE ?","       ", P&hkd[HK2].absch,		 JANEIN_FORM, 0, P&vis,		V1, 0, 0},
@@ -651,54 +653,69 @@ schreibe die KommandoTabelle in "KomTab.c"
 	{  14,  71},	//	599=qsm[] {"SYS;"," DAT-ERROR R37_2","       ", P&alarmtab[69].alspeicher,		JANEIN_FORM, 0, P&vis,	V1, 0, 0},
 	{  14,  72},	//	600=qsm[] {"SYS;"," DAT-ERROR R38_1","       ", P&alarmtab[70].alspeicher,		JANEIN_FORM, 0, P&vis,	V1, 0, 0},
 	{  14,  77},	//	601=qsm[] {" 99:"," QUITTIER-TASTE "," EIN=1 ", P&quit_taste,			 						US_CHAR, 0, P&hid1,	V1, 0, 0},
-	{  17,   2},	//	602=wlp[] {"_01;"," BEZEICHNUNG    ","       ", P&BusPuPara[0].Name,							DYN_ASCII_FORM,  0, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  11},	//	603=wlp[] {"*20;"," BETR.-ART SOLL ","       ", P&BusPuData[0].betriebsArtSoll,	 	DYN_ASCII_FORM, 15, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  14},	//	604=wlp[] {"*21;"," BETR.-ART IST  ","       ", P&BusPuData[0].betriebsArtIst,	 	DYN_ASCII_FORM, 15, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  16},	//	605=wlp[] {"*22;"," REGELART SOLL  ","       ", P&BusPuData[0].regelArtSoll,	 		DYN_ASCII_FORM, 15, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  19},	//	606=wlp[] {"*23;"," REGELART IST   ","       ", P&BusPuData[0].regelArtIst,	 			DYN_ASCII_FORM, 15, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  21},	//	607=wlp[] {"*24;"," SOLLWERT SOLL  "," %     ", P&modb_data[0].output_value0_temp,  			US_INT,  1, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  22},	//	608=wlp[] {"*25."," SOLLWERT IST   "," %     ", P&modb_data[0].SetPoint_Input, 		 				US_INT,  1, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  23},	//	609=wlp[] {"*30;"," DREHZAHL       "," 1/min ", P&modb_data[0].input_reg5, 								US_INT,  0, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  24},	//	610=wlp[] {"*31;"," DIFFERENZDRUCK "," mWS   ", P&modb_data[0].input_reg0, 								US_INT,	 1, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  25},	//	611=wlp[] {"*32;"," FOERDERSTROM   "," m/h  ", P&modb_data[0].input_reg1, 								US_INT,	 1, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  26},	//	612=wlp[] {"*33;"," MEDIEN-TEMP.   "," C    ", P&modb_data[0].input_reg6_celsius, 				 S_INT,  1, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  28},	//	613=wlp[] {"*34;"," LEISTUNG       "," W     ", P&modb_data[0].input_reg3, 								US_INT,  0, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  29},	//	614=wlp[] {"*35;"," ENERGIEVERBR.  "," kWh   ", P&modb_data[0].input_reg2, 								US_INT,  0, P&hid1, V1, 0, EXP_WLP},
-	{  17,  31},	//	615=wlp[] {"*40;"," SERVICE-MELDUNG","       ", P&modb_data[0].message1_text,			DYN_ASCII_FORM, 15, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  33},	//	616=wlp[] {"*41;"," ALARM-MELDUNG  ","       ", P&modb_data[0].message2_text,		  DYN_ASCII_FORM, 15, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  35},	//	617=wlp[] {"*42;"," ALARM-STATUS   ","       ", P&modb_data[0].message3_text,   	DYN_ASCII_FORM, 15, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  37},	//	618=wlp[] {"*43;"," PUMPEN-STATUS  ","       ", P&modb_data[0].message4_text,	    DYN_ASCII_FORM, 15, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  39},	//	619=wlp[] {"*44;"," STATUS DIAGNOSE","       ", P&modb_data[0].message5_text,  		DYN_ASCII_FORM, 15, P&hid1,	V1, 0, EXP_WLP},
-	{  17,  61},	//	620=wlp[] {"*80;"," SM WILO-PUMPE ?","       ", P&BusPuData[0].puAlarm,							  JANEIN_FORM, 0, P&hid1, V1, 0, EXP_WLP},
-	{  17,  62},	//	621=wlp[] {"*81;"," SM MODBUS ?    ","       ", P&BusPuData[0].busSm,				 					JANEIN_FORM, 0, P&hid1, V1, 0, EXP_WLP},
-	{  17,  64},	//	622=wlp[] {"*82;"," SM RM PUMPE ?  ","       ", P&BusPuData[0].betriebSm,		 					JANEIN_FORM, 0, P&hid1, V1, 0, EXP_WLP},
-	{  17,  65},	//	623=wlp[] {"*89;"," HANDBETRIEB ?  ","       ", P&BusPuPara[0].Hand,		 			 				JANEIN_FORM, 0, P&hid1,	V1, 0, EXP_WLP},
-	{  18,  33},	//	624=zlt[] {"*19;"," OBJ-ORT FEHLT ?","       ", P&ort_idf,									 JANEIN_FORM, 0, P&hid1,	E1, ANZEIGE, 0},
-	{  18,  34},	//	625=zlt[] {"*20;"," STATION-ADRESSE","       ", P&StationsAdr,								 	 US_CHAR, 0, P&hid1,	V1, 0, 0},
-	{  18,  36},	//	626=zlt[] {"021;"," MASTER -IDF    ","       ", P&Master_Idf,								 TELE_FORM, 0, P&hid1,	V1, 0, 0},
-	{  18,  37},	//	627=zlt[] {"022;"," STATION-IDF    ","       ", P&Station_Idf,								 TELE_FORM, 0, P&hid1,	V1, 0, 0},
-	{  18,  38},	//	628=zlt[] {"023;"," ALARM-IDF 1    ","       ", P&Alarm_Idf[0],							 TELE_FORM, 0, P&hid1,	V1, 0, 0},
-	{  18,  39},	//	629=zlt[] {"024;"," ALARM-IDF 2    ","       ", P&Alarm_Idf[1],							 TELE_FORM, 0, P&hid1,	V1, 0, 0},
-	{  18,  40},	//	630=zlt[] {"025;"," ALARM-IDF 3    ","       ", P&Alarm_Idf[2],							 TELE_FORM, 0, P&hid1,	V1, 0, 0},
-	{  18,  41},	//	631=zlt[] {"026;"," SERVICE-IDF    ","       ", P&Service_Idf,								 TELE_FORM, 0, P&hid1,	V1, 0, 0},
-	{  18,  48},	//	632=zlt[] {"*33;"," PIN FEHLT ?    ","       ", P&pin_fehlt,								 JANEIN_FORM, 0, P&hid1,	E1, ANZEIGE, 0},
-	{  21,  67},	//	633=sys[] {"*43;"," DAT-ERROR R37_1","       ", P&mod37[0].error,			 JANEIN_FORM, 0, P&r37vis[0],	E1, MODULE, 0},
-	{  21,  84},	//	634=sys[] {"*43;"," DAT-ERROR R37_2","       ", P&mod37[1].error,			 JANEIN_FORM, 0, P&r37vis[1],	E1, MODULE, 0},
-	{  21, 101},	//	635=sys[] {"*53;"," DAT-ERROR R38_1","       ", P&mod38[0].error,	 				 JANEIN_FORM, 0, P&r38vis[0],	E1, MODULE, 0},
-	{  21, 122},	//	636=sys[] {"*82;"," RTC-UHR ERROR  ","       ", P&rtc_error,				 JANEIN_FORM, 0, P&hid1,	E1, EREIGNIS, 0},
-	{  21, 123},	//	637=sys[] {"*83;"," MAIN-CRASH:TASK","       ", P&noi_reanimate,			 TASK_FORM, 0, P&hid1,	E1, EREIGNIS, 0},
-	{  21, 129},	//	638=sys[] {" ->;"," SDM-ARCHIV-INIT","       ", P&werks_sdm_code,		  US_INT,  2, P&hid1,	V1, 0, 0},
-	{  21, 130},	//	639=sys[] {" ->;"," SDM-DAE-INIT   "," -DAE,E", P&reset_dae,			    	  S_INT, 1, P&hid1,	V1, 0, 0},
-	{  21, 132},	//	640=sys[] {"*->;"," FerroRAM2 FEHLT","       ", P&ferro_err,			  JANEIN_FORM, 0, P&hid1,	E1, EREIGNIS, 0},
-	{  21, 133},	//	641=sys[] {"*->;"," SDHC-Card FEHLT","       ", P&card_err,			  JANEIN_FORM, 0, P&hid1,	E1, EREIGNIS, 0},
-	{  21, 144},	//	642=sys[] {"*96;"," PROGRAMM-TYP   ","       ", P&Version_PTyp, 			ASCII_FORM, 0, P&hid1,	V1, 0, 0},
-	{  21, 145},	//	643=sys[] {"*97;"," PROGR.-VERSION ","       ", P&Version_PVers,			 DATE_FORM, 0, P&hid1,	V1, 0, 0},
-	{  21, 146},	//	644=sys[] {"*98;"," SYSTEM-VERSION ","       ", P&Version_SVers, 		 DATE_FORM, 0, P&hid1,	V1, 0, 0},
-	{   3,  36},	//	645=hk1[] {" 65;"," VENT.MAX SOLAR "," %     ", P&hks[HK1].VentMaxSolar,	US_INT, 1, P&hid1,	V2, 0, 0},
-	{   4,   7},	//	646=hkSoL[] {" 11;"," VL-ANHEB. HKS: "," K     ", P&hksSoL[HK1].TvAnheb,						US_INT, 1, P&hid1, V2, 0, 0},
-	{  12,  36},	//	647=hk1[] {" 65;"," VENT.MAX SOLAR "," %     ", P&hks[HK1].VentMaxSolar,	US_INT, 1, P&hid1,	V2, 0, 0},
+	{  18,   2},	//	602=wlp[] {"_01:"," BEZEICHNUNG    ","       ", P&BusPuPara[0].Name,																		ASCII_FORM,  0, P&vis,	V1, 0, EXP_WLP},
+	{  18,   3},	//	603=wlp[] {" 02;"," BUS EIN ?      "," 1=JA  ", P&BusPuPara[0].Funktion,										 	 		 				 US_CHAR,  0, P&hid1,	V1, 0, EXP_WLP},
+	{  18,   7},	//	604=wlp[] {" 06;"," BETR.-ART AUTO_"," 0..1  ", P&BusPuPara[0].Betrieb,	 				 						 		 	 				 US_CHAR,  0, P&hid1,	V1, 0, EXP_WLP},
+	{  18,   9},	//	605=wlp[] {" 08;"," REGELART AUTO_ "," 0..3  ", P&BusPuPara[0].Regelart,										 	 		 				 US_CHAR,  0, P&hid1,	V1, 0, EXP_WLP},
+	{  18,  10},	//	606=wlp[] {"*09:"," SOLLWERT AUTO  "," %     ", P&BusPuPara[0].Sollwert,										  							US_INT,  1, P&vis,	V1, 0, EXP_WLP},
+	{  18,  11},	//	607=wlp[] {" 10;"," RMELDG.-VERZOEG"," min   ", P&BusPuPara[0].RMverz,											 	 		 				 US_CHAR,  0, P&hid1,	V1, 0, EXP_WLP},
+	{  18,  13},	//	608=wlp[] {"*20:"," BETR.-ART SOLL ","       ", P&BusPuData[0].betriebsArtSoll,	 										DYN_ASCII_FORM, 15, P&vis,	V1, 0, EXP_WLP},
+	{  18,  16},	//	609=wlp[] {"*22:"," BETR.-ART IST  ","       ", P&BusPuData[0].betriebsArtIst,	 										DYN_ASCII_FORM, 15, P&vis,	V1, 0, EXP_WLP},
+	{  18,  18},	//	610=wlp[] {"*24:"," REGELART SOLL  ","       ", P&BusPuData[0].regelArtSoll,	 											DYN_ASCII_FORM, 15, P&vis,	V1, 0, EXP_WLP},
+	{  18,  21},	//	611=wlp[] {"*26:"," REGELART IST   ","       ", P&BusPuData[0].regelArtIst,	 												DYN_ASCII_FORM, 15, P&vis,	V1, 0, EXP_WLP},
+	{  18,  23},	//	612=wlp[] {"*28:"," SOLLWERT       "," %     ", P&modWiloPu[0].SetPoint_Input, 		 													US_INT,  0, P&vis,	V1, 0, EXP_WLP},
+	{  18,  25},	//	613=wlp[] {"*30:"," DREHZAHL       "," 1/min ", P&modWiloPu[0].wiloInReg.mwspSpeed, 											ANA_FORM,  0, P&vis,	V1, 0, EXP_WLP},
+	{  18,  26},	//	614=wlp[] {"*31:"," DIFFERENZDRUCK "," mWS   ", P&modWiloPu[0].wiloInReg.mwspActualDifferentialPressure, 	ANA_FORM,	 1, P&vis,	V1, 0, EXP_WLP},
+	{  18,  27},	//	615=wlp[] {"*32:"," FOERDERSTROM   "," m/h  ", P&modWiloPu[0].wiloInReg.mwspFlowRate, 										ANA_FORM,	 1, P&vis,	V1, 0, EXP_WLP},
+	{  18,  28},	//	616=wlp[] {"*33:"," MEDIEN-TEMP.   "," C    ", P&modWiloPu[0].siMediumTemperature, 											   S_INT,  1, P&vis,	V1, 0, EXP_WLP},
+	{  18,  30},	//	617=wlp[] {"*34:"," LEISTUNG       "," W     ", P&modWiloPu[0].wiloInReg.mwspPowerRating, 								ANA_FORM,  0, P&vis,	V1, 0, EXP_WLP},
+	{  18,  31},	//	618=wlp[] {"*35:"," ENERGIEVERBR.  "," kWh   ", P&modWiloPu[0].wiloInReg.mwspPowerConsumption,						ANA_FORM,  0, P&vis,  V1, 0, EXP_WLP},
+	{  18,  32},	//	619=wlp[] {"*36:"," BETRIEBSZEIT   "," h     ", P&modWiloPu[0].op_hours, 							 										 US_LONG,  0, P&vis,  V1, 0, EXP_WLP},
+	{  18,  33},	//	620=wlp[] {"*40;"," SERVICE-MELDUNG","       ", P&modWiloPu[0].strServiceMessage,										DYN_ASCII_FORM, 15, P&hid1,	V1, 0, EXP_WLP},
+	{  18,  34},	//	621=wlp[] {"*->;"," Service Message","       ", P&modWiloPu[0].wiloInReg.mwspServiceMessage.messw,  		 DIGR_FORM, 16, P&hid2,	V1, 0, EXP_WLP},
+	{  18,  35},	//	622=wlp[] {"*41;"," ALARM-MELDUNG  ","       ", P&modWiloPu[0].strErrorType,		   	 								DYN_ASCII_FORM, 15, P&hid1,	V1, 0, EXP_WLP},
+	{  18,  36},	//	623=wlp[] {"*->;"," alarm-meldung  ","       ", P&modWiloPu[0].wiloInReg.mwspErrorType.messw,   				 DIGR_FORM, 16, P&hid2,	V1, 0, EXP_WLP},
+	{  18,  37},	//	624=wlp[] {"*42;"," ALARM-STATUS   ","       ", P&modWiloPu[0].strErrorMessage,   	 						 		DYN_ASCII_FORM, 15, P&hid1,	V1, 0, EXP_WLP},
+	{  18,  38},	//	625=wlp[] {"*->;"," alarm-status   ","       ", P&modWiloPu[0].wiloInReg.mwspErrorMessage.messw,   			 DIGR_FORM, 16, P&hid2,	V1, 0, EXP_WLP},
+	{  18,  39},	//	626=wlp[] {"*43;"," PUMPEN-STATUS  ","       ", P&modWiloPu[0].strPumpStatus,	    									DYN_ASCII_FORM, 15, P&hid1,	V1, 0, EXP_WLP},
+	{  18,  40},	//	627=wlp[] {"*->;"," pumpen-status  ","       ", P&modWiloPu[0].wiloInReg.mwspPumpStatus.messw,   				 DIGR_FORM, 16, P&hid2,	V1, 0, EXP_WLP},
+	{  18,  41},	//	628=wlp[] {"*44;"," STATUS DIAGNOSE","       ", P&modWiloPu[0].strStateDiagnostics,  								DYN_ASCII_FORM, 15, P&hid1,	V1, 0, EXP_WLP},
+	{  18,  42},	//	629=wlp[] {"*->;"," status diagnose","       ", P&modWiloPu[0].wiloInReg.mwspStateDiagnostics.messw,   	 DIGR_FORM, 16, P&hid2,	V1, 0, EXP_WLP},
+	{  18,  43},	//	630=wlp[] {"*45;"," mehrfach_msg   ","       ", P&modWiloPu[0].ucGlobalFlag,													 JANEIN_FORM,  0, P&hid2,	V1, 0, EXP_WLP},
+	{  18,  53},	//	631=wlp[] {"*80:"," SM WILO-PUMPE ?","       ", P&BusPuData[0].puAlarm,							  JANEIN_FORM, 0, P&vis, 	V1, 0, EXP_WLP},
+	{  18,  54},	//	632=wlp[] {"*81:"," SM MODBUS ?    ","       ", P&BusPuData[0].busSm,				 					JANEIN_FORM, 0, P&vis, 	V1, 0, EXP_WLP},
+	{  18,  56},	//	633=wlp[] {"*82:"," SM RM PUMPE ?  ","       ", P&BusPuData[0].betriebSm,		 					JANEIN_FORM, 0, P&vis, 	V1, 0, EXP_WLP},
+	{  18,  57},	//	634=wlp[] {"*89:"," HANDBETRIEB ?  ","       ", P&BusPuPara[0].Hand,		 			 				JANEIN_FORM, 0, P&vis,	V1, 0, EXP_WLP},
+	{  18,  58},	//	635=wlp[] {" 99;"," HAND/AUTOMATIK "," HAND=1", P&BusPuPara[0].Hand,				 		 	 				US_CHAR, 0, P&hid1,	V1, 0, EXP_WLP},
+	{  18,  59},	//	636=wlp[] {" ->;"," BETR.-ART HAND "," 0..3  ", P&BusPuPara[0].BetriebHand,		 	 					US_CHAR, 0, P&hid1,	V1, 0, EXP_WLP},
+	{  18,  60},	//	637=wlp[] {" ->;"," REGELART  HAND "," 0..3  ", P&BusPuPara[0].RegelartHand,		 	 				US_CHAR, 0, P&hid1,	V1, 0, EXP_WLP},
+	{  18,  61},	//	638=wlp[] {" ->;"," SOLLWERT HAND  "," %     ", P&BusPuPara[0].SollHand,		 							 US_INT, 1, P&hid1,	V1, 0, EXP_WLP},
+	{  19,  33},	//	639=zlt[] {"*19;"," OBJ-ORT FEHLT ?","       ", P&ort_idf,									 JANEIN_FORM, 0, P&hid1,	E1, ANZEIGE, 0},
+	{  19,  34},	//	640=zlt[] {"*20;"," STATION-ADRESSE","       ", P&StationsAdr,								 	 US_CHAR, 0, P&hid1,	V1, 0, 0},
+	{  19,  36},	//	641=zlt[] {"021;"," MASTER -IDF    ","       ", P&Master_Idf,								 TELE_FORM, 0, P&hid1,	V1, 0, 0},
+	{  19,  37},	//	642=zlt[] {"022;"," STATION-IDF    ","       ", P&Station_Idf,								 TELE_FORM, 0, P&hid1,	V1, 0, 0},
+	{  19,  38},	//	643=zlt[] {"023;"," ALARM-IDF 1    ","       ", P&Alarm_Idf[0],							 TELE_FORM, 0, P&hid1,	V1, 0, 0},
+	{  19,  39},	//	644=zlt[] {"024;"," ALARM-IDF 2    ","       ", P&Alarm_Idf[1],							 TELE_FORM, 0, P&hid1,	V1, 0, 0},
+	{  19,  40},	//	645=zlt[] {"025;"," ALARM-IDF 3    ","       ", P&Alarm_Idf[2],							 TELE_FORM, 0, P&hid1,	V1, 0, 0},
+	{  19,  41},	//	646=zlt[] {"026;"," SERVICE-IDF    ","       ", P&Service_Idf,								 TELE_FORM, 0, P&hid1,	V1, 0, 0},
+	{  19,  48},	//	647=zlt[] {"*33;"," PIN FEHLT ?    ","       ", P&pin_fehlt,								 JANEIN_FORM, 0, P&hid1,	E1, ANZEIGE, 0},
+	{  22,  67},	//	648=sys[] {"*43;"," DAT-ERROR R37_1","       ", P&mod37[0].error,			 JANEIN_FORM, 0, P&r37vis[0],	E1, MODULE, 0},
+	{  22,  84},	//	649=sys[] {"*43;"," DAT-ERROR R37_2","       ", P&mod37[1].error,			 JANEIN_FORM, 0, P&r37vis[1],	E1, MODULE, 0},
+	{  22, 101},	//	650=sys[] {"*53;"," DAT-ERROR R38_1","       ", P&mod38[0].error,	 				 JANEIN_FORM, 0, P&r38vis[0],	E1, MODULE, 0},
+	{  22, 122},	//	651=sys[] {"*82;"," RTC-UHR ERROR  ","       ", P&rtc_error,				 JANEIN_FORM, 0, P&hid1,	E1, EREIGNIS, 0},
+	{  22, 123},	//	652=sys[] {"*83;"," MAIN-CRASH:TASK","       ", P&noi_reanimate,			 TASK_FORM, 0, P&hid1,	E1, EREIGNIS, 0},
+	{  22, 129},	//	653=sys[] {" ->;"," SDM-ARCHIV-INIT","       ", P&werks_sdm_code,		  US_INT,  2, P&hid1,	V1, 0, 0},
+	{  22, 130},	//	654=sys[] {" ->;"," SDM-DAE-INIT   "," -DAE,E", P&reset_dae,			    	  S_INT, 1, P&hid1,	V1, 0, 0},
+	{  22, 132},	//	655=sys[] {"*->;"," FerroRAM2 FEHLT","       ", P&ferro_err,			  JANEIN_FORM, 0, P&hid1,	E1, EREIGNIS, 0},
+	{  22, 133},	//	656=sys[] {"*->;"," SDHC-Card FEHLT","       ", P&card_err,			  JANEIN_FORM, 0, P&hid1,	E1, EREIGNIS, 0},
+	{  22, 144},	//	657=sys[] {"*96;"," PROGRAMM-TYP   ","       ", P&Version_PTyp, 			ASCII_FORM, 0, P&hid1,	V1, 0, 0},
+	{  22, 145},	//	658=sys[] {"*97;"," PROGR.-VERSION ","       ", P&Version_PVers,			 DATE_FORM, 0, P&hid1,	V1, 0, 0},
+	{  22, 146},	//	659=sys[] {"*98;"," SYSTEM-VERSION ","       ", P&Version_SVers, 		 DATE_FORM, 0, P&hid1,	V1, 0, 0},
+	{   3,  36},	//	660=hk1[] {" 65;"," VENT.MAX SOLAR "," %     ", P&hks[HK1].VentMaxSolar,	US_INT, 1, P&hid1,	V2, 0, 0},
+	{   4,   7},	//	661=hkSoL[] {" 11;"," VL-ANHEB. HKS: "," K     ", P&hksSoL[HK1].TvAnheb,						US_INT, 1, P&hid1, V2, 0, 0},
+	{  12,  36},	//	662=hk1[] {" 65;"," VENT.MAX SOLAR "," %     ", P&hks[HK1].VentMaxSolar,	US_INT, 1, P&hid1,	V2, 0, 0},
 };
-const unsigned int KOMTAB_LENG = 648;
+const unsigned int KOMTAB_LENG = 663;
 
 // Alarmtabelle mit mindestens 7 Alarmen					
 const events Pe_Tab[] = {
@@ -794,14 +811,14 @@ const events Se_Tab[] = {
 	{DAE_YES , 555, 0}, // 134/135  64=hk2[] {"*87:"," SM STW NK1 ?   ","       ", P&STWHK[HK2], 		 JANEIN_FORMIP, 0, P&vis,		A1, EINZEL,   0},
 	{DAE_YES , 556, 0}, // 136/137  65=hk2[] {"*88:"," SM PU NK1     ?","       ", P&hkd[HK2].puSmAnz,	 JANEIN_FORM, 0, P&vis,		E1, STANDARD, 0},
 	{DAE_YES , 557, 0}, // 138/139  66=hk2[] {"*89:"," HANDBETRIEB ?  ","       ", P&hks[HK2].Haut,		 JANEIN_FORM, 0, P&vis,		E1, EREIGNIS, 0},
-	{DAE_YES , 624, 0}, // 140/141  67=zlt[] {"*19;"," OBJ-ORT FEHLT ?","       ", P&ort_idf,									 JANEIN_FORM, 0, P&hid1,	E1, ANZEIGE, 0},
-	{DAE_YES , 632, 0}, // 142/143  68=zlt[] {"*33;"," PIN FEHLT ?    ","       ", P&pin_fehlt,								 JANEIN_FORM, 0, P&hid1,	E1, ANZEIGE, 0},
-	{DAE_YES , 633, 0}, // 144/145  69=sys[] {"*43;"," DAT-ERROR R37_1","       ", P&mod37[0].error,			 JANEIN_FORM, 0, P&r37vis[0],	E1, MODULE, 0},
-	{DAE_YES , 634, 0}, // 146/147  70=sys[] {"*43;"," DAT-ERROR R37_2","       ", P&mod37[1].error,			 JANEIN_FORM, 0, P&r37vis[1],	E1, MODULE, 0},
-	{DAE_YES , 635, 0}, // 148/149  71=sys[] {"*53;"," DAT-ERROR R38_1","       ", P&mod38[0].error,	 				 JANEIN_FORM, 0, P&r38vis[0],	E1, MODULE, 0},
-	{DAE_YES , 636, 0}, // 150/151  72=sys[] {"*82;"," RTC-UHR ERROR  ","       ", P&rtc_error,				 JANEIN_FORM, 0, P&hid1,	E1, EREIGNIS, 0},
-	{DAE_YES , 637, 0}, // 152/153  73=sys[] {"*83;"," MAIN-CRASH:TASK","       ", P&noi_reanimate,			 TASK_FORM, 0, P&hid1,	E1, EREIGNIS, 0},
-	{DAE_YES , 640, 0}, // 154/155  74=sys[] {"*->;"," FerroRAM2 FEHLT","       ", P&ferro_err,			  JANEIN_FORM, 0, P&hid1,	E1, EREIGNIS, 0},
-	{DAE_YES , 641, 0}, // 156/157  75=sys[] {"*->;"," SDHC-Card FEHLT","       ", P&card_err,			  JANEIN_FORM, 0, P&hid1,	E1, EREIGNIS, 0},
+	{DAE_YES , 639, 0}, // 140/141  67=zlt[] {"*19;"," OBJ-ORT FEHLT ?","       ", P&ort_idf,									 JANEIN_FORM, 0, P&hid1,	E1, ANZEIGE, 0},
+	{DAE_YES , 647, 0}, // 142/143  68=zlt[] {"*33;"," PIN FEHLT ?    ","       ", P&pin_fehlt,								 JANEIN_FORM, 0, P&hid1,	E1, ANZEIGE, 0},
+	{DAE_YES , 648, 0}, // 144/145  69=sys[] {"*43;"," DAT-ERROR R37_1","       ", P&mod37[0].error,			 JANEIN_FORM, 0, P&r37vis[0],	E1, MODULE, 0},
+	{DAE_YES , 649, 0}, // 146/147  70=sys[] {"*43;"," DAT-ERROR R37_2","       ", P&mod37[1].error,			 JANEIN_FORM, 0, P&r37vis[1],	E1, MODULE, 0},
+	{DAE_YES , 650, 0}, // 148/149  71=sys[] {"*53;"," DAT-ERROR R38_1","       ", P&mod38[0].error,	 				 JANEIN_FORM, 0, P&r38vis[0],	E1, MODULE, 0},
+	{DAE_YES , 651, 0}, // 150/151  72=sys[] {"*82;"," RTC-UHR ERROR  ","       ", P&rtc_error,				 JANEIN_FORM, 0, P&hid1,	E1, EREIGNIS, 0},
+	{DAE_YES , 652, 0}, // 152/153  73=sys[] {"*83;"," MAIN-CRASH:TASK","       ", P&noi_reanimate,			 TASK_FORM, 0, P&hid1,	E1, EREIGNIS, 0},
+	{DAE_YES , 655, 0}, // 154/155  74=sys[] {"*->;"," FerroRAM2 FEHLT","       ", P&ferro_err,			  JANEIN_FORM, 0, P&hid1,	E1, EREIGNIS, 0},
+	{DAE_YES , 656, 0}, // 156/157  75=sys[] {"*->;"," SDHC-Card FEHLT","       ", P&card_err,			  JANEIN_FORM, 0, P&hid1,	E1, EREIGNIS, 0},
 };
 const unsigned char SETAB_TABL = 75;

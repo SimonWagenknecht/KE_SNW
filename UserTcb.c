@@ -27,6 +27,11 @@ extern void U22_TASK(void);
 extern void U23_TASK(void);
 extern void U24_TASK(void);
 extern void U25_TASK(void);
+extern void U26_TASK(void);
+extern void U27_TASK(void);
+extern void U28_TASK(void);
+extern void U29_TASK(void);
+extern void U30_TASK(void);
 
 /* Aufbau des Task-Control-Blocks (variabler Teil): Status, Zähler */
 tcb_var tcblist_var_user[] = {
@@ -55,6 +60,11 @@ tcb_var tcblist_var_user[] = {
 		{U23_STAT,	 U23_ZAEHL},
 		{U24_STAT,	 U24_ZAEHL},
 		{U25_STAT,	 U25_ZAEHL},
+		{U26_STAT,	 U26_ZAEHL},
+		{U27_STAT,	 U27_ZAEHL},
+		{U28_STAT,	 U28_ZAEHL},
+		{U29_STAT,	 U29_ZAEHL},
+		{U30_STAT,	 U30_ZAEHL},
 };
 
 // Aufbau des Task-Control-Blocks (konstanter Teil): 
@@ -85,6 +95,11 @@ const tcb_con tcblist_con_user[] = {
 		{U23_BICB,	U23_ZEITG,	(void *)U23_TASK},
 		{U24_BICB,	U24_ZEITG,	(void *)U24_TASK},
 		{U25_BICB,	U25_ZEITG,	(void *)U25_TASK},
+		{U26_BICB,	U26_ZEITG,	(void *)U26_TASK},
+		{U27_BICB,	U27_ZEITG,	(void *)U27_TASK},
+		{U28_BICB,	U28_ZEITG,	(void *)U28_TASK},
+		{U29_BICB,	U29_ZEITG,	(void *)U29_TASK},
+		{U30_BICB,	U30_ZEITG,	(void *)U30_TASK},
 };
 const char USER_TASKZ = sizeof(tcblist_con_user) / sizeof(tcb_con);
 

@@ -14,8 +14,8 @@ const char user_compile_date[15] = __DATE__;
 
 	/* Typ und Version des gesamten Projektes												*/
 //									             				 "---------------"
-	const char Kategorie_Typ[16] 				= {"JMX71:NAHWAERME"};  //genau 15 Zeichen
-	const char Kategorie_Vers[3] 				= {15,2,19};           	//Jahr, Monat, Tag
+	const char Kategorie_Typ[16] 				= {"JMX81:NAHWAERME"};  //genau 15 Zeichen
+	const char Kategorie_Vers[3] 				= {18,6,7};           	//Jahr, Monat, Tag
 
 	const char Proj_Typ = 1;		// konstantes Projekt, für variable Proj. auf 0 setzen
 
@@ -336,7 +336,8 @@ const char c_Stopbits_S3            = NULL_STOP;            // NULL_STOP = dummy
                                  //        betrifft InOutR.c, UserRam.c .h, userdef.h, parli.h
 //#define VERS_DATUM  {17,11,13} // Josch: R3X-Simulator mit System {17,11,1} incl. Modulkonfiguration
                                  //        betrifft InOutR.c, UserRam.c uramext.h
-  #define VERS_DATUM  {18,5,31}  // Josch: ArchivSDM.c erweitert. Datenblöcke enthalten zusätzlich Archiv-Info Kennzeichen. System vom {18,3,14} erforderlich
+//#define VERS_DATUM  {18,5,31}  // Josch: ArchivSDM.c erweitert. Datenblöcke enthalten zusätzlich Archiv-Info Kennzeichen. System vom {18,3,14} erforderlich
+#define VERS_DATUM  {18,5,31}  	 //  SiWa: Systemaktualisierung auf 03.04.18, ModuBus und Wilo-Implemtierung 
                               
 /*--------------------------------------------------------------------------------*/
 /* 										Liste von Anlagen																						*/
@@ -436,7 +437,7 @@ const Anlage Projekte[] = {
 	{	
 	 // Typ und Version
 	 //"??-R-????-?????"			//Kennzeichen an fester Position !!	
-		{"KE-R-1s03-JMX71"},		//genau 15 ASCII-Zeichen
+		{"KE-R-1s03-JMX81"},		//genau 15 ASCII-Zeichen
 		VERS_DATUM,	           		//Jahr, Monat, Tag
 		// Kategoriebezeichnung für variable Projekte
 		{"TEST PROJEKT   "},
