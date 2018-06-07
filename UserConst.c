@@ -14,7 +14,7 @@ const char user_compile_date[15] = __DATE__;
 
 	/* Typ und Version des gesamten Projektes												*/
 //									             				 "---------------"
-	const char Kategorie_Typ[16] 				= {"JMX81:NAHWAERME"};  //genau 15 Zeichen
+	const char Kategorie_Typ[16] 				= {"QRX81:NAHWAERME"};  //genau 15 Zeichen
 	const char Kategorie_Vers[3] 				= {18,6,7};           	//Jahr, Monat, Tag
 
 	const char Proj_Typ = 1;		// konstantes Projekt, für variable Proj. auf 0 setzen
